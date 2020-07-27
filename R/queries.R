@@ -29,8 +29,8 @@ matchReactions <- function(id=NULL, name=NULL, species=NULL, all.depths=FALSE,
   con <- getOption("con")
   
   # write the full query
-  MATCH.1 <- 'MATCH (prle:ReactionLikeEvent)<-[:precedingEvent]-(rle:ReactionLikeEvent)'
-  MATCH.2 <- 'MATCH (rle)<-[:precedingEvent]-(frle:ReactionLikeEvent)'
+  MATCH.1 <- 'MATCH p1 = (prle:ReactionLikeEvent)<-[:precedingEvent]-(rle:ReactionLikeEvent)'
+  MATCH.2 <- 'MATCH p2 = (rle)<-[:precedingEvent]-(frle:ReactionLikeEvent)'
   MATCH <- paste(MATCH.1, MATCH.2, collapse = ";")
   if (all.depths) {
     MATCH <- gsub(":precedingEvent", ":precedingEvent*", MATCH)
@@ -42,16 +42,13 @@ matchReactions <- function(id=NULL, name=NULL, species=NULL, all.depths=FALSE,
     WHERE <- paste0(WHERE, " AND rle.speciesName = ", .matchSpecies(species, "displayName"))
   }
   RETURN <- 'RETURN prle,rle,frle'
-  query <- paste(MATCH, WHERE, RETURN, collapse = ";")
-  #print(query)
+  # return graph relationships
+  if (type == "graph") RETURN <- paste0(RETURN, ",relationships(p1),relationships(p2)")
   
+  query <- paste(MATCH, WHERE, RETURN, collapse = ";")
   res <- call_neo4j(query, con, type=type)
-  # manipulate content
-  if (type == "row") {
-    res <- lapply(res, function(tbl) unique(as.data.frame(tbl))) # uniq & turn into list
-  } else {
-    #WIP - why no relationships???
-  }
+  # uniq & turn into df
+  if (type == "row")  res <- lapply(res, function(tbl) unique(as.data.frame(tbl)))
   res
 }
 
