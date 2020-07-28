@@ -22,27 +22,30 @@ matchReactions <- function(id=NULL, name=NULL, species=NULL, all.depths=FALSE,
   # ensure the inputs
   if (is.null(name) && is.null(id)) stop("Must specify either an id or a name.")
   if (!all.depths && is.null(depths)) message("Retrieving immediate preceding/following Reactions... Specify depth-related arguments for more depths")
-  if (missing(type)) message("Type argument not specified, retrieving row data... For graph data, specify type='graph'")
+  if (missing(type)) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
   type <- match.arg(type, several.ok = FALSE)
   
   # show the connexion object locally
   con <- getOption("con")
   
   # write the full query
+  # retrieve preceding/following reactions
   MATCH.1 <- 'MATCH p1 = (prle:ReactionLikeEvent)<-[:precedingEvent]-(rle:ReactionLikeEvent)'
   MATCH.2 <- 'MATCH p2 = (rle)<-[:precedingEvent]-(frle:ReactionLikeEvent)'
   MATCH <- paste(MATCH.1, MATCH.2, collapse = ";")
+  # add depths
   if (all.depths) {
     MATCH <- gsub(":precedingEvent", ":precedingEvent*", MATCH)
   } else if (!is.null(depths)) {
     MATCH <- gsub(":precedingEvent", paste0(":precedingEvent*1..", as.integer(depths)), MATCH)
   }
+  # add conditions
   WHERE <- paste0('WHERE rle', .genIdTerm(id)) 
   if (grepl("^[0-9]+$", id) && !is.null(species)) {
     WHERE <- paste0(WHERE, " AND rle.speciesName = ", .matchSpecies(species, "displayName"))
   }
   RETURN <- 'RETURN prle,rle,frle'
-  # return graph relationships
+  # return relationships for graph data
   if (type == "graph") RETURN <- paste0(RETURN, ",relationships(p1),relationships(p2)")
   
   query <- paste(MATCH, WHERE, RETURN, collapse = ";")
