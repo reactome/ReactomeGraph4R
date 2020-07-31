@@ -7,9 +7,9 @@
 	- ‘interactor’ connection, Interaction class
 
 ```
-MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)<-[itr:interactor]-(i:Interaction)
+MATCH p1 = (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)<-[:interactor]-(i:Interaction)
 WHERE pe.dbId = 996766
-RETURN pe,re,i,itr
+RETURN pe,re,i,relationships(p1)
 ```
 
 ---
@@ -18,19 +18,18 @@ RETURN pe,re,i,itr
 	- Submit a Pathway name/id, retrieve via ‘hasEvent’ connection
 
 ```
-MATCH path = (p:Pathway)-[r:hasEvent]->(rle:ReactionLikeEvent)
+MATCH p1 = (p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent)
 WHERE p.stId = "R-HSA-1369062"
-RETURN rle,relationships(path)
+RETURN p,rle,relationships(p1)
 ```
 
 
   - Submit a Reaction name/id, find Pathway(s) via ‘hasEvent’ connection, and then find all Reactions
 
 ```
-MATCH path1 = (rle:ReactionLikeEvent)<-[r:hasEvent]-(p:Pathway)
-MATCH path2 = (p)-[:hasEvent]->(rles:ReactionLikeEvent)
+MATCH p = (rle:ReactionLikeEvent)<-[:hasEvent]-(pathway:Pathway)-[:hasEvent]->(rles:ReactionLikeEvent)
 WHERE rle.stId = "R-HSA-5682285"
-RETURN rles
+RETURN rle,pathway,rles,relationships(p)
 ```
 
 ---
@@ -60,7 +59,7 @@ Hmmm how to send errors?
 
 ```
 MATCH (n)
-WHERE n.displayName = "RCOR1 [nucleoplasm]"
+WHERE n.displayName = "RCOR1 [nucleoplasm]" AND n.speciesName = "Homo sapiens"
 RETURN n
 
 MATCH (n {dbId: 996766})
@@ -74,18 +73,19 @@ RETURN n
 _Differentiate Reactome & external ID_
 
 ```
-MATCH (re:ReferenceEntity)<-[r:referenceEntity]-(pe:PhysicalEntity)
+MATCH p1 = (re:ReferenceEntity)<-[:referenceEntity]-(pe:PhysicalEntity)
+MATCH p2 = (pe)<-[:input|output|catalystActivity|regulatedBy]-(event:Event)
 WHERE re.databaseName = "UniProt" AND re.identifier = "P04637"
-WITH pe
-MATCH (pe)-[:input|output|catalystActivity|regulatedBy]-(event:Event)
-RETURN event
+RETURN re,pe,event,relationships(p1) AS r1,relationships(p2) AS r2
 ```
 
 ```
-MATCH (pe:PhysicalEntity)-[:input|output|catalystActivity|regulatedBy]-(e:Event)
+MATCH p1 = (pe:PhysicalEntity)<-[:input|output|catalystActivity|regulatedBy]-(event:Event)
 WHERE pe.stId = "R-HSA-196015"
-RETURN e
+RETURN pe,event,relationships(p1)
 ```
+
+**Hierarchy**: use the function in the last PR (replace rle with event)
 
 ---
 
@@ -99,11 +99,10 @@ _No idea_
 - Find existing ‘roles’ of PhysicalEntity (input, output, regulator, catalyst)
 
 ```
-MATCH p=(pe:PhysicalEntity)<-[:input|output|catalystActivity|regulatedBy*]-(do:DatabaseObject)
+MATCH p=(pe:PhysicalEntity)<-[:input|output|catalystActivity|regulatedBy]-(do:DatabaseObject)
 WHERE pe.stId = "R-HSA-8944354"
 RETURN pe,do,relationships(p)
 ```
-_how to know the exact relationship??_
 
 ---
 
@@ -112,28 +111,18 @@ _how to know the exact relationship??_
 
 ```
 MATCH (pathway:Pathway)
-WHERE pathway.stId = "R-HSA-1369062"
-
-CALL apoc.do.when(
-  pathway.isInDisease,
-  'RETURN pathway.disease',
-  'RETURN "No associative disease"',
-  pathway:pathway)
-YIELD value
-RETURN value
+WHERE pathway.stId = "R-HSA-162588"
+RETURN pathway,
+CASE
+WHEN pathway.isInDisease = true
+THEN [(pathway)-[:disease]->(d:Disease) | d]
+ELSE "No relevant disease" END AS disease
 ```
-I want to use the 'if/else' in cypher, but an error returned:
 
 ```
-Neo.ClientError.Procedure.ProcedureNotFound
-There is no procedure with the name `apoc.do.when` registered for this database instance. Please ensure you've spelled the procedure name correctly and that the procedure is properly deployed.
-```
-https://neo4j.com/docs/labs/apoc/current/cypher-execution/conditionals/
-
-```
-MATCH (d:Disease)<-[r:disease]-(pe:PhysicalEntity)
+MATCH p1 = (d:Disease)<-[:disease]-(pe:PhysicalEntity)
 WHERE d.displayName = "cancer" AND pe.speciesName = "Homo sapiens"
-RETURN pe LIMIT 50
+RETURN d,pe,relationships(p1) LIMIT 50
 ```
 
 ---
@@ -143,9 +132,9 @@ RETURN pe LIMIT 50
 
 
 ```
-MATCH (lr:LiteratureReference)<-[r:literatureReference]-(event:Event)
+MATCH p1 = (lr:LiteratureReference)<-[:literatureReference]-(event:Event)
 WHERE lr.pubMedIdentifier = 20797626
-RETURN event,r
+RETURN lr,event,relationships(p1)
 ```
 
 
