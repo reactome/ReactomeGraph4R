@@ -90,9 +90,14 @@ RETURN pe,event,relationships(p1)
 ---
 
 - Find Referrals of instance
-	- Focus on ‘Biological’ referrals (Events, PhysicalEntities, Regulations, Catalysts, ModifiedResidues)
+	- Focus on ‘Biological’ referrals (Events, PhysicalEntities, Regulations, Catalysts, ReferenceEntities, Interactors, ModifiedResidues)
 
-_No idea_
+```
+MATCH ref = (dbo:DatabaseObject)-[]->(rle:ReactionLikeEvent)
+WHERE rle.dbId = 113454
+RETURN rle, dbo, relationships(ref)
+```
+Filter unwanted objects in R
 
 ---
 
@@ -138,5 +143,5 @@ RETURN lr,event,relationships(p1)
 ```
 
 
-**ERROR HANDLING** - it's so inconvenient that Neo4j doesn't return any error message... 
+**ERROR HANDLING** - NO `(no changes, no records)`
 
