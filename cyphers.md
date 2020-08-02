@@ -95,9 +95,11 @@ RETURN pe,event,relationships(p1)
 ```
 MATCH ref = (dbo:DatabaseObject)-[]->(rle:ReactionLikeEvent)
 WHERE rle.dbId = 113454
+WITH *, nodes(ref) AS ns
+WHERE ALL(node IN ns WHERE NOT node:InstanceEdit)
 RETURN rle, dbo, relationships(ref)
 ```
-Filter unwanted objects in R
+Filter unwanted objects in R ⭕
 
 ---
 
