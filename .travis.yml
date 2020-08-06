@@ -2,3 +2,7 @@
 
 language: R
 cache: packages
+
+# install package from github
+r_github_packages:
+  - neo4j-rstats/neo4r
