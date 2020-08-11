@@ -1,14 +1,15 @@
 ## for cypher queries
 
-# clauses (connected with ';')
+# clauses - MATCH, WHERE, RETURN
 
 .MATCH <- function(clause.list) {
   num.clause <- length(clause.list)
   final.clause <- ""
+  # glue clauses in the list
   for (num in 1:num.clause) {
     clause <- as.character(clause.list[[num]])
-    clause <- paste0("MATCH p", num, " = ", clause) # no need to worry about keys in list!
-    final.clause <- ifelse(num == 1, clause, paste(final.clause, clause, collapse = ";"))
+    clause <- paste0("MATCH p", num, " = ", clause) # no need to worry about names of elements in the list
+    final.clause <- ifelse(num == 1, clause, paste(final.clause, clause))
   }
   final.clause
 }
@@ -26,7 +27,8 @@
     # can't fetch data if adding Reactome as databaseName so just remove it
     if (filters[["databaseName"]] == "Reactome") filters <- filters[names(filters) != "databaseName"]
   }
-
+  
+  # complete WHERE clause by adding filter arguments (eg. id, species) in a query function
   for (filter in names(filters)) {
     .checkInfo(filter, "property")
     if (filter == "id") {

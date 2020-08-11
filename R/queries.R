@@ -31,7 +31,7 @@ matchObject <- function(id=NULL, name=NULL, species="human") {
 }
 
 
-#' MATCH horizontally linked Events
+#' MATCH the preceding/following Events
 #' 
 #' @param id a stable or db id of an Event
 #' @param name an Event name
@@ -200,12 +200,13 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
   }
   
   # full query
-  # (Reactions <--) Pathway --> (other) Reactions
   if (event.class == "Pathway") {
+    # find Reactions connected to the given Pathway
     MATCH.list <- list('(pathway:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent)')
     node4where <- "pathway"
     nodes4return <- c("pathway", "rle")
   } else if (event.class == "ReactionLikeEvent") {
+    # find the Pathway connected with the given Reaction, and get other Reactions that also connect to the Pathway
     MATCH.list <- list('(rle:ReactionLikeEvent)<-[:hasEvent]-(pathway:Pathway)-[:hasEvent]->(orle:ReactionLikeEvent)')
     node4where <- "rle"
     nodes4return <- c("rle", "pathway", "orle")
