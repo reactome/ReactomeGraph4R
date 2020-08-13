@@ -25,9 +25,10 @@ matchObject <- function(id=NULL, name=NULL, species="human") {
   # retrieve
   c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
   c.WHERE <- .WHERE("dbo", id=id, displayName=name, speciesName=species)
-  c.RETURN <- .RETURN("dbo", type="row")
-  query <- paste(c.MATCH, c.WHERE, c.RETURN, collapse = ";")
-  .callAPI(query, type="row")
+  nodes4return <- "dbo"
+  c.RETURN <- .RETURN(nodes4return, type="row")
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  .callAPI(query, return.names=.goodName(nodes4return), type="row")
 }
 
 
@@ -64,13 +65,14 @@ matchEventPaths <- function(id=NULL, name=NULL, species=NULL, depth=1,
   c.WHERE <- .WHERE(node='event', id=id, displayName=name, speciesName=species)
   ## return
   c.RETURN <- .RETURN(node=c("pevent", "event", "fevent"), type=type, numOfMatch=length(match.list))
-
-  query <- paste(c.MATCH, c.WHERE, c.RETURN, collapse = ";")
+  return.names <- c("precedingEvent", "event", "followingEvent")
   
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+
   # call API
   tmp.id <- ifelse(is.null(id), name, id)
   new.msg <- paste0("This Event ", sQuote(tmp.id), " probably has no linked Events")
-  .callAPI(query, type, verbose, new.msg)
+  .callAPI(query, return.names, type, verbose, new.msg)
 }
 
 
@@ -81,28 +83,32 @@ matchEventPaths <- function(id=NULL, name=NULL, species=NULL, depth=1,
 #' @param id stId or dbId of Event/PhysicalEntity; or id of an external database
 #' @param resource database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}
 #' @param species name or taxon id or dbId or abbreviation of specified species
-#' @param class Class of the given id. For external ids, only "Entity" can be specified
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return hierarchical instances of the given id and resource
 #' @examples
-#' \dontrun{
-#' ### there are errors for this query using neo4r! check later ###
-#' matchHierarchy(id="P04637", resource="UniProt", class="Entity", type="row")
-#' }
-#' matchHierarchy(id="R-HSA-196015", class="Entity", type="row")
-#' matchHierarchy(id="R-HSA-1369062", class="Event", type="graph")
+#' matchHierarchy(id="P04637", resource="UniProt", type="row")
+#' matchHierarchy(id="R-HSA-196015", type="row")
+#' matchHierarchy(id="R-HSA-1369062", type="graph")
 #' 
 #' @rdname matchHierarchy
 #' @family match
 #' @export 
 
-matchHierarchy <- function(id, resource="Reactome", class=c("Entity", "Event"), species=NULL, type=c("row", "graph")) {
+matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (missing(class)) stop("Please make sure what the schema class of this id is")
-  class <- match.arg(class, several.ok=FALSE)
-  if (resource != "Reactome" && class == "Event") stop("'Event' is only for Reactome ids")
   verbose <- ifelse(missing(type), TRUE, FALSE) 
   type <- match.arg(type, several.ok=FALSE)
+  
+  # get class
+  id.labels <- .getNodeInfo(.WHERE("dbo", id=id, databaseName=resource), "labels")
+  id.labels <- id.labels[, 1]
+  if ("ReferenceEntity" %in% id.labels || "PhysicalEntity" %in% id.labels) {
+    class <- "Entity"
+  } else if ("Event" %in% id.labels) {
+    class <- "Event"
+  } else {
+    stop("Please input an Event or Entity id", call.=FALSE)
+  }
   
   # full query
   # (RE <--) PE <-- Reactions <-- Pathways
@@ -125,12 +131,14 @@ matchHierarchy <- function(id, resource="Reactome", class=c("Entity", "Event"), 
     node <- "re" # in WHERE
     nodes4return <- c("re", "pe", "event", "upevent") # in RETURN
   }
+  
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE(node, id=id, databaseName=resource, species=species)
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
-  query <- paste(c.MATCH, c.WHERE, c.RETURN, collapse = ";")
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
   # retrieve
-  .callAPI(query, type, verbose)
+  .callAPI(query, .goodName(nodes4return), type, verbose)
 }
 
 
@@ -143,9 +151,7 @@ matchHierarchy <- function(id, resource="Reactome", class=c("Entity", "Event"), 
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return interactions of a given PhysicalEntity
 #' @examples
-#' \dontrun{
-#' matchInteractors(996766) ### get errors using neo4r as well!! ###
-#' }
+#' matchInteractors(996766)
 #' @rdname matchHierarchy
 #' @family match
 #' @export 
@@ -157,13 +163,14 @@ matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
   
   # full query
   # PhysicalEntities --> RefEntities <-- Interaction
-  MATCH.list <- list('(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)<-[:interactor]-(i:Interaction)')
+  MATCH.list <- list('(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)<-[:interactor]-(interaction:Interaction)')
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE("pe", id=pe.id, species=species)
-  c.RETURN <- .RETURN(c("pe", "re", "i"), type, length(MATCH.list))
-  query <- paste(c.MATCH, c.WHERE, c.RETURN, collapse = ";")
+  nodes4return <- c("pe", "re", "interaction")
+  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
   # retrieve
-  .callAPI(query, type, verbose)
+  .callAPI(query, .goodName(nodes4return), type, verbose)
 }
 
 
@@ -190,7 +197,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
   
   # get class
   event.labels <- .getNodeInfo(.WHERE("dbo", id=event.id), "labels")
-  event.labels <- event.labels$value
+  event.labels <- event.labels[, 1]
   if ("Pathway" %in% event.labels) {
     event.class <- "Pathway"
   } else if ("ReactionLikeEvent" %in% event.labels) {
@@ -207,17 +214,16 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
     nodes4return <- c("pathway", "rle")
   } else if (event.class == "ReactionLikeEvent") {
     # find the Pathway connected with the given Reaction, and get other Reactions that also connect to the Pathway
-    MATCH.list <- list('(rle:ReactionLikeEvent)<-[:hasEvent]-(pathway:Pathway)-[:hasEvent]->(orle:ReactionLikeEvent)')
+    MATCH.list <- list('(rle:ReactionLikeEvent)<-[:hasEvent]-(pathway:Pathway)-[:hasEvent]->(otherrle:ReactionLikeEvent)')
     node4where <- "rle"
-    nodes4return <- c("rle", "pathway", "orle")
+    nodes4return <- c("rle", "pathway", "otherrle")
   }
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE(node4where, id=event.id, displayName=event.name, species=species)
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
-  query <- paste(c.MATCH, c.WHERE, c.RETURN, collapse = ";")
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
   # retrieve
-  print(query)
-  .callAPI(query, type, verbose)
+  .callAPI(query, .goodName(nodes4return), type, verbose)
 }
 
 

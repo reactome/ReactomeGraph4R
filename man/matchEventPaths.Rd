@@ -2,7 +2,7 @@
 % Please edit documentation in R/queries.R
 \name{matchEventPaths}
 \alias{matchEventPaths}
-\title{MATCH horizontally linked Events}
+\title{MATCH the preceding/following Events}
 \usage{
 matchEventPaths(
   id = NULL,
@@ -30,7 +30,7 @@ matchEventPaths(
 preceding/following Events connected to the given Event in specified depth(s), default depth = 1
 }
 \description{
-MATCH horizontally linked Events
+MATCH the preceding/following Events
 }
 \examples{
 matchEventPaths("R-HSA-983150", all.depth=TRUE, type="row")
