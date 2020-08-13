@@ -6,12 +6,17 @@
 \alias{reactome.graphdb4r-package}
 \title{reactome.graphdb4r: R Interface for Reactome Graph Database}
 \description{
-This package is to provide an interface to query data with network structure
- in the Reactome Graph Database. There is also another package, reactome4r, for queries in 
- Reactome Content Service.
+This package is to provide an interface to query data with the network structure
+    in Reactome Graph Database. There is also another package, reactome4r, for queries in 
+    Reactome Content Service.
 }
 \author{
 \strong{Maintainer}: Chi-Lam Poon \email{clpoon807@gmail.com}
+
+Other contributors:
+\itemize{
+  \item Reactome \email{help@reactome.org} [copyright holder]
+}
 
 }
 \keyword{internal}
