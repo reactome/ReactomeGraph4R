@@ -28,7 +28,7 @@
     if (filters[["databaseName"]] == "Reactome") filters <- filters[names(filters) != "databaseName"]
   }
   
-  # complete WHERE clause by adding filter arguments (eg. id, species) in a query function
+  # complete WHERE clause by adding filter arguments (eg. id, species) from a query function
   for (filter in names(filters)) {
     .checkInfo(filter, "property")
     if (filter == "id") {
@@ -52,6 +52,7 @@
   clause <- 'RETURN '
   nodes <- paste(node, collapse = ",")
   clause <- paste0(clause, nodes)
+  
   # add `relationships()` for each path
   if (type == "graph") {
     numOfMatch <- seq(1, numOfMatch) # vectorize
@@ -67,9 +68,10 @@
 .varLen <- function(clause, rel, depth, all) {
   # have a check!
   .checkInfo(rel, "relationship")
+  # in case of 0 & negative values - the minimum depth is 1
   if (depth < 1) depth <- 1
   
-  # depth = 1 by default
+  # since depth = 1 by default
   if (!all && depth == 1) {
     message("Retrieving immediate connected instances... Specify depth-related arguments for more depths")
   }

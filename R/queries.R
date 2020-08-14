@@ -71,7 +71,7 @@ matchEventPaths <- function(id=NULL, name=NULL, species=NULL, depth=1,
 
   # call API
   tmp.id <- ifelse(is.null(id), name, id)
-  new.msg <- paste0("This Event ", sQuote(tmp.id), " probably has no linked Events")
+  new.msg <- paste0("This Event ", sQuote(tmp.id), " probably has no other connected Events")
   .callAPI(query, return.names, type, verbose, new.msg)
 }
 
@@ -115,7 +115,7 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
   # retrieve ALL Events linked with 'hasEvent' since it's hierarchy 
   all.MATCH.list <- list('(re:ReferenceEntity)<-[:referenceEntity]-(pe:PhysicalEntity)',
                          '(pe:PhysicalEntity)<-[:input|output|catalystActivity|regulatedBy]-(event:Event)',
-                         '(event:Event)<-[:hasEvent*]-(upevent:Event)')
+                         '(event:Event)<-[:hasEvent*]-(upperevent:Event)')
 
   if (resource == "Reactome") {
     # throw unwanted lines
@@ -124,12 +124,12 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
     # select the node in WHERE
     node <- ifelse(class == "Entity", 'pe', 'event')
     # RETURN
-    ifelse(class == "Event", nodes4return <- c("event", "upevent"), 
-                             nodes4return <- c("pe", "event", "upevent"))
+    ifelse(class == "Event", nodes4return <- c("event", "upperevent"), 
+                             nodes4return <- c("pe", "event", "upperevent"))
   } else {
     MATCH.list <- all.MATCH.list
     node <- "re" # in WHERE
-    nodes4return <- c("re", "pe", "event", "upevent") # in RETURN
+    nodes4return <- c("re", "pe", "event", "upperevent") # in RETURN
   }
   
   c.MATCH <- .MATCH(MATCH.list)
