@@ -44,13 +44,13 @@ matchInteractors(996766)
 }
 \seealso{
 Other match: 
-\code{\link{matchEventPaths}()},
 \code{\link{matchObject}()},
+\code{\link{matchPrecedingAndFollowingEvents}()},
 \code{\link{matchReactionsInPathway}()}
 
 Other match: 
-\code{\link{matchEventPaths}()},
 \code{\link{matchObject}()},
+\code{\link{matchPrecedingAndFollowingEvents}()},
 \code{\link{matchReactionsInPathway}()}
 }
 \concept{match}

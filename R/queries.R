@@ -42,16 +42,16 @@ matchObject <- function(id=NULL, name=NULL, species="human") {
 #' @param type to return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return preceding/following Events connected to the given Event in specified depth(s), default depth = 1
 #' @examples
-#' matchEventPaths("R-HSA-983150", all.depth=TRUE, type="row")
-#' @rdname matchEventPaths
+#' matchPrecedingAndFollowingEvents("R-HSA-983150", all.depth=TRUE, type="row")
+#' @rdname matchPrecedingAndFollowingEvents
 #' @family match
 #' @export 
 
-matchEventPaths <- function(id=NULL, name=NULL, species=NULL, depth=1, 
-                            all.depth=FALSE, type=c("row", "graph")) {
+matchPrecedingAndFollowingEvents <- function(id=NULL, name=NULL, species=NULL, depth=1, 
+                                             all.depth=FALSE, type=c("row", "graph")) {
   # ensure the inputs
   if (is.null(name) && is.null(id)) stop("Must specify either an 'id' or a 'name'")
-  verbose <- ifelse(missing(type), TRUE, FALSE) 
+  verbose <- ifelse(missing(type), TRUE, FALSE)
   type <- match.arg(type, several.ok=FALSE)
   
   # full query
@@ -119,7 +119,7 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
 
   if (resource == "Reactome") {
     # throw unwanted lines
-    ifelse(class == "Entity", throws <-  1, throws <- 1:2)
+    ifelse(class == "Entity", throws <- 1, throws <- 1:2)
     MATCH.list <- all.MATCH.list[-throws]
     # select the node in WHERE
     node <- ifelse(class == "Entity", 'pe', 'event')
@@ -183,8 +183,8 @@ matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return Reactions related to the given Pathway/Reaction
 #' @examples
-#' matchReactionsInPathway("R-HSA-1369062", type="row")
-#' matchReactionsInPathway("R-HSA-5682285", type="graph")
+#' matchReactionsInPathway("R-HSA-1369062", type="graph")
+#' matchReactionsInPathway("R-HSA-5682285", type="row")
 #' @rdname matchReactionsInPathway
 #' @family match
 #' @export 
@@ -214,9 +214,9 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
     nodes4return <- c("pathway", "rle")
   } else if (event.class == "ReactionLikeEvent") {
     # find the Pathway connected with the given Reaction, and get other Reactions that also connect to the Pathway
-    MATCH.list <- list('(rle:ReactionLikeEvent)<-[:hasEvent]-(pathway:Pathway)-[:hasEvent]->(otherrle:ReactionLikeEvent)')
+    MATCH.list <- list('(rle:ReactionLikeEvent)<-[:hasEvent]-(pathway:Pathway)-[:hasEvent]->(otherReactionLikeEvent:ReactionLikeEvent)')
     node4where <- "rle"
-    nodes4return <- c("rle", "pathway", "otherrle")
+    nodes4return <- c("rle", "pathway", "otherReactionLikeEvent")
   }
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE(node4where, id=event.id, displayName=event.name, species=species)
@@ -225,6 +225,5 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
   # retrieve
   .callAPI(query, .goodName(nodes4return), type, verbose)
 }
-
 
 

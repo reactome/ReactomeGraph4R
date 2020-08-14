@@ -76,6 +76,7 @@
 
 
 # check if value(s) in db or not (mostly used in internal checks)
+# info is a character, not vector
 .checkInfo <- function(info, type=c("label", "relationship", "property")) {
   type <- match.arg(type, several.ok = FALSE)
   info <- gsub("^:", "", info)
@@ -96,7 +97,10 @@
   throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier'
   if (length(throw) > 0) {
     throw <- paste(throw, collapse = ", ")
+    return(FALSE)
     warning(paste0("The ", type, " '", throw, "' is not in this database"), call.=FALSE)
+  } else {
+    return(TRUE)
   }
 }
 
