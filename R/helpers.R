@@ -155,13 +155,14 @@
 }
 
 
-# ameliorate names in 'row' data
+# ameliorate names of 'row' data list
+# `\\<` & `\\>` - double-escaping to prevent replacing strings within a word
 .goodName <- function(name) {
-  name <- gsub('pe', 'physicalEntity', name)
-  name <- gsub('re', 'referenceEntity', name)
-  name <- gsub('dbo', 'databaseObject', name)
-  name <- gsub('rle', 'reactionLikeEvent', name)
-  name <- gsub('lr', 'literatureReference', name)
+  name <- gsub('\\<pe\\>', 'physicalEntity', name)
+  name <- gsub('\\<re\\>', 'referenceEntity', name)
+  name <- gsub('\\<dbo\\>', 'databaseObject', name)
+  name <- gsub('\\<rle\\>', 'reactionLikeEvent', name)
+  name <- gsub('\\<lr\\>', 'literatureReference', name)
   name
 }
 
