@@ -3,13 +3,13 @@
 # clauses - MATCH, WHERE, RETURN
 
 .MATCH <- function(clause.list) {
-  num.clause <- length(clause.list)
   final.clause <- ""
+  
   # glue clauses in the list
-  for (num in 1:num.clause) {
-    clause <- as.character(clause.list[[num]])
-    clause <- paste0("MATCH p", num, " = ", clause) # no need to worry about names of elements in the list
-    final.clause <- ifelse(num == 1, clause, paste(final.clause, clause))
+  for (list.idx in 1:length(clause.list)) {
+    clause <- as.character(clause.list[[list.idx]])
+    clause <- paste0("MATCH p", list.idx, " = ", clause) # no need to worry about names of elements in the list
+    final.clause <- ifelse(list.idx == 1, clause, paste(final.clause, clause))
   }
   final.clause
 }
@@ -23,24 +23,31 @@
   # list(`property` = arg)
   filters <- list(...)
   filters <- filters[!sapply(filters, is.null)] # remove NULL elements
-  if ("databaseName" %in% names(filters)) {
-    # can't fetch data if adding Reactome as databaseName so just remove it
-    if (filters[["databaseName"]] == "Reactome") filters <- filters[names(filters) != "databaseName"]
+  
+  # can't fetch data if adding Reactome as databaseName so just remove it
+  if ("databaseName" %in% names(filters) && filters[["databaseName"]] == "Reactome") {
+    filters <- filters[names(filters) != "databaseName"]
   }
   
   # complete WHERE clause by adding filter arguments (eg. id, species) from a query function
   for (filter in names(filters)) {
+    # check if the property name correct
     .checkInfo(filter, "property")
+    
+    # specifically handle id & species info
     if (filter == "id") {
       db <- ifelse("databaseName" %in% names(filters), filters[["databaseName"]], "Reactome") 
       add <- paste0(node, .genIdTerm(filters[[filter]], database = db))
     } else if (filter == "speciesName") {
+      # automatically change different forms of species names into 'displayName'
       add <- paste0(node, '.speciesName = "', .matchSpecies(filters[[filter]], "displayName"), '"')
     } else {
       # add dquotes for those include alphabet
       tmp <- ifelse(grepl("^[0-9]+$", filters[[filter]]), filters[[filter]], paste0('"', filters[[filter]], '"'))
       add <- paste0(node, ".", filter, " = ", tmp)
     }
+    
+    # glue the elements
     clause <- ifelse(!grepl(node, clause), paste0(clause, add), paste0(clause, " AND ", add))
   }
   clause
@@ -73,11 +80,15 @@
   
   # since depth = 1 by default
   if (!all && depth == 1) {
-    message("Retrieving immediate connected instances... Specify depth-related arguments for more depths")
+    message("Retrieving immediately connected instances... Specify depth-related arguments for more depths")
   }
   
   # replace
-  new.rel <- ifelse(all, paste0(rel, "*"), ifelse(depth > 1, paste0(rel, "*1..", as.integer(depth)), rel))
+  if (all) {
+    new.rel <- paste0(rel, "*")
+  } else {
+    new.rel <- ifelse(depth > 1, paste0(rel, "*1..", as.integer(depth)), rel)
+  }
   new.clause <- gsub(rel, new.rel, clause)
   new.clause
 }
@@ -91,13 +102,13 @@
     if (grepl("^R-[A-Z]{3}-", id)) {
       term <- paste0('.stId = "', id, '"')
     } else if (grepl("^[0-9]+$", id)) {
-      term <- paste0(".dbId = ", id)
+      term <- paste0('.dbId = ', id)
     } else {
       stop("Is this id correct?", call.=FALSE)
     }
   } else { # non-Reactome ids
     if (grepl("^[0-9]+$", id)) {
-      term <- paste0(".identifier = ", id)
+      term <- paste0('.identifier = ', id)
     } else {
       # add quotes
       term <- paste0('.identifier = "', id, '"')

@@ -125,13 +125,13 @@
 
 
 # get value of specific attribute(s) with a given id/name
-.getSlotValue <- function(dbo, dbo.type=c("id", "name"), resource="Reactome", slot) {
+.getSlotValue <- function(dbObject, dbObject.type=c("id", "name"), resource="Reactome", slot) {
   # assign value
   id <- NULL -> name
-  if (dbo.type == "id") {
-    id <- dbo
+  if (dbObject.type == "id") {
+    id <- dbObject
   } else {
-    name <- dbo
+    name <- dbObject
   }
   
   # check info
@@ -139,15 +139,16 @@
   
   # retrieve
   c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=name)
+  c.WHERE <- .WHERE("dbo", id=id, displayName=name, databaseName=resource)
   c.RETURN <- .RETURN(paste0("dbo.", slot), type="row") # can input >1 slots!
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
-  .callAPI(query, slot, type="row")
+  
+  .callAPI(query, return.names=slot, type="row")
 }
 
 
 # get all labels/keys of node(s)
-# more types to be added
+# more info types to be added
 .getNodeInfo <- function(node.where, info=c("keys", "labels")) {
   info <- match.arg(info)
   query <- paste('MATCH (dbo:DatabaseObject)',
@@ -155,7 +156,7 @@
                  paste0('UNWIND ', info, '(dbo) AS info'),
                  'RETURN distinct(info)')
   res <- .callAPI(query, return.names=info, type="row")
-  res[[info]]
+  res[[1]][[info]]
 }
 
 

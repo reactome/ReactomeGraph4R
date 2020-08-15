@@ -84,10 +84,15 @@
                       x
                      })
   # add names
-  if (!is.null(res.names) && length(res.names) != length(res)) {
-    stop("Check inputed return names & RETURN clause") # internal check
-  } else if (!is.null(res.names)) {
-    names(res) <- res.names
+  if (!is.null(res.names)) {
+    # eg: .getSlotValue(dbObject="RCOR1 [nucleoplasm]", dbObject.type="name", slot=c("dbId", "displayName"))
+    if (length(res) == 1 && class(res[[1]]) == "data.frame") {
+      colnames(res[[1]]) <- res.names # usually the lengths are matched, not check here
+    } else if (length(res.names) != length(res)) {
+      stop("Check inputed return names & RETURN clause") # internal check
+    } else {
+      names(res) <- res.names
+    }
   }
   res
 }

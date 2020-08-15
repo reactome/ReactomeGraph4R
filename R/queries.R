@@ -16,11 +16,14 @@
 #' @export 
 
 matchObject <- function(id=NULL, name=NULL, species="human") {
-  ### need to return graph data? ###
-  
   # make sure the input
-  if (is.null(name) && is.null(id)) stop("Must specify either an 'id' or a 'name'")
-  if (missing(species)) message("Species not specified, returning human data...")
+  if (is.null(name) && is.null(id)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  
+  if (missing(species)) {
+    message("Species not specified, returning human data...")
+  }
   
   # retrieve
   c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
@@ -28,6 +31,7 @@ matchObject <- function(id=NULL, name=NULL, species="human") {
   nodes4return <- "dbo"
   c.RETURN <- .RETURN(nodes4return, type="row")
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
   .callAPI(query, return.names=.goodName(nodes4return), type="row")
 }
 
@@ -50,8 +54,10 @@ matchObject <- function(id=NULL, name=NULL, species="human") {
 matchPrecedingAndFollowingEvents <- function(id=NULL, name=NULL, species=NULL, depth=1, 
                                              all.depth=FALSE, type=c("row", "graph")) {
   # ensure the inputs
-  if (is.null(name) && is.null(id)) stop("Must specify either an 'id' or a 'name'")
-  verbose <- ifelse(missing(type), TRUE, FALSE)
+  if (is.null(name) && is.null(id)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
   # full query
@@ -72,7 +78,7 @@ matchPrecedingAndFollowingEvents <- function(id=NULL, name=NULL, species=NULL, d
   # call API
   tmp.id <- ifelse(is.null(id), name, id)
   new.msg <- paste0("This Event ", sQuote(tmp.id), " probably has no other connected Events")
-  .callAPI(query, return.names, type, verbose, new.msg)
+  .callAPI(query, return.names, type, isVerbose, new.msg)
 }
 
 
@@ -96,12 +102,11 @@ matchPrecedingAndFollowingEvents <- function(id=NULL, name=NULL, species=NULL, d
 
 matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  verbose <- ifelse(missing(type), TRUE, FALSE) 
+  isisVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
   # get class
   id.labels <- .getNodeInfo(.WHERE("dbo", id=id, databaseName=resource), "labels")
-  id.labels <- id.labels[, 1]
   if ("ReferenceEntity" %in% id.labels || "PhysicalEntity" %in% id.labels) {
     class <- "Entity"
   } else if ("Event" %in% id.labels) {
@@ -138,7 +143,7 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, verbose)
+  .callAPI(query, .goodName(nodes4return), type, isisVerbose)
 }
 
 
@@ -158,7 +163,7 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
 
 matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  verbose <- ifelse(missing(type), TRUE, FALSE) 
+  isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
   # full query
@@ -170,7 +175,7 @@ matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, verbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose)
 }
 
 
@@ -191,13 +196,15 @@ matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
 
 matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(event.id) && is.null(event.name)) stop("Must specify either an 'id' or a 'name'")
-  verbose <- ifelse(missing(type), TRUE, FALSE) 
+  if (is.null(event.id) && is.null(event.name)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  
+  isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
   # get class
   event.labels <- .getNodeInfo(.WHERE("dbo", id=event.id), "labels")
-  event.labels <- event.labels[, 1]
   if ("Pathway" %in% event.labels) {
     event.class <- "Pathway"
   } else if ("ReactionLikeEvent" %in% event.labels) {
@@ -223,7 +230,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, verbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose)
 }
 
 
