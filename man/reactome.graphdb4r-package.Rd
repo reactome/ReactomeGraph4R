@@ -11,7 +11,7 @@ This package is to provide an interface to query data with the network structure
     Reactome Content Service.
 }
 \author{
-\strong{Maintainer}: Chi-Lam Poon \email{clpoon807@gmail.com}
+\strong{Maintainer}: Chi-Lam Poon \email{clpoon807@gmail.com} (\href{https://orcid.org/0000-0001-6298-7099}{ORCID})
 
 Other contributors:
 \itemize{
