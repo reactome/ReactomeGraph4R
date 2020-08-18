@@ -27,13 +27,13 @@ Reactions related to the given Pathway/Reaction
 MATCH Reactions in associated Pathway
 }
 \examples{
-matchReactionsInPathway("R-HSA-1369062", type="row")
-matchReactionsInPathway("R-HSA-5682285", type="graph")
+matchReactionsInPathway("R-HSA-1369062", type="graph")
+matchReactionsInPathway("R-HSA-5682285", type="row")
 }
 \seealso{
 Other match: 
-\code{\link{matchEventPaths}()},
 \code{\link{matchHierarchy}()},
-\code{\link{matchObject}()}
+\code{\link{matchObject}()},
+\code{\link{matchPrecedingAndFollowingEvents}()}
 }
 \concept{match}

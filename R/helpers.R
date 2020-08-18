@@ -76,6 +76,7 @@
 
 
 # check if value(s) in db or not (mostly used in internal checks)
+# info is a character, not vector
 .checkInfo <- function(info, type=c("label", "relationship", "property")) {
   type <- match.arg(type, several.ok = FALSE)
   info <- gsub("^:", "", info)
@@ -96,13 +97,16 @@
   throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier'
   if (length(throw) > 0) {
     throw <- paste(throw, collapse = ", ")
-    warning(paste0("The ", type, " '", throw, "' is not in this database"), call.=FALSE) ## or stop()? ##
+    return(FALSE)
+    warning(paste0("The ", type, " '", throw, "' is not in this database"), call.=FALSE)
+  } else {
+    return(TRUE)
   }
 }
 
 
 # call neo4j API
-.callAPI <- function(query, type, verbose=FALSE, msg=NULL, ...) {
+.callAPI <- function(query, return.names=NULL, type, verbose=FALSE, msg=NULL, ...) {
   # being wordy if 'type' arg missing
   if (verbose) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
 
@@ -110,40 +114,24 @@
   con <- getOption("con")
   
   # call API
-  res <- neo4r::call_neo4j(query = query,
-                           con = con,
-                           type = type,
-                           ...)
-  # check & send error if any
-  .errMsg(res, msg=msg)
-  
-  # manipulate 'row' content
-  if (type == "row")  res <- lapply(res, function(tbl) unique(as.data.frame(tbl)))
-  res
-}
-
-
-# error messages
-.errMsg <- function(res, msg=NULL) {
-  # send more information
-  if (length(res) == 0) {
-    # customized info following 'No data returned'
-    if(!is.null(msg)) stop(msg, call.=FALSE)
-  } else if ("error_message" %in% names(res)) {
-    # query syntax error
-    stop(paste0(res[["error_code"]], "\n", res[["error_message"]]), call.=FALSE)
-  }
+  json.res <- neo4r::call_neo4j(query = query,
+                                con = con,
+                                type = type,
+                                output = "json", # output in json format
+                                ...)
+  # parse json data
+  .parseJSON(json.res, return.names=return.names, type=type)
 }
 
 
 # get value of specific attribute(s) with a given id/name
-.getSlotValue <- function(dbo, type=c("id", "name"), resource="Reactome", slot) {
+.getSlotValue <- function(dbObject, dbObject.type=c("id", "name"), resource="Reactome", slot) {
   # assign value
   id <- NULL -> name
-  if (type == "id") {
-    id <- dbo
+  if (dbObject.type == "id") {
+    id <- dbObject
   } else {
-    name <- dbo
+    name <- dbObject
   }
   
   # check info
@@ -151,27 +139,35 @@
   
   # retrieve
   c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=name)
+  c.WHERE <- .WHERE("dbo", id=id, displayName=name, databaseName=resource)
   c.RETURN <- .RETURN(paste0("dbo.", slot), type="row") # can input >1 slots!
-  query <- paste(c.MATCH, c.WHERE, c.RETURN, collapse = ";")
-  .callAPI(query, type="row")
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
+  .callAPI(query, return.names=slot, type="row")
 }
 
 
 # get all labels/keys of node(s)
-# more types to be added
-.getNodeInfo <- function(node.where, type=c("keys", "labels")) {
-  type <- match.arg(type)
+# more info types to be added
+.getNodeInfo <- function(node.where, info=c("keys", "labels")) {
+  info <- match.arg(info)
   query <- paste('MATCH (dbo:DatabaseObject)',
                  node.where,
-                 paste0('UNWIND ', type, '(dbo) AS info'),
-                 'RETURN distinct(info)',
-                 collapse = ";")
-  res <- .callAPI(query, type="row")
-  res[["info"]]
+                 paste0('UNWIND ', info, '(dbo) AS info'),
+                 'RETURN distinct(info)')
+  res <- .callAPI(query, return.names=info, type="row")
+  res[[1]][[info]]
 }
 
 
-
-
+# ameliorate names of 'row' data list
+# `\\<` & `\\>` - double-escaping to prevent replacing strings within a word
+.goodName <- function(name) {
+  name <- gsub('\\<pe\\>', 'physicalEntity', name)
+  name <- gsub('\\<re\\>', 'referenceEntity', name)
+  name <- gsub('\\<dbo\\>', 'databaseObject', name)
+  name <- gsub('\\<rle\\>', 'reactionLikeEvent', name)
+  name <- gsub('\\<lr\\>', 'literatureReference', name)
+  name
+}
 

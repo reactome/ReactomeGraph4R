@@ -8,7 +8,6 @@
 matchHierarchy(
   id,
   resource = "Reactome",
-  class = c("Entity", "Event"),
   species = NULL,
   type = c("row", "graph")
 )
@@ -19,8 +18,6 @@ matchInteractors(pe.id, species = NULL, type = c("row", "graph"))
 \item{id}{stId or dbId of Event/PhysicalEntity; or id of an external database}
 
 \item{resource}{database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}}
-
-\item{class}{Class of the given id. For external ids, only "Entity" can be specified}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
@@ -39,26 +36,21 @@ Retrieve hierarchical data: Pathway-Reaction-Entity
 Retrieve interactions of a given PhysicalEntity
 }
 \examples{
-\dontrun{
-### there are errors for this query using neo4r! check later ###
-matchHierarchy(id="P04637", resource="UniProt", class="Entity", type="row")
-}
-matchHierarchy(id="R-HSA-196015", class="Entity", type="row")
-matchHierarchy(id="R-HSA-1369062", class="Event", type="graph")
+matchHierarchy(id="P04637", resource="UniProt", type="row")
+matchHierarchy(id="R-HSA-196015", type="row")
+matchHierarchy(id="R-HSA-1369062", type="graph")
 
-\dontrun{
-matchInteractors(996766) ### get errors using neo4r as well!! ###
-}
+matchInteractors(996766)
 }
 \seealso{
 Other match: 
-\code{\link{matchEventPaths}()},
 \code{\link{matchObject}()},
+\code{\link{matchPrecedingAndFollowingEvents}()},
 \code{\link{matchReactionsInPathway}()}
 
 Other match: 
-\code{\link{matchEventPaths}()},
 \code{\link{matchObject}()},
+\code{\link{matchPrecedingAndFollowingEvents}()},
 \code{\link{matchReactionsInPathway}()}
 }
 \concept{match}

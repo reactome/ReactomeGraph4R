@@ -24,8 +24,8 @@ matchObject(name = "RCOR1 [nucleoplasm]")
 }
 \seealso{
 Other match: 
-\code{\link{matchEventPaths}()},
 \code{\link{matchHierarchy}()},
+\code{\link{matchPrecedingAndFollowingEvents}()},
 \code{\link{matchReactionsInPathway}()}
 }
 \concept{match}
