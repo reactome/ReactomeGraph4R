@@ -1,0 +1,144 @@
+# parse json data into R objects
+# impudently copied and modified some functions from: 
+# https://github.com/neo4j-rstats/neo4r/blob/master/R/api_result_parsing.R
+
+# Note: neo4r 0.1.3 doesn't return syntax errors of cypher queries when format='json'
+
+# not include stats & meta
+.parseJSON <- function(json.res, type, return.names, msg=NULL) {
+
+  # transform into list
+  json.list <- jsonlite::fromJSON(json.res)
+  
+  # Get the result element
+  json.results <- as.list(json.list[[1]])
+  
+  # check & send error/msg if any
+  .errMsg(json.results, msg)
+  
+  # Turn NULL to NA & get the data
+  res.data <- .null_to_na(json.results)
+  
+  .parse_row(res.data, return.names)
+}
+
+
+# error messages
+.errMsg <- function(res, msg=NULL) {
+  if (length(res) == 0) {
+    # (no changes, no records)
+    message("No data returned")
+    # send custom info
+    if(!is.null(msg)) stop(msg, call.=FALSE)
+  } else if ("error_message" %in% names(res)) {
+    # query syntax error
+    stop(paste0(res[["error_code"]], "\n", res[["error_message"]]), call.=FALSE)
+  }
+}
+
+
+.null_to_na <- function(list) {
+  for (i in 1:purrr::vec_depth(list) - 1){
+    list <- purrr::modify_depth(
+      list, i, function(x){
+        if (is.null(x)){
+          NA
+        } else {
+          x
+        }
+      }, .ragged = TRUE
+    )
+  }
+  list
+}
+
+
+# Parse 'row' data
+
+#' @importFrom magrittr %>%
+#' @importFrom purrr transpose map_depth map
+
+.parse_row <- function(res.data, res.names) {
+  # flatten & discard 'meta' data
+  res.data <- res.data[["row"]]
+  
+  # transform data (based on the logic in neo4r)
+  res.data <- lapply(res.data, as.list)
+  res.data <- lapply(res.data, transpose)
+  t.res.data <- transpose(res.data)
+  
+  # manipulate lists in 2nd depth & merge these lists into a dataframe
+  res <- map_depth(t.res.data, 2, .manipulate_list) %>%
+          map(.rbindlist_to_df)
+  
+  # remove repeated rows
+  res <- lapply(res, function(x) {
+                      x <- unique(x)
+                      rownames(x) <- 1:nrow(x) # renew row names
+                      x
+                     })
+  # add names
+  if (!is.null(res.names) && length(res) > 0) {
+    if (any(grepl("\\.", res.names))) {
+      # there are specified attributes of node(s) in RETURN -- e.g. dbo.dbId, dbo.displayName
+      # eg: matchObject(displayName="RCOR1 [nucleoplasm]", attribute=c("dbId", "displayName"))
+      
+      # get unique node names
+      node.names <- unique(sapply(strsplit(res.names, split="\\."), function(x) x[[1]]))
+      names(res) <- .goodName(node.names)
+      if (length(node.names) != length(res)) {
+        stop("Check inputed return names & RETURN clause")
+      }
+      
+      # name the columns with specified attributes
+      node.names.with.dot <- unique(sapply(strsplit(res.names[grep("\\.", res.names)], split="\\."), function(x) x[[1]]))
+      for (name in node.names.with.dot) {
+        attr.name <- res.names[grep(name, res.names)]
+        attr.name <- gsub(paste0(name, "."), "", attr.name)
+        colnames(res[[.goodName(name)]]) <- attr.name
+      }
+    } else {
+      if (length(res.names) != length(res)) {
+        stop("Check inputed return names & RETURN clause")
+      } else {
+        names(res) <- res.names
+      }
+    }
+  }
+  res
+}
+
+
+.manipulate_list <- function(list) {
+  # combine multiple sub-characters/lists into one list
+  list <- lapply(list, function(x) {
+    if (length(x) != 1 && all(!is.na(x))) {
+      list(x)
+    } else {
+      x
+    }
+  })
+  
+  # remove NA element if any
+  if (!all(!unlist(sapply(list, is.na)))) {
+    list <- list[!unlist(sapply(list, is.na))] 
+  }
+  
+  list
+}
+
+
+# turn list to data frame
+.rbindlist_to_df <- function(list) {
+  sublist.len <- sapply(list, length)
+  if (length(unique(sublist.len)) == 1) { # all lengths of sublists are same
+    as.data.frame(data.table::rbindlist(list))
+  } else {
+    as.data.frame(data.table::rbindlist(list, fill = TRUE))
+  }
+}
+
+
+### include relationships data
+
+
