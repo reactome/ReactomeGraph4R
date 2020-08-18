@@ -24,9 +24,15 @@
   filters <- list(...)
   filters <- filters[!sapply(filters, is.null)] # remove NULL elements
   
-  # can't fetch data if adding Reactome as databaseName so just remove it
-  if ("databaseName" %in% names(filters) && filters[["databaseName"]] == "Reactome") {
-    filters <- filters[names(filters) != "databaseName"]
+  db <- "Reactome" # for .genIdTerm()
+  if ("databaseName" %in% names(filters)) {
+    # get database name
+    db <- filters[["databaseName"]]
+    
+    # can't fetch data if adding Reactome as databaseName so just remove it
+    if (any(filters[["databaseName"]] %in% c("Reactome", "PubMed"))) {
+      filters <- filters[names(filters) != "databaseName"]
+    }
   }
   
   # complete WHERE clause by adding filter arguments (eg. id, species) from a query function
@@ -36,7 +42,6 @@
     
     # specifically handle id & species info
     if (filter == "id") {
-      db <- ifelse("databaseName" %in% names(filters), filters[["databaseName"]], "Reactome") 
       add <- paste0(node, .genIdTerm(filters[[filter]], database = db))
     } else if (filter == "speciesName") {
       # automatically change different forms of species names into 'displayName'
@@ -89,14 +94,18 @@
   } else {
     new.rel <- ifelse(depth > 1, paste0(rel, "*1..", as.integer(depth)), rel)
   }
-  new.clause <- gsub(rel, new.rel, clause)
+  rel <- sub('.*\\|', '', rel) # use the last part to be replaced
+  new.rel <- sub('.*\\|', '', new.rel)
+  new.clause <- gsub(paste0(rel, "\\]-"), paste0(new.rel, "\\]-"), clause)
   new.clause
 }
 
 
 # generate the ID term - stId, dbId, external id
 .genIdTerm <- function(id, database="Reactome") {
-  id <- gsub("\\s", "", id) # remove blanks
+  # remove blanks
+  id <- gsub("\\s", "", id)
+  
   if (database == "Reactome") {
     id <- toupper(id)
     if (grepl("^R-[A-Z]{3}-", id)) {
@@ -106,7 +115,10 @@
     } else {
       stop("Is this id correct?", call.=FALSE)
     }
-  } else { # non-Reactome ids
+  } else if (database == "PubMed") {
+    term <- paste0('.pubMedIdentifier = ', id)
+  } else { 
+    # other non-Reactome ids
     if (grepl("^[0-9]+$", id)) {
       term <- paste0('.identifier = ', id)
     } else {
