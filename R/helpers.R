@@ -106,48 +106,30 @@
 
 
 # call neo4j API
-.callAPI <- function(query, return.names=NULL, type, verbose=FALSE, msg=NULL, ...) {
+.callAPI <- function(query, return.names=NULL, type, isVerbose=FALSE, msg=NULL, ...) {
   # being wordy if 'type' arg missing
-  if (verbose) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
+  if (isVerbose) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
 
   # get the connexion object locally
   con <- getOption("con")
   
   # call API
-  json.res <- neo4r::call_neo4j(query = query,
-                                con = con,
-                                type = type,
-                                output = "json", # output in json format
-                                ...)
-  # parse json data
-  .parseJSON(json.res, return.names=return.names, type=type)
-}
-
-
-# get value of specific attribute(s) with a given id/name
-.getSlotValue <- function(dbObject, dbObject.type=c("id", "name"), resource="Reactome", slot) {
-  # assign value
-  id <- NULL -> name
-  if (dbObject.type == "id") {
-    id <- dbObject
+  if (type == "row") {
+    # return in json format since neo4r would raise errors (from tibble)
+    json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
+    
+    # parse json data
+    res <- .parseJSON(json.res, return.names=return.names, msg=msg)
   } else {
-    name <- dbObject
+    # graph data can use R output
+    res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
   }
-  
-  # check info
-  .checkInfo(slot, "property")
-  
-  # retrieve
-  c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=name, databaseName=resource)
-  c.RETURN <- .RETURN(paste0("dbo.", slot), type="row") # can input >1 slots!
-  query <- paste(c.MATCH, c.WHERE, c.RETURN)
-  
-  .callAPI(query, return.names=slot, type="row")
+  res
 }
 
 
 # get all labels/keys of node(s)
+# species not required
 # more info types to be added
 .getNodeInfo <- function(node.where, info=c("keys", "labels")) {
   info <- match.arg(info)
@@ -156,7 +138,7 @@
                  paste0('UNWIND ', info, '(dbo) AS info'),
                  'RETURN distinct(info)')
   res <- .callAPI(query, return.names=info, type="row")
-  res[[1]][[info]]
+  res[[1]][ ,1]
 }
 
 
@@ -170,4 +152,24 @@
   name <- gsub('\\<lr\\>', 'literatureReference', name)
   name
 }
+
+
+.checkClass <- function(id, displayName, class, database="Reactome", stopOrNot=FALSE) {
+  # get labels
+  labels <- .getNodeInfo(.WHERE('dbo', id=id, displayName=displayName, databaseName=database), "labels")
+  
+  # send error
+  if (!any(class %in% labels)) {
+    if (stopOrNot) {
+      stop("This is not a ", paste(sQuote(class), collapse=","), " object", call.=FALSE)
+    } else {
+      message("This is not a ", paste(sQuote(class), collapse=","), " object")
+      # will return NULL
+    }
+  } else {
+    # get the schema class
+    return(labels[labels %in% class])
+  }
+}
+
 
