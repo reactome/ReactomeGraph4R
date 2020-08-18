@@ -5,7 +5,7 @@
 # Note: neo4r 0.1.3 doesn't return syntax errors of cypher queries when format='json'
 
 # not include stats & meta
-.parseJSON <- function(json.res, type, return.names, msg=NULL) {
+.parseJSON <- function(json.res, return.names, msg=NULL) {
 
   # transform into list
   json.list <- jsonlite::fromJSON(json.res)
