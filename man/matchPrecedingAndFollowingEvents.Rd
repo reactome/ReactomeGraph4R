@@ -5,8 +5,8 @@
 \title{MATCH the preceding/following Events}
 \usage{
 matchPrecedingAndFollowingEvents(
-  id = NULL,
-  name = NULL,
+  event.id = NULL,
+  event.displayName = NULL,
   species = NULL,
   depth = 1,
   all.depth = FALSE,
@@ -14,9 +14,9 @@ matchPrecedingAndFollowingEvents(
 )
 }
 \arguments{
-\item{id}{a stable or db id of an Event}
+\item{event.id}{a stable or db id of an Event}
 
-\item{name}{an Event name}
+\item{event.displayName}{displayName of an Event}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
@@ -37,8 +37,12 @@ matchPrecedingAndFollowingEvents("R-HSA-983150", all.depth=TRUE, type="row")
 }
 \seealso{
 Other match: 
+\code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
 \code{\link{matchObject}()},
-\code{\link{matchReactionsInPathway}()}
+\code{\link{matchPEroles}()},
+\code{\link{matchPaperObjects}()},
+\code{\link{matchReactionsInPathway}()},
+\code{\link{matchReferrals}()}
 }
 \concept{match}

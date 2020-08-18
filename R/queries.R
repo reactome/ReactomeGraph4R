@@ -3,43 +3,58 @@
 
 #' Basic query for database object 
 #' 
-#' Fetch instance by dbId/stId/displayName
+#' Fetch instance by Reactome dbId/stId/displayName or non-Reactome identifier/displayName
 #' 
-#' @param id stId or dbId of database object
-#' @param name name of database object
+#' @param id Reactome stId or dbId, or non-Reactome identifier
+#' @param displayName displayName of a database object
 #' @param species name or taxon id or dbId or abbreviation of specified species
-#' @return data of the given id or name
+#' @param attribute specific attribute(s) to be returned. If set to `NULL`, all attributes returned
+#' @param databaseName database name
+#' @return Reactome database object matched with the given id or name
 #' @examples
-#' matchObject(name = "RCOR1 [nucleoplasm]")
+#' # name of Reactome object
+#' matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
+#' 
+#' # UniProt id
+#' matchObject(id = "P60484", databaseName = "UniProt")
 #' @rdname matchObject
-#' @family match
+#' @family match 
 #' @export 
 
-matchObject <- function(id=NULL, name=NULL, species="human") {
+matchObject <- function(id=NULL, displayName=NULL, species=NULL, attribute=NULL , databaseName="Reactome") {
   # make sure the input
-  if (is.null(name) && is.null(id)) {
+  if (is.null(displayName) && is.null(id)) {
     stop("Must specify either an 'id' or a 'name'")
   }
   
-  if (missing(species)) {
-    message("Species not specified, returning human data...")
+  # check attributes in the db or not
+  .checkInfo(attribute, "property")
+  
+  # remove species filter for an external id
+  if (databaseName != "Reactome") {
+    species <- NULL
   }
   
   # retrieve
   c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=name, speciesName=species)
-  nodes4return <- "dbo"
+  c.WHERE <- .WHERE("dbo", id=id, displayName=displayName, speciesName=species, databaseName=databaseName)
+  if (is.null(attribute)) {
+    nodes4return <- "dbo" # return all attributes
+  } else {
+    nodes4return <- paste0("dbo.", attribute)
+  }
   c.RETURN <- .RETURN(nodes4return, type="row")
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
+  # retrieve
   .callAPI(query, return.names=.goodName(nodes4return), type="row")
 }
 
 
 #' MATCH the preceding/following Events
 #' 
-#' @param id a stable or db id of an Event
-#' @param name an Event name
+#' @param event.id a stable or db id of an Event
+#' @param event.displayName displayName of an Event
 #' @param species name or taxon id or dbId or abbreviation of specified species
 #' @param all.depth if set to `TRUE`, all RLEs connected to the given Event in all depths returned
 #' @param depth number of depths
@@ -51,32 +66,35 @@ matchObject <- function(id=NULL, name=NULL, species="human") {
 #' @family match
 #' @export 
 
-matchPrecedingAndFollowingEvents <- function(id=NULL, name=NULL, species=NULL, depth=1, 
-                                             all.depth=FALSE, type=c("row", "graph")) {
+matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NULL, species=NULL, 
+                                             depth=1, all.depth=FALSE, type=c("row", "graph")) {
   # ensure the inputs
-  if (is.null(name) && is.null(id)) {
+  if (is.null(event.displayName) && is.null(event.id)) {
     stop("Must specify either an 'id' or a 'name'")
   }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
+  # check if it's Event
+  .checkClass(id=event.id, displayName=event.displayName, class="Event")
+  
   # full query
   ## retrieve preceding/following Events
-  match.list <- list('(pevent:Event)<-[:precedingEvent]-(event:Event)',
+  MATCH.list <- list('(pevent:Event)<-[:precedingEvent]-(event:Event)',
                      '(event)<-[:precedingEvent]-(fevent:Event)')
-  c.MATCH <- .MATCH(match.list)
+  c.MATCH <- .MATCH(MATCH.list)
   ## add depths
   c.MATCH <- .varLen(clause=c.MATCH, rel=':precedingEvent', depth=depth, all=all.depth)
   ## add conditions
-  c.WHERE <- .WHERE(node='event', id=id, displayName=name, speciesName=species)
+  c.WHERE <- .WHERE(node='event', id=event.id, displayName=event.displayName, speciesName=species)
   ## return
-  c.RETURN <- .RETURN(node=c("pevent", "event", "fevent"), type=type, numOfMatch=length(match.list))
+  c.RETURN <- .RETURN(node=c("pevent", "event", "fevent"), type=type, numOfMatch=length(MATCH.list))
   return.names <- c("precedingEvent", "event", "followingEvent")
   
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
 
   # call API
-  tmp.id <- ifelse(is.null(id), name, id)
+  tmp.id <- ifelse(is.null(event.id), event.displayName, event.id)
   new.msg <- paste0("This Event ", sQuote(tmp.id), " probably has no other connected Events")
   .callAPI(query, return.names, type, isVerbose, new.msg)
 }
@@ -87,33 +105,32 @@ matchPrecedingAndFollowingEvents <- function(id=NULL, name=NULL, species=NULL, d
 #' Retrieve hierarchical data: Pathway-Reaction-Entity
 #' 
 #' @param id stId or dbId of Event/PhysicalEntity; or id of an external database
-#' @param resource database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}
+#' @param displayName displayName of Event/PhysicalEntity/ReferenceEntity
+#' @param databaseName database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}
 #' @param species name or taxon id or dbId or abbreviation of specified species
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
-#' @return hierarchical instances of the given id and resource
+#' @return hierarchical instances of the given id and databaseName
 #' @examples
-#' matchHierarchy(id="P04637", resource="UniProt", type="row")
+#' # use the Reactome displayName of a UniProt object
+#' matchHierarchy(displayName="UniProt:P04637 TP53", databaseName="UniProt", type="row")
 #' matchHierarchy(id="R-HSA-196015", type="row")
 #' matchHierarchy(id="R-HSA-1369062", type="graph")
-#' 
 #' @rdname matchHierarchy
 #' @family match
 #' @export 
 
-matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", "graph")) {
-  # ensure inputs
-  isisVerbose <- missing(type)
+matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome", 
+                           species=NULL, type=c("row", "graph")) {
+  # ensure the inputs
+  if (is.null(displayName) && is.null(id)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
   # get class
-  id.labels <- .getNodeInfo(.WHERE("dbo", id=id, databaseName=resource), "labels")
-  if ("ReferenceEntity" %in% id.labels || "PhysicalEntity" %in% id.labels) {
-    class <- "Entity"
-  } else if ("Event" %in% id.labels) {
-    class <- "Event"
-  } else {
-    stop("Please input an Event or Entity id", call.=FALSE)
-  }
+  class <- .checkClass(id=id, displayName=displayName, stopOrNot=TRUE,
+                       class=c("Event", "ReferenceEntity", "PhysicalEntity"))
   
   # full query
   # (RE <--) PE <-- Reactions <-- Pathways
@@ -121,29 +138,28 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
   all.MATCH.list <- list('(re:ReferenceEntity)<-[:referenceEntity]-(pe:PhysicalEntity)',
                          '(pe:PhysicalEntity)<-[:input|output|catalystActivity|regulatedBy]-(event:Event)',
                          '(event:Event)<-[:hasEvent*]-(upperevent:Event)')
-
-  if (resource == "Reactome") {
-    # throw unwanted lines
-    ifelse(class == "Entity", throws <- 1, throws <- 1:2)
-    MATCH.list <- all.MATCH.list[-throws]
-    # select the node in WHERE
-    node <- ifelse(class == "Entity", 'pe', 'event')
-    # RETURN
-    ifelse(class == "Event", nodes4return <- c("event", "upperevent"), 
-                             nodes4return <- c("pe", "event", "upperevent"))
-  } else {
-    MATCH.list <- all.MATCH.list
-    node <- "re" # in WHERE
-    nodes4return <- c("re", "pe", "event", "upperevent") # in RETURN
-  }
   
+  if (class == "ReferenceEntity") {
+    MATCH.list <- all.MATCH.list
+    node4where <- 're'
+    nodes4return <- c("re", "pe", "event", "upperevent")
+  } else if (class == "PhysicalEntity") {
+    MATCH.list <- all.MATCH.list[-1]
+    node4where <- 'pe'
+    nodes4return <- c("pe", "event", "upperevent")
+  } else if (class == "Event") {
+    MATCH.list <- all.MATCH.list[-c(1:2)]
+    node4where <- 'event'
+    nodes4return <- c("event", "upperevent")
+  }
+
   c.MATCH <- .MATCH(MATCH.list)
-  c.WHERE <- .WHERE(node, id=id, databaseName=resource, species=species)
+  c.WHERE <- .WHERE(node4where, id=id, displayName=displayName, databaseName=databaseName, speciesName=species)
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isisVerbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose)
 }
 
 
@@ -151,7 +167,8 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
 #' 
 #' Retrieve interactions of a given PhysicalEntity
 #' 
-#' @param pe.id stId or dbId of PhysicalEntity
+#' @param pe.id stId or dbId of a PhysicalEntity
+#' @param pe.displayName displayName of a PhysicalEntity
 #' @param species name or taxon id or dbId or abbreviation of specified species
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return interactions of a given PhysicalEntity
@@ -161,19 +178,26 @@ matchHierarchy <- function(id, resource="Reactome", species=NULL, type=c("row", 
 #' @family match
 #' @export 
 
-matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
+matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
+  if (is.null(pe.displayName) && is.null(pe.id)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  
+  # check Class
+  .checkClass(id=pe.id, displayName=pe.displayName, class="Interaction")
   
   # full query
   # PhysicalEntities --> RefEntities <-- Interaction
   MATCH.list <- list('(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)<-[:interactor]-(interaction:Interaction)')
   c.MATCH <- .MATCH(MATCH.list)
-  c.WHERE <- .WHERE("pe", id=pe.id, species=species)
+  c.WHERE <- .WHERE("pe", id=pe.id, displayName=pe.displayName, speciesName=species)
   nodes4return <- c("pe", "re", "interaction")
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
   # retrieve
   .callAPI(query, .goodName(nodes4return), type, isVerbose)
 }
@@ -182,9 +206,9 @@ matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
 #' MATCH Reactions in associated Pathway
 #' 
 #' 
-#' @param event.id stId or dbId of Event
-#' @param event.name name of Event
-#' @param species name or taxon id or dbId or abbreviation of specified species
+#' @param event.id stId or dbId of an Event
+#' @param event.displayName displayName of an Event
+#' @param species name or taxon id or dbId or abbreviation of the specified species
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return Reactions related to the given Pathway/Reaction
 #' @examples
@@ -194,24 +218,16 @@ matchInteractors <- function(pe.id, species=NULL, type=c("row", "graph")) {
 #' @family match
 #' @export 
 
-matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL, type=c("row", "graph")) {
+matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(event.id) && is.null(event.name)) {
+  if (is.null(event.id) && is.null(event.displayName)) {
     stop("Must specify either an 'id' or a 'name'")
   }
-  
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
   
   # get class
-  event.labels <- .getNodeInfo(.WHERE("dbo", id=event.id), "labels")
-  if ("Pathway" %in% event.labels) {
-    event.class <- "Pathway"
-  } else if ("ReactionLikeEvent" %in% event.labels) {
-    event.class <- "ReactionLikeEvent"
-  } else {
-    stop("Please input an Event id", call.=FALSE)
-  }
+  event.class <- .checkClass(id=event.id, displayName=event.displayName, class=c("Pathway", "ReactionLikeEvent"), stopOrNot=TRUE)
   
   # full query
   if (event.class == "Pathway") {
@@ -226,11 +242,226 @@ matchReactionsInPathway <- function(event.id=NULL, event.name=NULL, species=NULL
     nodes4return <- c("rle", "pathway", "otherReactionLikeEvent")
   }
   c.MATCH <- .MATCH(MATCH.list)
-  c.WHERE <- .WHERE(node4where, id=event.id, displayName=event.name, species=species)
+  c.WHERE <- .WHERE(node4where, id=event.id, displayName=event.displayName, speciesName=species)
   c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
   # retrieve
   .callAPI(query, .goodName(nodes4return), type, isVerbose)
 }
 
+
+#' MATCH biological referrals
+#' 
+#' This method retrieves Reactome objects that are connected with the given object 
+#' in a reverse relationship. For example, to find Pathways contained the given Reaction.
+#' 
+#' For now it just focuses on biological referrals in the following Classes: 
+#' "Event", "PhysicalEntity", "Regulation", "CatalystActivity", "ReferenceEntity"
+#' "Interaction", "AbstractModifiedResidue".
+#' 
+#' @param id stId or dbId of a Reactome object
+#' @param displayName displayName of a Reactome object
+#' @param main if set to `TRUE`, only \strong{first-class} referrals returned
+#' @param all.depth if set to `TRUE`, connected objects in all depths returned
+#' @param depth number of depths
+#' @param species name or taxon id or dbId or abbreviation of the specified species
+#' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
+#' @return referrals of the given instance
+#' @examples
+#' matchReferrals("113454", type="row")
+#' matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
+#' @rdname matchReferrals
+#' @family match
+#' @export 
+
+matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1, 
+                           all.depth=FALSE, species=NULL, type=c("row", "graph")) {
+  # ensure inputs
+  if (is.null(id) && is.null(displayName)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  isVerbose <- missing(type)
+  type <- match.arg(type, several.ok=FALSE)
+  
+  # all first-class referrals (relationships) of schema class objects of our interest
+  # collected from https://reactome.org/content/schema/ (Aug. 2020) 
+  referral.list <- list(
+    Event = c("hasEvent", "modification", "templateEvent", "catalyzedEvent", 
+              "consumedByEvent", "producedByEvent", "regulatedEntity"),
+    PhysicalEntity = c("activeUnit", "diseaseEntity", "entityOnOtherCell",
+                       "hasCandidate", "hasComponent", "hasMember", "input",
+                       "modification", "normalEntity", "output", "physicalEntity",
+                       "regulator", "repeatedUnit", "requiredInputComponent"),
+    Regulation = c("modification", "regulatedBy", "negativelyRegulates", 
+                   "positivelyRegulates", "isRequired"),
+    CatalystActivity = c("catalystActivities", "catalystActivity", "modification"),
+    ReferenceEntity = c("interactor", "modification", "source", "target",
+                        "referenceEntity", "referenceSequence", "secondReferenceSequence",
+                        "referenceGene", "isoformParent", "referenceTranscript"),
+    Interaction = "modification",
+    AbstractModifiedResidue = c("hasModifiedResidue", "modification")
+  )
+  
+  # select those really in the database
+  referral.list <- lapply(referral.list, function(class) class[sapply(class, function(rel) .checkInfo(rel, "relationship"))])
+  
+  # make sure it's one of our interested schema classes
+  class <- .checkClass(id=id, displayName=displayName, class=names(referral.list), stopOrNot=TRUE)
+  
+  # full cypher query
+  ## to return first-class referrals or all
+  relationships <- ifelse(main, paste0(":", paste(referral.list[[class]], collapse = "|")), "")
+  
+  MATCH.list <- list(paste0('(dbo:DatabaseObject)-[', relationships, ']->(n:', class, ')'))
+  c.MATCH <- .MATCH(MATCH.list)
+  c.MATCH <- .varLen(clause=c.MATCH, rel=relationships, depth=depth, all=all.depth)
+  c.WHERE <- .WHERE("n", id=id, displayName=displayName, speciesName=species)
+  # filter out unwanted nodes
+  c.WITH <- 'WITH *, nodes(p1) AS ns'
+  c.WHERE.2 <- 'WHERE ALL(node IN ns WHERE NOT node:InstanceEdit)'
+  c.RETURN <- .RETURN(c("n", "dbo"), type, length(MATCH.list))
+  query <- paste(c.MATCH, c.WHERE, c.WITH, c.WHERE.2, c.RETURN)
+  
+  # retrieve
+  .callAPI(query, .goodName(c(class, "dbo")), type, isVerbose)
+}
+
+
+#' MATCH roles of PhysicalEntity
+#' 
+#' 
+#' @param pe.id stId or dbId of a PhysicalEntity
+#' @param pe.displayName displayName of a PhysicalEntity
+#' @param species name or taxon id or dbId or abbreviation of the specified species
+#' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
+#' @return Reactions related to the given Pathway/Reaction
+#' @examples
+#' matchPEroles(pe.id = "R-HSA-8944354", type = "graph")
+#' matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", species = "pig", type = "row")
+#' @rdname matchPEroles
+#' @family match
+#' @export 
+
+matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("row", "graph")) {
+  # ensure inputs
+  if (is.null(pe.id) && is.null(pe.displayName)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  isVerbose <- missing(type)
+  type <- match.arg(type, several.ok=FALSE)
+  
+  # check the Class
+  .checkClass(id=pe.id, displayName=pe.displayName, class="PhysicalEntity")
+  
+  # full query
+  # find existing ‘roles’ - input, output, regulator, catalyst
+  MATCH.list <- list('(pe:PhysicalEntity)<-[:input|output|catalystActivity|regulatedBy]-(dbo:DatabaseObject)')
+  c.MATCH <- .MATCH(MATCH.list)
+  c.WHERE <- .WHERE('pe', id=pe.id, displayName=pe.displayName, speciesName=species)
+  nodes4return <- c("pe", "dbo")
+  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
+  # retrieve
+  .callAPI(query, .goodName(nodes4return), type, isVerbose)
+}
+
+
+#' MATCH diseases of PhysicalEntity/Reaction/Pathway
+#' 
+#' 
+#' @param id stId or dbId of a PhysicalEntity/Event/Disease
+#' @param displayName displayName of a PhysicalEntity/Event/Disease
+#' @param species name or taxon id or dbId or abbreviation of the specified species
+#' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
+#' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
+#' @examples
+#' matchDiseases(displayName="cancer", type="row")
+#' matchDiseases(id="R-HSA-162588", type="graph")
+#' @rdname matchDiseases
+#' @family match
+#' @export 
+
+matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row", "graph")) {
+  # ensure inputs
+  if (is.null(id) && is.null(displayName)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  isVerbose <- missing(type)
+  type <- match.arg(type, several.ok=FALSE)
+  
+  # check the Class
+  class <- .checkClass(id=id, displayName=displayName, class=c("PhysicalEntity", "Event", "Disease"), stopOrNot=TRUE)
+  
+  if (class == "Disease") {
+    message("Retrieving instances associated with the given Disease...")
+    
+    # find instances associated with the given Disease
+    MATCH.list <- list(paste0('(disease:Disease)<-[:disease]-(dbo:DatabaseObject)'))
+    c.WHERE <- .WHERE('disease', id=id, displayName=displayName) # no species slot in Disease
+    nodes4return <- c("disease", "dbo") -> return.names
+  } else {
+    message("Retrieving Disease(s) associated with the given instance...")
+    
+    # check if the instance is in Disease or not
+    isInDisease <- matchObject(id=id, displayName=displayName, 
+                               attribute="isInDisease", species=species)
+    isInDisease <- isInDisease[["databaseObject"]][["isInDisease"]]
+    
+    if (!isInDisease) {
+      stop("No associated disease", call.=FALSE)
+    } else {
+      # find Diseases associated with the given PhysicalEntity/Reaction/Pathway
+      MATCH.list <- list(paste0('(n:', class,')-[:disease]->(disease:Disease)'))
+      c.WHERE <- .WHERE('n', id=id, displayName=displayName, speciesName=species)
+      nodes4return <- c("n", "disease")
+      return.names <- c(class, "disease")
+    }
+  }
+  c.MATCH <- .MATCH(MATCH.list)
+  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
+  # retrieve
+  .callAPI(query, .goodName(return.names), type, isVerbose) 
+}
+
+
+#' MATCH objects related to a paper
+#' 
+#' @param pubmed.id PubMed identifier of a paper
+#' @param displayName paper title
+#' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
+#' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
+#' @examples
+#' matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance", type="row")
+#' matchPaperObjects(pubmed.id="20797626", type="graph")
+#' matchPaperObjects(pubmed.id="23515720", type="row")
+#' @rdname matchPaperObjects
+#' @family match
+#' @export 
+
+matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "graph")) {
+  # ensure inputs
+  if (is.null(pubmed.id) && is.null(displayName)) {
+    stop("Must specify either an 'id' or a 'name'")
+  }
+  isVerbose <- missing(type)
+  type <- match.arg(type, several.ok=FALSE)
+  
+  # check Class
+  .checkClass(id=pubmed.id, displayName=displayName, database="PubMed", class="LiteratureReference")
+  
+  # get objects associated with the given LiteratureReference
+  MATCH.list <- list('(lr:LiteratureReference)<-[:literatureReference]-(dbo:DatabaseObject)')
+  c.MATCH <- .MATCH(MATCH.list)
+  c.WHERE <- .WHERE('lr', pubMedIdentifier=pubmed.id, displayName=displayName)
+  nodes4return <- c("lr", "dbo")
+  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  query <- paste(c.MATCH, c.WHERE, c.RETURN)
+  
+  # retrieve
+  .callAPI(query, .goodName(nodes4return), type, isVerbose) 
+}
 

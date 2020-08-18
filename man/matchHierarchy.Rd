@@ -6,27 +6,37 @@
 \title{MATCH hierarchy}
 \usage{
 matchHierarchy(
-  id,
-  resource = "Reactome",
+  id = NULL,
+  displayName = NULL,
+  databaseName = "Reactome",
   species = NULL,
   type = c("row", "graph")
 )
 
-matchInteractors(pe.id, species = NULL, type = c("row", "graph"))
+matchInteractors(
+  pe.id = NULL,
+  pe.displayName = NULL,
+  species = NULL,
+  type = c("row", "graph")
+)
 }
 \arguments{
 \item{id}{stId or dbId of Event/PhysicalEntity; or id of an external database}
 
-\item{resource}{database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}}
+\item{displayName}{displayName of Event/PhysicalEntity/ReferenceEntity}
+
+\item{databaseName}{database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
 \item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
 
-\item{pe.id}{stId or dbId of PhysicalEntity}
+\item{pe.id}{stId or dbId of a PhysicalEntity}
+
+\item{pe.displayName}{displayName of a PhysicalEntity}
 }
 \value{
-hierarchical instances of the given id and resource
+hierarchical instances of the given id and databaseName
 
 interactions of a given PhysicalEntity
 }
@@ -36,21 +46,29 @@ Retrieve hierarchical data: Pathway-Reaction-Entity
 Retrieve interactions of a given PhysicalEntity
 }
 \examples{
-matchHierarchy(id="P04637", resource="UniProt", type="row")
+# use the Reactome displayName of a UniProt object
+matchHierarchy(displayName="UniProt:P04637 TP53", databaseName="UniProt", type="row")
 matchHierarchy(id="R-HSA-196015", type="row")
 matchHierarchy(id="R-HSA-1369062", type="graph")
-
 matchInteractors(996766)
 }
 \seealso{
 Other match: 
+\code{\link{matchDiseases}()},
 \code{\link{matchObject}()},
+\code{\link{matchPEroles}()},
+\code{\link{matchPaperObjects}()},
 \code{\link{matchPrecedingAndFollowingEvents}()},
-\code{\link{matchReactionsInPathway}()}
+\code{\link{matchReactionsInPathway}()},
+\code{\link{matchReferrals}()}
 
 Other match: 
+\code{\link{matchDiseases}()},
 \code{\link{matchObject}()},
+\code{\link{matchPEroles}()},
+\code{\link{matchPaperObjects}()},
 \code{\link{matchPrecedingAndFollowingEvents}()},
-\code{\link{matchReactionsInPathway}()}
+\code{\link{matchReactionsInPathway}()},
+\code{\link{matchReferrals}()}
 }
 \concept{match}

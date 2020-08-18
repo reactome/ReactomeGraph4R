@@ -4,28 +4,46 @@
 \alias{matchObject}
 \title{Basic query for database object}
 \usage{
-matchObject(id = NULL, name = NULL, species = "human")
+matchObject(
+  id = NULL,
+  displayName = NULL,
+  species = NULL,
+  attribute = NULL,
+  databaseName = "Reactome"
+)
 }
 \arguments{
-\item{id}{stId or dbId of database object}
+\item{id}{Reactome stId or dbId, or non-Reactome identifier}
 
-\item{name}{name of database object}
+\item{displayName}{displayName of a database object}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
+
+\item{attribute}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
+
+\item{databaseName}{database name}
 }
 \value{
-data of the given id or name
+Reactome database object matched with the given id or name
 }
 \description{
-Fetch instance by dbId/stId/displayName
+Fetch instance by Reactome dbId/stId/displayName or non-Reactome identifier/displayName
 }
 \examples{
-matchObject(name = "RCOR1 [nucleoplasm]")
+# name of Reactome object
+matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
+
+# UniProt id
+matchObject(id = "P60484", databaseName = "UniProt")
 }
 \seealso{
 Other match: 
+\code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
+\code{\link{matchPEroles}()},
+\code{\link{matchPaperObjects}()},
 \code{\link{matchPrecedingAndFollowingEvents}()},
-\code{\link{matchReactionsInPathway}()}
+\code{\link{matchReactionsInPathway}()},
+\code{\link{matchReferrals}()}
 }
 \concept{match}
