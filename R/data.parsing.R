@@ -5,7 +5,7 @@
 # Note: neo4r 0.1.3 doesn't return syntax errors of cypher queries when format='json'
 
 # not include stats & meta
-.parseJSON <- function(json.res, return.names, msg=NULL) {
+.parseJSON <- function(json.res, return.names, error.info=NULL) {
 
   # transform into list
   json.list <- jsonlite::fromJSON(json.res)
@@ -14,26 +14,12 @@
   json.results <- as.list(json.list[[1]])
   
   # check & send error/msg if any
-  .errMsg(json.results, msg)
+  .sendErrors(json.results, error.info)
   
   # Turn NULL to NA & get the data
   res.data <- .null_to_na(json.results)
   
   .parse_row(res.data, return.names)
-}
-
-
-# error messages
-.errMsg <- function(res, msg=NULL) {
-  if (length(res) == 0) {
-    # (no changes, no records)
-    message("No data returned")
-    # send custom info
-    if(!is.null(msg)) stop(msg, call.=FALSE)
-  } else if ("error_message" %in% names(res)) {
-    # query syntax error
-    stop(paste0(res[["error_code"]], "\n", res[["error_message"]]), call.=FALSE)
-  }
 }
 
 
@@ -137,6 +123,7 @@
     as.data.frame(data.table::rbindlist(list, fill = TRUE))
   }
 }
+
 
 
 ### include relationships data

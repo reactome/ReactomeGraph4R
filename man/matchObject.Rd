@@ -7,6 +7,7 @@
 matchObject(
   id = NULL,
   displayName = NULL,
+  schemaClass = NULL,
   species = NULL,
   attribute = NULL,
   databaseName = "Reactome"
@@ -16,6 +17,8 @@ matchObject(
 \item{id}{Reactome stId or dbId, or non-Reactome identifier}
 
 \item{displayName}{displayName of a database object}
+
+\item{schemaClass}{schema class of a database object}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
@@ -27,14 +30,19 @@ matchObject(
 Reactome database object matched with the given id or name
 }
 \description{
-Fetch instance by Reactome dbId/stId/displayName or non-Reactome identifier/displayName
+Fetch instance by Reactome dbId/stId/displayName/schemaClass
+or non-Reactome identifier/displayName
 }
 \examples{
-# name of Reactome object
+# fetch instance by class
+all.species <- matchObject(schemaClass = "Species")
+
+# fetch instance by name
 matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
 
-# UniProt id
-matchObject(id = "P60484", databaseName = "UniProt")
+# fetch instance by id
+matchObject(id = "R-HSA-9626034")
+matchObject(id = "P60484", species="pig", databaseName = "UniProt")
 }
 \seealso{
 Other match: 

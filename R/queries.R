@@ -3,41 +3,43 @@
 
 #' Basic query for database object 
 #' 
-#' Fetch instance by Reactome dbId/stId/displayName or non-Reactome identifier/displayName
+#' Fetch instance by Reactome dbId/stId/displayName/schemaClass 
+#' or non-Reactome identifier/displayName
 #' 
 #' @param id Reactome stId or dbId, or non-Reactome identifier
 #' @param displayName displayName of a database object
+#' @param schemaClass schema class of a database object
 #' @param species name or taxon id or dbId or abbreviation of specified species
 #' @param attribute specific attribute(s) to be returned. If set to `NULL`, all attributes returned
 #' @param databaseName database name
 #' @return Reactome database object matched with the given id or name
 #' @examples
-#' # name of Reactome object
+#' # fetch instance by class
+#' all.species <- matchObject(schemaClass = "Species")
+#' 
+#' # fetch instance by name
 #' matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
 #' 
-#' # UniProt id
+#' # fetch instance by id
+#' matchObject(id = "R-HSA-9626034")
 #' matchObject(id = "P60484", databaseName = "UniProt")
 #' @rdname matchObject
 #' @family match 
 #' @export 
 
-matchObject <- function(id=NULL, displayName=NULL, species=NULL, attribute=NULL , databaseName="Reactome") {
-  # make sure the input
-  if (is.null(displayName) && is.null(id)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
+matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, 
+                        attribute=NULL , databaseName="Reactome") {
+  # check inputs
+  input.list <- .verifyInputs(id, displayName, schemaClass, species, databaseName)
   
   # check attributes in the db or not
+  # NULL also returns TRUE
   .checkInfo(attribute, "property")
-  
-  # remove species filter for an external id
-  if (databaseName != "Reactome") {
-    species <- NULL
-  }
   
   # retrieve
   c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=displayName, speciesName=species, databaseName=databaseName)
+  c.WHERE <- .WHERE("dbo", id=id, displayName=displayName, schemaClass=schemaClass, 
+                    speciesName=species, databaseName=databaseName)
   if (is.null(attribute)) {
     nodes4return <- "dbo" # return all attributes
   } else {
@@ -47,7 +49,7 @@ matchObject <- function(id=NULL, displayName=NULL, species=NULL, attribute=NULL 
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, return.names=.goodName(nodes4return), type="row")
+  .callAPI(query, return.names=.goodName(nodes4return), type="row", error.info=input.list)
 }
 
 
@@ -69,11 +71,9 @@ matchObject <- function(id=NULL, displayName=NULL, species=NULL, attribute=NULL 
 matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NULL, species=NULL, 
                                              depth=1, all.depth=FALSE, type=c("row", "graph")) {
   # ensure the inputs
-  if (is.null(event.displayName) && is.null(event.id)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(event.id, event.displayName, species=species)
   
   # check if it's Event
   .checkClass(id=event.id, displayName=event.displayName, class="Event")
@@ -94,9 +94,7 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
 
   # call API
-  tmp.id <- ifelse(is.null(event.id), event.displayName, event.id)
-  new.msg <- paste0("This Event ", sQuote(tmp.id), " probably has no other connected Events")
-  .callAPI(query, return.names, type, isVerbose, new.msg)
+  .callAPI(query, return.names, type, isVerbose, input.list)
 }
 
 
@@ -122,11 +120,9 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
 matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome", 
                            species=NULL, type=c("row", "graph")) {
   # ensure the inputs
-  if (is.null(displayName) && is.null(id)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(id, displayName, species=species, database=databaseName)
   
   # get class
   class <- .checkClass(id=id, displayName=displayName, stopOrNot=TRUE,
@@ -159,7 +155,7 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
 }
 
 
@@ -180,11 +176,9 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
 
 matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(pe.displayName) && is.null(pe.id)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(pe.id, pe.displayName, species=species)
   
   # check Class
   .checkClass(id=pe.id, displayName=pe.displayName, class="Interaction")
@@ -199,7 +193,7 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
 }
 
 
@@ -220,11 +214,9 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
 
 matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(event.id) && is.null(event.displayName)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(event.id, event.displayName, species=species)
   
   # get class
   event.class <- .checkClass(id=event.id, displayName=event.displayName, class=c("Pathway", "ReactionLikeEvent"), stopOrNot=TRUE)
@@ -247,7 +239,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, speci
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
 }
 
 
@@ -278,11 +270,9 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, speci
 matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1, 
                            all.depth=FALSE, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(id) && is.null(displayName)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(id, displayName, species=species)
   
   # all first-class referrals (relationships) of schema class objects of our interest
   # collected from https://reactome.org/content/schema/ (Aug. 2020) 
@@ -324,7 +314,7 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
   query <- paste(c.MATCH, c.WHERE, c.WITH, c.WHERE.2, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(c(class, "dbo")), type, isVerbose)
+  .callAPI(query, .goodName(c(class, "dbo")), type, isVerbose, input.list)
 }
 
 
@@ -345,11 +335,9 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
 
 matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(pe.id) && is.null(pe.displayName)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(pe.id, pe.displayName, species=species)
   
   # check the Class
   .checkClass(id=pe.id, displayName=pe.displayName, class="PhysicalEntity")
@@ -364,7 +352,9 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose)
+  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
+  
+  # get PE roles - WIP
 }
 
 
@@ -377,7 +367,7 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
 #' @examples
-#' matchDiseases(displayName="cancer", type="row")
+#' matchDiseases(displayName="cancer", species="M. musculus", type="row")
 #' matchDiseases(id="R-HSA-162588", type="graph")
 #' @rdname matchDiseases
 #' @family match
@@ -385,11 +375,9 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
 
 matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(id) && is.null(displayName)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(id, displayName, species=species)
   
   # check the Class
   class <- .checkClass(id=id, displayName=displayName, class=c("PhysicalEntity", "Event", "Disease"), stopOrNot=TRUE)
@@ -402,7 +390,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
     c.WHERE <- .WHERE('disease', id=id, displayName=displayName) # no species slot in Disease
     nodes4return <- c("disease", "dbo") -> return.names
   } else {
-    message("Retrieving Disease(s) associated with the given instance...")
+    message("Retrieving Diseases associated with the given instance...")
     
     # check if the instance is in Disease or not
     isInDisease <- matchObject(id=id, displayName=displayName, 
@@ -424,7 +412,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(return.names), type, isVerbose) 
+  .callAPI(query, .goodName(return.names), type, isVerbose, input.list) 
 }
 
 
@@ -435,7 +423,10 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
 #' @examples
+#' # fetch Reactome instances by paper title
 #' matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance", type="row")
+#' 
+#' # fetch Reactome instances by pubmed id
 #' matchPaperObjects(pubmed.id="20797626", type="graph")
 #' matchPaperObjects(pubmed.id="23515720", type="row")
 #' @rdname matchPaperObjects
@@ -444,11 +435,9 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
 
 matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "graph")) {
   # ensure inputs
-  if (is.null(pubmed.id) && is.null(displayName)) {
-    stop("Must specify either an 'id' or a 'name'")
-  }
   isVerbose <- missing(type)
   type <- match.arg(type, several.ok=FALSE)
+  input.list <- .verifyInputs(pubmed.id, displayName)
   
   # check Class
   .checkClass(id=pubmed.id, displayName=displayName, database="PubMed", class="LiteratureReference")
@@ -462,6 +451,6 @@ matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "g
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose) 
+  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list) 
 }
 

@@ -60,8 +60,9 @@
   
   # to see what data type this species arg is by checking which column it belongs to
   species.data.type <- colnames(all.species)[apply(all.species, 2, function(col) species %in% unlist(col))]
-  if (length(species.data.type) == 0) stop(paste0(sQuote(species), " not listed in Reactome"))
-
+  if (length(species.data.type) == 0) {
+    stop(sQuote(species), ' not listed in Reactome. Try `matchObject(class="Species")` to get valid species inputs', call.=FALSE)
+  }
   # output
   species.data.type <- species.data.type[1] # in case type==c("displayName","name")
   species.row <- all.species[all.species[[species.data.type]] == species, ] 
@@ -72,59 +73,6 @@
   } else {
     as.data.frame(unique(species.row[ ,output]))
   }
-}
-
-
-# check if value(s) in db or not (mostly used in internal checks)
-# info is a character, not vector
-.checkInfo <- function(info, type=c("label", "relationship", "property")) {
-  type <- match.arg(type, several.ok = FALSE)
-  info <- gsub("^:", "", info)
-  
-  con <- getOption("con") # get connexion
-  if (type == "label") {
-    info <- strsplit(info, split=':', fixed=TRUE)[[1]]
-    terms <- con$get_labels()
-  } else if (type == "relationship") {
-    info <- strsplit(info, split='|', fixed=TRUE)[[1]]
-    terms <- con$get_relationships()
-  } else if (type == "property") {
-    terms <- con$get_property_keys()
-  }
-  terms <- terms$labels # to character
-  
-  throw <- info[!info %in% terms]
-  throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier'
-  if (length(throw) > 0) {
-    throw <- paste(throw, collapse = ", ")
-    return(FALSE)
-    warning(paste0("The ", type, " '", throw, "' is not in this database"), call.=FALSE)
-  } else {
-    return(TRUE)
-  }
-}
-
-
-# call neo4j API
-.callAPI <- function(query, return.names=NULL, type, isVerbose=FALSE, msg=NULL, ...) {
-  # being wordy if 'type' arg missing
-  if (isVerbose) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
-
-  # get the connexion object locally
-  con <- getOption("con")
-  
-  # call API
-  if (type == "row") {
-    # return in json format since neo4r would raise errors (from tibble)
-    json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
-    
-    # parse json data
-    res <- .parseJSON(json.res, return.names=return.names, msg=msg)
-  } else {
-    # graph data can use R output
-    res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
-  }
-  res
 }
 
 
@@ -151,25 +99,6 @@
   name <- gsub('\\<rle\\>', 'reactionLikeEvent', name)
   name <- gsub('\\<lr\\>', 'literatureReference', name)
   name
-}
-
-
-.checkClass <- function(id, displayName, class, database="Reactome", stopOrNot=FALSE) {
-  # get labels
-  labels <- .getNodeInfo(.WHERE('dbo', id=id, displayName=displayName, databaseName=database), "labels")
-  
-  # send error
-  if (!any(class %in% labels)) {
-    if (stopOrNot) {
-      stop("This is not a ", paste(sQuote(class), collapse=","), " object", call.=FALSE)
-    } else {
-      message("This is not a ", paste(sQuote(class), collapse=","), " object")
-      # will return NULL
-    }
-  } else {
-    # get the schema class
-    return(labels[labels %in% class])
-  }
 }
 
 

@@ -20,4 +20,6 @@ Imports:
     jsonlite,
     purrr,
     magrittr,
-    data.table
+    data.table,
+    reactome4r,
+    rlang

@@ -24,7 +24,10 @@ Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances re
 MATCH objects related to a paper
 }
 \examples{
+# fetch Reactome instances by paper title
 matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance", type="row")
+
+# fetch Reactome instances by pubmed id
 matchPaperObjects(pubmed.id="20797626", type="graph")
 matchPaperObjects(pubmed.id="23515720", type="row")
 }
