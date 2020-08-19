@@ -130,27 +130,3 @@
 }
 
 
-# call neo4j API
-.callAPI <- function(query, return.names=NULL, type, isVerbose=FALSE, error.info=NULL, ...) {
-  # being wordy if 'type' arg missing
-  if (isVerbose) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
-  
-  # get the connexion object locally
-  con <- getOption("con")
-  
-  # call API
-  if (type == "row") {
-    # return in json format since neo4r would raise errors (from tibble)
-    json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
-    
-    # parse json data
-    res <- .parseJSON(json.res, return.names=return.names, error.info=error.info)
-  } else {
-    # graph data can use R output
-    res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
-  }
-  res
-}
-
-
-

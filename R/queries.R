@@ -30,7 +30,8 @@
 matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, 
                         attribute=NULL , databaseName="Reactome") {
   # check inputs
-  input.list <- .verifyInputs(id, displayName, schemaClass, species, databaseName)
+  input.list <- .verifyInputs(id, displayName, schemaClass, species, databaseName, type=NULL)
+  type <- "row" # return 'row' data only
   
   # check attributes in the db or not
   # NULL also returns TRUE
@@ -45,11 +46,11 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
   } else {
     nodes4return <- paste0("dbo.", attribute)
   }
-  c.RETURN <- .RETURN(nodes4return, type="row")
+  c.RETURN <- .RETURN(nodes4return, type=type)
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, return.names=.goodName(nodes4return), type="row", error.info=input.list)
+  .callAPI(query, return.names=.goodName(nodes4return), type=type, error.info=input.list)
 }
 
 
@@ -71,9 +72,7 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
 matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NULL, species=NULL, 
                                              depth=1, all.depth=FALSE, type=c("row", "graph")) {
   # ensure the inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(event.id, event.displayName, species=species)
+  input.list <- .verifyInputs(event.id, event.displayName, species=species, type=type)
   
   # check if it's Event
   .checkClass(id=event.id, displayName=event.displayName, class="Event")
@@ -92,9 +91,9 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
   return.names <- c("precedingEvent", "event", "followingEvent")
   
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
-
+  
   # call API
-  .callAPI(query, return.names, type, isVerbose, input.list)
+  .callAPI(query, return.names, type, input.list)
 }
 
 
@@ -120,9 +119,7 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
 matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome", 
                            species=NULL, type=c("row", "graph")) {
   # ensure the inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(id, displayName, species=species, database=databaseName)
+  input.list <- .verifyInputs(id, displayName, species=species, database=databaseName, type=type)
   
   # get class
   class <- .checkClass(id=id, displayName=displayName, stopOrNot=TRUE,
@@ -155,7 +152,7 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
+  .callAPI(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -176,9 +173,7 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
 
 matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(pe.id, pe.displayName, species=species)
+  input.list <- .verifyInputs(pe.id, pe.displayName, species=species, type=type)
   
   # check Class
   .checkClass(id=pe.id, displayName=pe.displayName, class="Interaction")
@@ -193,7 +188,7 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
+  .callAPI(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -214,9 +209,7 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
 
 matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(event.id, event.displayName, species=species)
+  input.list <- .verifyInputs(event.id, event.displayName, species=species, type=type)
   
   # get class
   event.class <- .checkClass(id=event.id, displayName=event.displayName, class=c("Pathway", "ReactionLikeEvent"), stopOrNot=TRUE)
@@ -239,7 +232,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, speci
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
+  .callAPI(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -270,9 +263,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, speci
 matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1, 
                            all.depth=FALSE, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(id, displayName, species=species)
+  input.list <- .verifyInputs(id, displayName, species=species, type=type)
   
   # all first-class referrals (relationships) of schema class objects of our interest
   # collected from https://reactome.org/content/schema/ (Aug. 2020) 
@@ -314,7 +305,7 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
   query <- paste(c.MATCH, c.WHERE, c.WITH, c.WHERE.2, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(c(class, "dbo")), type, isVerbose, input.list)
+  .callAPI(query, .goodName(c(class, "dbo")), type, input.list)
 }
 
 
@@ -335,9 +326,7 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
 
 matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(pe.id, pe.displayName, species=species)
+  input.list <- .verifyInputs(pe.id, pe.displayName, species=species, type=type)
   
   # check the Class
   .checkClass(id=pe.id, displayName=pe.displayName, class="PhysicalEntity")
@@ -352,7 +341,7 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list)
+  .callAPI(query, .goodName(nodes4return), type, input.list)
   
   # get PE roles - WIP
 }
@@ -367,7 +356,7 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
 #' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
 #' @examples
-#' matchDiseases(displayName="cancer", species="M. musculus", type="row")
+#' matchDiseases(displayName="neuropathy", species="M. musculus", type="row")
 #' matchDiseases(id="R-HSA-162588", type="graph")
 #' @rdname matchDiseases
 #' @family match
@@ -375,9 +364,7 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
 
 matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row", "graph")) {
   # ensure inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(id, displayName, species=species)
+  input.list <- .verifyInputs(id, displayName, species=species, type=type)
   
   # check the Class
   class <- .checkClass(id=id, displayName=displayName, class=c("PhysicalEntity", "Event", "Disease"), stopOrNot=TRUE)
@@ -412,7 +399,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(return.names), type, isVerbose, input.list) 
+  .callAPI(query, .goodName(return.names), type, input.list) 
 }
 
 
@@ -435,9 +422,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
 
 matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "graph")) {
   # ensure inputs
-  isVerbose <- missing(type)
-  type <- match.arg(type, several.ok=FALSE)
-  input.list <- .verifyInputs(pubmed.id, displayName)
+  input.list <- .verifyInputs(pubmed.id, displayName, type=type)
   
   # check Class
   .checkClass(id=pubmed.id, displayName=displayName, database="PubMed", class="LiteratureReference")
@@ -451,6 +436,6 @@ matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "g
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, isVerbose, input.list) 
+  .callAPI(query, .goodName(nodes4return), type, input.list) 
 }
 

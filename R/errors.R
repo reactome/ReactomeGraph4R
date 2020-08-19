@@ -75,9 +75,6 @@
       stop("Try to check above argument inputs. \n", 
            "  Or perhaps no result object can be found at all (`-_-)", call.=FALSE)
     }
-  } else if ("error_message" %in% names(res)) {
-    # query syntax error
-    stop(paste0(res[["error_code"]], "\n", res[["error_message"]]), call.=FALSE)
   }
 }
 
@@ -112,8 +109,19 @@
 }
 
 
-# verify the main input arguments
-.verifyInputs <- function(id=NULL, name=NULL, class=NULL, species=NULL, database="Reactome") {
+# verify the main input arguments & output a list
+.verifyInputs <- function(id=NULL, name=NULL, class=NULL, species=NULL, database="Reactome", type) {
+  # being wordy if 'type' arg missing
+  # `with(parent.frame())` -- execute in the parent environment
+  if (!is.null(type)) {
+    with(parent.frame(), {
+      if (missing(type)) {
+        message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
+      }
+      type <- match.arg(type, several.ok=FALSE)
+    })
+  }
+  
   # make sure having at least one input
   if (is.null(class) && is.null(id) && is.null(name)) {
     stop("Must specify 'id' or 'displayName' or 'class'", call.=FALSE)
@@ -123,10 +131,11 @@
 
   if (database != "Reactome") {
     # remove species filter for an external id
-    # `with(parent.frame())` -- execute in the parent environment
     species <- NULL
     with(parent.frame(), {species <- NULL})
   }
+  
+  # return a list summarizing these args
   list(id=id, name=name, class=class, species=species, database=database)
 }
 

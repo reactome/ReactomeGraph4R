@@ -44,6 +44,26 @@
 }
 
 
+# call neo4j API
+.callAPI <- function(query, return.names=NULL, type, error.info=NULL, ...) {
+  # get the connexion object locally
+  con <- getOption("con")
+  
+  # call API
+  if (type == "row") {
+    # return in json format since neo4r would raise errors (from tibble)
+    json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
+    
+    # parse json data
+    res <- .parseJSON(json.res, return.names=return.names, error.info=error.info)
+  } else {
+    # graph data can use R output
+    res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
+  }
+  res
+}
+
+
 # match species names (similar to that one in CS pkg)
 .matchSpecies <- function(species, output=c("displayName", "taxId", "dbId", "name", "abbreviation")) {
   # ensure correct input

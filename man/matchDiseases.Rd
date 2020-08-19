@@ -27,7 +27,7 @@ Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances re
 MATCH diseases of PhysicalEntity/Reaction/Pathway
 }
 \examples{
-matchDiseases(displayName="cancer", species="M. musculus", type="row")
+matchDiseases(displayName="neuropathy", species="M. musculus", type="row")
 matchDiseases(id="R-HSA-162588", type="graph")
 }
 \seealso{

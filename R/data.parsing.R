@@ -2,18 +2,21 @@
 # impudently copied and modified some functions from: 
 # https://github.com/neo4j-rstats/neo4r/blob/master/R/api_result_parsing.R
 
-# Note: neo4r 0.1.3 doesn't return syntax errors of cypher queries when format='json'
 
 # not include stats & meta
 .parseJSON <- function(json.res, return.names, error.info=NULL) {
-
+  # return query syntax error if any
+  if ("error_code" %in% names(json.res)) {
+    stop(paste0(json.res[["error_code"]], "\n", json.res[["error_message"]]), call.=FALSE)
+  }
+  
   # transform into list
   json.list <- jsonlite::fromJSON(json.res)
   
   # Get the result element
   json.results <- as.list(json.list[[1]])
   
-  # check & send error/msg if any
+  # send errors if '(no changes, no records)'
   .sendErrors(json.results, error.info)
   
   # Turn NULL to NA & get the data

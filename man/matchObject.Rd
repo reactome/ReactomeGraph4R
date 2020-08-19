@@ -42,7 +42,7 @@ matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesNam
 
 # fetch instance by id
 matchObject(id = "R-HSA-9626034")
-matchObject(id = "P60484", species="pig", databaseName = "UniProt")
+matchObject(id = "P60484", databaseName = "UniProt")
 }
 \seealso{
 Other match: 
