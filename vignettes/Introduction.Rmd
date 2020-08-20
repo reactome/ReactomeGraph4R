@@ -1,0 +1,27 @@
+---
+title: "Introduction"
+author: Chi-Lam Poon
+date: "`r format(Sys.time(), '%m/%d/%Y')`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    highlight: pygments
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(reactome.graphdb4r)
+```

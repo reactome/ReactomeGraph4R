@@ -124,7 +124,7 @@
   
   # make sure having at least one input
   if (is.null(class) && is.null(id) && is.null(name)) {
-    stop("Must specify 'id' or 'displayName' or 'class'", call.=FALSE)
+    stop("Must specify 'id' or 'displayName' or 'schemaClass'", call.=FALSE)
   } else if (missing(class) && is.null(id) && is.null(name)) {
     stop("Must specify either 'id' or 'displayName'", call.=FALSE)
   }

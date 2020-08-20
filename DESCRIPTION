@@ -23,3 +23,8 @@ Imports:
     data.table,
     reactome4r,
     rlang
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
