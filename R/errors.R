@@ -13,7 +13,7 @@
     id.spellcheck <- spellCheck(input.list[["id"]])
     if (!is.null(id.spellcheck)) {
       message(
-        rlang::format_error_bullets(c("i" = "'id' spell check:",
+        rlang::format_error_bullets(c("i" = "'id' check:",
                                       id.spellcheck))
       )
     }
@@ -23,7 +23,7 @@
     name.spellcheck <- spellCheck(input.list[["name"]])
     if (!is.null(name.spellcheck)) {
       message(
-        rlang::format_error_bullets(c("i" = "'displayName' spell check (note that the space is required):",
+        rlang::format_error_bullets(c("i" = "'displayName' check (note that the space is required):",
                                       name.spellcheck))
       )
     }
@@ -83,9 +83,13 @@
 # info is a character, NOT vector
 .checkInfo <- function(info, type=c("label", "relationship", "property")) {
   type <- match.arg(type, several.ok = FALSE)
+  # remove colon
   info <- gsub("^:", "", info)
   
-  con <- getOption("con") # get connexion
+  # get connexion
+  con <- getOption("con")
+  
+  # get all labels/relationships/properties existing in the current database
   if (type == "label") {
     info <- strsplit(info, split=':', fixed=TRUE)[[1]]
     terms <- con$get_labels()
@@ -97,8 +101,9 @@
   }
   terms <- terms$labels # to character
   
+  # get those not in db
   throw <- info[!info %in% terms]
-  throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier'
+  throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier' in this pkg
   if (length(throw) > 0) {
     throw <- paste(throw, collapse = ", ")
     return(FALSE)
