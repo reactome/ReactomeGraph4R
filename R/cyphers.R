@@ -60,18 +60,16 @@
 
 
 # graph object needs 'relationships'
-.RETURN <- function(node, type, numOfMatch=1) {
+.RETURN <- function(node, numOfMatch=1) {
   clause <- 'RETURN '
   nodes <- paste(node, collapse = ",")
   clause <- paste0(clause, nodes)
   
   # add `relationships()` for each path
-  if (type == "graph") {
-    numOfMatch <- seq(1, numOfMatch) # vectorize
-    rels <- paste0("relationships(p", numOfMatch, ")")
-    rels <- paste(rels, collapse = ",")
-    clause <- paste0(clause, ",", rels)
-  }
+  numOfMatch <- seq(1, numOfMatch) # vectorize
+  rels <- paste0("relationships(p", numOfMatch, ")")
+  rels <- paste(rels, collapse = ",")
+  clause <- paste0(clause, ",", rels)
   clause
 }
 
