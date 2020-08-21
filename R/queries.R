@@ -46,11 +46,11 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
   } else {
     nodes4return <- paste0("dbo.", attribute)
   }
-  c.RETURN <- .RETURN(nodes4return, type=type)
+  c.RETURN <- .RETURN(nodes4return)
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, return.names=.goodName(nodes4return), type=type, error.info=input.list)
+  .finalRes(query, return.names=.goodName(nodes4return), type=type, error.info=input.list)
 }
 
 
@@ -87,13 +87,13 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
   ## add conditions
   c.WHERE <- .WHERE(node='event', id=event.id, displayName=event.displayName, speciesName=species)
   ## return
-  c.RETURN <- .RETURN(node=c("pevent", "event", "fevent"), type=type, numOfMatch=length(MATCH.list))
+  c.RETURN <- .RETURN(node=c("pevent", "event", "fevent"), numOfMatch=length(MATCH.list))
   return.names <- c("precedingEvent", "event", "followingEvent")
   
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
-  # call API
-  .callAPI(query, return.names, type, input.list)
+  # retrieve final results
+  .finalRes(query, return.names, type, input.list)
 }
 
 
@@ -148,11 +148,11 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
 
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE(node4where, id=id, displayName=displayName, databaseName=databaseName, speciesName=species)
-  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
-  
+  print(query)
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -176,7 +176,7 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
   input.list <- .verifyInputs(pe.id, pe.displayName, species=species, type=type)
   
   # check Class
-  .checkClass(id=pe.id, displayName=pe.displayName, class="Interaction")
+  .checkClass(id=pe.id, displayName=pe.displayName, class="PhysicalEntity")
   
   # full query
   # PhysicalEntities --> RefEntities <-- Interaction
@@ -184,11 +184,11 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE("pe", id=pe.id, displayName=pe.displayName, speciesName=species)
   nodes4return <- c("pe", "re", "interaction")
-  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -228,11 +228,11 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, speci
   }
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE(node4where, id=event.id, displayName=event.displayName, speciesName=species)
-  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -301,11 +301,11 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
   # filter out unwanted nodes
   c.WITH <- 'WITH *, nodes(p1) AS ns'
   c.WHERE.2 <- 'WHERE ALL(node IN ns WHERE NOT node:InstanceEdit)'
-  c.RETURN <- .RETURN(c("n", "dbo"), type, length(MATCH.list))
+  c.RETURN <- .RETURN(c("n", "dbo"), length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.WITH, c.WHERE.2, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(c(class, "dbo")), type, input.list)
+  .finalRes(query, .goodName(c(class, "dbo")), type, input.list)
 }
 
 
@@ -337,13 +337,11 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE('pe', id=pe.id, displayName=pe.displayName, speciesName=species)
   nodes4return <- c("pe", "dbo")
-  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, input.list)
-  
-  # get PE roles - WIP
+  .finalRes(query, .goodName(nodes4return), type, input.list)
 }
 
 
@@ -395,11 +393,11 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
     }
   }
   c.MATCH <- .MATCH(MATCH.list)
-  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(return.names), type, input.list) 
+  .finalRes(query, .goodName(return.names), type, input.list) 
 }
 
 
@@ -432,10 +430,10 @@ matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "g
   c.MATCH <- .MATCH(MATCH.list)
   c.WHERE <- .WHERE('lr', pubMedIdentifier=pubmed.id, displayName=displayName)
   nodes4return <- c("lr", "dbo")
-  c.RETURN <- .RETURN(nodes4return, type, length(MATCH.list))
+  c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .callAPI(query, .goodName(nodes4return), type, input.list) 
+  .finalRes(query, .goodName(nodes4return), type, input.list) 
 }
 

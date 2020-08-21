@@ -7,7 +7,7 @@
 .parseJSON <- function(json.res, return.names, error.info=NULL) {
   # return query syntax error if any
   if ("error_code" %in% names(json.res)) {
-    stop(paste0(json.res[["error_code"]], "\n", json.res[["error_message"]]), call.=FALSE)
+    stop(json.res[["error_code"]], "\n", json.res[["error_message"]], call.=FALSE)
   }
   
   # transform into list
@@ -128,7 +128,33 @@
 }
 
 
-
-### include relationships data
+# include relationships in 'row' data
+.processRowOutput <- function(res.list) {
+  # get data
+  row <- res.list[["row"]]
+  graph <- res.list[["graph"]]
+  nodes <- as.data.frame(graph[["nodes"]])
+  relationships <- as.data.frame(graph[["relationships"]])
+  
+  # add columns in relationships
+  # grab the slots from properties list
+  for (node in c("startNode", "endNode")) {
+    for (slot in c("dbId", "schemaClass")) {
+      col.name <- paste0(node, ".", slot)
+      relationships[, col.name] <- sapply(as.character(relationships[, node]), function(x) 
+                                                    nodes[nodes$id == x, ]$properties[[1]][[slot]])               
+    }
+  }
+  
+  # rearrange columns
+  relationships <- relationships[ ,c("id", "type", "startNode", "startNode.dbId", "startNode.schemaClass",
+                                     "endNode", "endNode.dbId", "endNode.schemaClass", "properties")]
+  # rename columns
+  colnames(relationships)[which(colnames(relationships) %in% c("id", "startNode", "endNode"))] <- c("neo4jId", "startNode.neo4jId", "endNode.neo4jId")
+  
+  # add relationships to row list
+  row[["relationships"]] <- as.data.frame(relationships)
+  row
+}
 
 
