@@ -106,8 +106,8 @@
   throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier' in this pkg
   if (length(throw) > 0) {
     throw <- paste(throw, collapse = ", ")
+    message(rlang::format_error_bullets(c("x" = paste0("The ", type, " '", throw, "' is not in this database"))))
     return(FALSE)
-    warning(rlang::format_error_bullets(c("x" = paste0("The ", type, " '", throw, "' is not in this database"))))
   } else {
     return(TRUE)
   }
@@ -145,7 +145,7 @@
 }
 
 
-# check the class input matching with specific Class(s) or not
+# check the class input matching with specific Class(es) or not
 .checkClass <- function(id, displayName, class, database="Reactome", stopOrNot=FALSE) {
   # get labels of the node
   labels <- .getNodeInfo(.WHERE('dbo', id=id, displayName=displayName, databaseName=database), "labels")
@@ -154,11 +154,11 @@
   if (!any(class %in% labels)) {
     if (stopOrNot) {
       stop(rlang::format_error_bullets(
-              c("x" = paste0("This is not a ", paste(sQuote(class), collapse=","), " object"))),
+              c("x" = paste0("Please specify an instance of Class ", paste(sQuote(class), collapse=",")))),
           call.=FALSE)
     } else {
       message(rlang::format_error_bullets(
-              c("x" = paste0("This is not a ", paste(sQuote(class), collapse=","), " object")))
+              c("x" = paste0("This is not an instance of Class ", paste(sQuote(class), collapse=","))))
              )
       # will return NULL
     }

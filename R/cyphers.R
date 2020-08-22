@@ -92,7 +92,7 @@
   } else {
     new.rel <- ifelse(depth > 1, paste0(rel, "*1..", as.integer(depth)), rel)
   }
-  rel <- sub('.*\\|', '', rel) # use the last part to be replaced
+  rel <- sub('.*\\|', '', rel) # use the last part to replace
   new.rel <- sub('.*\\|', '', new.rel)
   new.clause <- gsub(paste0(rel, "\\]-"), paste0(new.rel, "\\]-"), clause)
   new.clause
