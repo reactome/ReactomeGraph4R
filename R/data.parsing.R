@@ -3,8 +3,11 @@
 # https://github.com/neo4j-rstats/neo4r/blob/master/R/api_result_parsing.R
 
 
+# Note: can't handle path data
+# e.g. MATCH p=()-[r:output]->() RETURN p
+
 # not include stats & meta
-.parseJSON <- function(json.res, return.names, error.info=NULL) {
+.parseJSON <- function(json.res, return.names, unique, error.info) {
   # return query syntax error if any
   if ("error_code" %in% names(json.res)) {
     stop(json.res[["error_code"]], "\n", json.res[["error_message"]], call.=FALSE)
@@ -22,7 +25,7 @@
   # Turn NULL to NA & get the data
   res.data <- .null_to_na(json.results)
   
-  .parse_row(res.data, return.names)
+  .parse_row(res.data, return.names, unique)
 }
 
 
@@ -47,7 +50,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom purrr transpose map_depth map
 
-.parse_row <- function(res.data, res.names) {
+.parse_row <- function(res.data, res.names, unique) {
   # flatten & discard 'meta' data
   res.data <- res.data[["row"]]
   
@@ -61,11 +64,14 @@
           map(.rbindlist_to_df)
   
   # remove repeated rows
-  res <- lapply(res, function(x) {
-                      x <- unique(x)
-                      rownames(x) <- 1:nrow(x) # renew row names
-                      x
-                     })
+  if (unique) {
+    res <- lapply(res, function(x) {
+      x <- unique(x)
+      rownames(x) <- 1:nrow(x) # renew row names
+      x
+    })
+  }
+
   # add names
   if (!is.null(res.names) && length(res) > 0) {
     if (any(grepl("\\.", res.names))) {

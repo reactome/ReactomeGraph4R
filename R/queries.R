@@ -11,8 +11,11 @@
 #' @param schemaClass schema class of a database object
 #' @param species name or taxon id or dbId or abbreviation of specified species
 #' @param attribute specific attribute(s) to be returned. If set to `NULL`, all attributes returned
+#' @param hasAttribute a property key. If specified, objects having the attribute(s) will be returned
+#' @param relationship a relationships type
+#' @param limit the limit of returned objects
 #' @param databaseName database name
-#' @return Reactome database object matched with the given id or name
+#' @return Reactome database object matched with the given conditions
 #' @examples
 #' # fetch instance by class
 #' all.species <- matchObject(schemaClass = "Species")
@@ -21,36 +24,82 @@
 #' matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
 #' 
 #' # fetch instance by id
+#' ## Reactome id
 #' matchObject(id = "R-HSA-9626034")
+#' ## non-Reactome id
 #' matchObject(id = "P60484", databaseName = "UniProt")
+#' 
+#' # fecth instances by relationship
+#' matchObject(relationship="inferredTo", limit=10)
+#' 
+#' # fetch instances by attribute
+#' matchObject(hasAttribute="isChimeric", attribute="displayName", species="chicken", limit=10)
+#' matchObject(hasAttribute="hasEHLD", limit=10)
+#' 
 #' @rdname matchObject
 #' @family match 
 #' @export 
 
-matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, 
-                        attribute=NULL , databaseName="Reactome") {
+matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, attribute=NULL, 
+                        hasAttribute=NULL, relationship=NULL, limit=NULL, databaseName="Reactome") {
   # check inputs
-  input.list <- .verifyInputs(id, displayName, schemaClass, species, databaseName, type=NULL)
-  type <- "row" # return 'row' data only
+  #input.list <- .verifyInputs(id, displayName, schemaClass, species, attribute, databaseName, type=NULL)
+  type <- "row" # return row data only
   
   # check attributes in the db or not
   # NULL also returns TRUE
   .checkInfo(attribute, "property")
   
-  # retrieve
-  c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=displayName, schemaClass=schemaClass, 
-                    speciesName=species, databaseName=databaseName)
-  if (is.null(attribute)) {
-    nodes4return <- "dbo" # return all attributes
+  if (!is.null(relationship)) {
+    message("Note that other arguments except 'limit' should be NULL if you specify 'relationship'")
+    message("Turn them into NULL")
+    id <- displayName <- schemaClass <- NULL -> species -> attribute -> hasAttribute
+    
+    # check if it's a correct relationship name
+    .checkInfo(relationship, "relationship")
+    
+    c.MATCH <- paste0('MATCH (n1)-[r:', relationship, ']->(n2)')
+    c.WHERE <- ""
+    c.RETURN <- 'RETURN n1,n2'
+    return.names <- c("n1", "n2")
+    unique <- FALSE
   } else {
-    nodes4return <- paste0("dbo.", attribute)
+    # retrieve
+    c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
+    c.WHERE <- .WHERE("dbo", id=id, displayName=displayName, schemaClass=schemaClass, 
+                      speciesName=species, databaseName=databaseName)
+    
+    # modify WHERE clause if 'hasAttribute' specified
+    if (!is.null(hasAttribute)) {
+      if (!is.null(id) || !is.null(displayName)) {
+        message("Do not input 'id' or 'displayName' if you've specified 'hasAttribute'")
+        message("Turn them into NULL")
+      }
+      c.WHERE <- .WHERE("dbo", schemaClass=schemaClass, speciesName=species, databaseName=databaseName)
+      attr.WHERE <- paste(paste0("EXISTS(dbo.", hasAttribute, ")"), collapse = " AND ")
+      c.WHERE <- ifelse(grepl("=", c.WHERE), paste0(c.WHERE, " AND ", attr.WHERE), paste0(c.WHERE, attr.WHERE))
+    }
+
+    if (is.null(attribute)) {
+      nodes4return <- "dbo" # return all attributes
+    } else {
+      nodes4return <- paste0("dbo.", attribute)
+    }
+    c.RETURN <- .RETURN(nodes4return)
+    return.names <- .goodName(nodes4return)
+    unique <- TRUE
   }
-  c.RETURN <- .RETURN(nodes4return)
+  
+  # add limit
+  if (!is.null(limit)) {
+    c.RETURN <- paste0(c.RETURN, " LIMIT ", limit)
+  }
+  
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .finalRes(query, return.names=.goodName(nodes4return), type=type, error.info=input.list)
+  input.list <- list(id=id, name=displayName, class=schemaClass, species=species, database=databaseName)
+  .finalRes(query, return.names=return.names, type=type, unique, error.info=input.list)
 }
 
 
@@ -89,11 +138,10 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
   ## return
   c.RETURN <- .RETURN(node=c("pevent", "event", "fevent"), numOfMatch=length(MATCH.list))
   return.names <- c("precedingEvent", "event", "followingEvent")
-  
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve final results
-  .finalRes(query, return.names, type, input.list)
+  .finalRes(query, return.names, type, error.info=input.list)
 }
 
 
@@ -150,9 +198,9 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
   c.WHERE <- .WHERE(node4where, id=id, displayName=displayName, databaseName=databaseName, speciesName=species)
   c.RETURN <- .RETURN(nodes4return, length(MATCH.list))
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
-  print(query)
+  
   # retrieve
-  .finalRes(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, error.info=input.list)
 }
 
 
@@ -188,7 +236,7 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .finalRes(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, error.info=input.list)
 }
 
 
@@ -232,7 +280,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL, speci
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .finalRes(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, error.info=input.list)
 }
 
 
@@ -305,7 +353,7 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
   query <- paste(c.MATCH, c.WHERE, c.WITH, c.WHERE.2, c.RETURN)
   
   # retrieve
-  .finalRes(query, .goodName(c(class, "dbo")), type, input.list)
+  .finalRes(query, .goodName(c(class, "dbo")), type, error.info=input.list)
 }
 
 
@@ -341,7 +389,7 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .finalRes(query, .goodName(nodes4return), type, input.list)
+  .finalRes(query, .goodName(nodes4return), type, error.info=input.list)
 }
 
 
@@ -397,7 +445,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .finalRes(query, .goodName(return.names), type, input.list) 
+  .finalRes(query, .goodName(return.names), type, error.info=input.list) 
 }
 
 
@@ -434,6 +482,6 @@ matchPaperObjects <- function(pubmed.id=NULL, displayName=NULL, type=c("row", "g
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # retrieve
-  .finalRes(query, .goodName(nodes4return), type, input.list) 
+  .finalRes(query, .goodName(nodes4return), type, error.info=input.list) 
 }
 

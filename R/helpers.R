@@ -45,7 +45,7 @@
 
 
 # call neo4j API
-.callAPI <- function(query, return.names=NULL, type, error.info=NULL, ...) {
+.callAPI <- function(query, return.names=NULL, type, unique=TRUE, error.info=NULL, ...) {
   # get the connexion object locally
   con <- getOption("con")
   
@@ -54,7 +54,7 @@
     # return in json format since neo4r would raise errors (from tibble)
     json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
     # parse json data
-    res <- .parseJSON(json.res, return.names=return.names, error.info=error.info)
+    res <- .parseJSON(json.res, return.names=return.names, unique=unique, error.info=error.info)
   } else {
     # graph data can use neo4r R output
     res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
@@ -65,23 +65,23 @@
 
 
 # get final results for queries
-.finalRes <- function(query, return.names=NULL, type, error.info=NULL, ...) {
+.finalRes <- function(query, return.names=NULL, type, unique=TRUE, error.info=NULL, ...) {
   if (type == "row") {
     # retrieve graph data first
     suppressMessages( # suppress if retrieving attributes
-      graph.res <- .callAPI(query=query, return.names=return.names, type="graph", error.info=error.info, ...)
+      graph.res <- .callAPI(query, return.names, "graph", error.info=error.info, ...)
     )
     
     # retrieve row data
     res.query <- gsub(",relationships\\s*\\([^\\)]+\\)", "", query) # remove ',relationships(p)' in RETURN clause
-    res <- .callAPI(query=res.query, return.names=return.names, type="row", error.info=error.info, ...)
+    res <- .callAPI(res.query, return.names, "row", unique, error.info, ...)
     
     if ("relationships" %in% names(graph.res)) {
       # add relationships from graph data into row data if any
       res <- .processRowOutput(list(row = res, graph = graph.res))
     }
   } else {
-    res <- .callAPI(query=query, return.names=return.names, type="graph", error.info=error.info, ...)
+    res <- .callAPI(query, return.names, "graph", error.info=error.info, ...)
   }
   res
 }

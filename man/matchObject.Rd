@@ -10,6 +10,9 @@ matchObject(
   schemaClass = NULL,
   species = NULL,
   attribute = NULL,
+  hasAttribute = NULL,
+  relationship = NULL,
+  limit = NULL,
   databaseName = "Reactome"
 )
 }
@@ -24,10 +27,16 @@ matchObject(
 
 \item{attribute}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
 
+\item{hasAttribute}{a property key. If specified, objects having the attribute(s) will be returned}
+
+\item{relationship}{a relationships type}
+
+\item{limit}{the limit of returned objects}
+
 \item{databaseName}{database name}
 }
 \value{
-Reactome database object matched with the given id or name
+Reactome database object matched with the given conditions
 }
 \description{
 Fetch instance by Reactome dbId/stId/displayName/schemaClass
@@ -41,8 +50,18 @@ all.species <- matchObject(schemaClass = "Species")
 matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
 
 # fetch instance by id
+## Reactome id
 matchObject(id = "R-HSA-9626034")
+## non-Reactome id
 matchObject(id = "P60484", databaseName = "UniProt")
+
+# fecth instances by relationship
+matchObject(relationship="inferredTo", limit=10)
+
+# fetch instances by attribute
+matchObject(hasAttribute="isChimeric", attribute="displayName", species="chicken", limit=10)
+matchObject(hasAttribute="hasEHLD", limit=10)
+
 }
 \seealso{
 Other match: 
