@@ -80,7 +80,7 @@
 
 
 # check if value(s) in db or not (mostly used in internal checks)
-# info is a character, NOT vector
+# info is a character, NOT vector for "label" & "relationship"
 .checkInfo <- function(info, type=c("label", "relationship", "property")) {
   type <- match.arg(type, several.ok = FALSE)
   # remove colon

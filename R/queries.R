@@ -10,8 +10,8 @@
 #' @param displayName displayName of a database object
 #' @param schemaClass schema class of a database object
 #' @param species name or taxon id or dbId or abbreviation of specified species
-#' @param attribute specific attribute(s) to be returned. If set to `NULL`, all attributes returned
-#' @param hasAttribute a property key. If specified, objects having the attribute(s) will be returned
+#' @param returnAttribute specific attribute(s) to be returned. If set to `NULL`, all attributes returned
+#' @param property a list of property keys and values
 #' @param relationship a relationships type
 #' @param limit the limit of returned objects
 #' @param databaseName database name
@@ -21,7 +21,7 @@
 #' all.species <- matchObject(schemaClass = "Species")
 #' 
 #' # fetch instance by name
-#' matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
+#' matchObject(displayName = "RCOR1 [nucleoplasm]", returnAttribute=c("stId", "speciesName"))
 #' 
 #' # fetch instance by id
 #' ## Reactome id
@@ -32,28 +32,32 @@
 #' # fecth instances by relationship
 #' matchObject(relationship="inferredTo", limit=10)
 #' 
-#' # fetch instances by attribute
-#' matchObject(hasAttribute="isChimeric", attribute="displayName", species="chicken", limit=10)
-#' matchObject(hasAttribute="hasEHLD", limit=10)
+#' # fetch instances by property
+#' property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
+#' matchObject(property = property.list, 
+#'             returnAttribute = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+#'             limit=20)
 #' 
 #' @rdname matchObject
 #' @family match 
 #' @export 
 
-matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, attribute=NULL, 
-                        hasAttribute=NULL, relationship=NULL, limit=NULL, databaseName="Reactome") {
+matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, returnAttribute=NULL, 
+                        property=NULL, relationship=NULL, limit=NULL, databaseName="Reactome") {
   # check inputs
-  #input.list <- .verifyInputs(id, displayName, schemaClass, species, attribute, databaseName, type=NULL)
   type <- "row" # return row data only
+  if (databaseName != "Reactome") species <- NULL
   
   # check attributes in the db or not
   # NULL also returns TRUE
-  .checkInfo(attribute, "property")
+  .checkInfo(returnAttribute, "property")
   
   if (!is.null(relationship)) {
+    # retrieve data based on relationship
+    
     message("Note that other arguments except 'limit' should be NULL if you specify 'relationship'")
     message("Turn them into NULL")
-    id <- displayName <- schemaClass <- NULL -> species -> attribute -> hasAttribute
+    id <- displayName <- schemaClass <- NULL -> species -> returnAttribute -> property
     
     # check if it's a correct relationship name
     .checkInfo(relationship, "relationship")
@@ -69,21 +73,22 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
     c.WHERE <- .WHERE("dbo", id=id, displayName=displayName, schemaClass=schemaClass, 
                       speciesName=species, databaseName=databaseName)
     
-    # modify WHERE clause if 'hasAttribute' specified
-    if (!is.null(hasAttribute)) {
+    # modify WHERE clause if 'property' specified
+    if (!is.null(property)) {
       if (!is.null(id) || !is.null(displayName)) {
-        message("Do not input 'id' or 'displayName' if you've specified 'hasAttribute'")
+        message("Do not input 'id' or 'displayName' if you've specified 'property'")
         message("Turn them into NULL")
       }
+      .checkInfo(names(property), "property")
       c.WHERE <- .WHERE("dbo", schemaClass=schemaClass, speciesName=species, databaseName=databaseName)
-      attr.WHERE <- paste(paste0("EXISTS(dbo.", hasAttribute, ")"), collapse = " AND ")
-      c.WHERE <- ifelse(grepl("=", c.WHERE), paste0(c.WHERE, " AND ", attr.WHERE), paste0(c.WHERE, attr.WHERE))
+      property.WHERE <- paste(sapply(names(property), function(n) paste0("dbo.", n, " = ", property[[n]])), collapse = " AND ")
+      c.WHERE <- ifelse(grepl("=", c.WHERE), paste0(c.WHERE, " AND ", property.WHERE), paste0(c.WHERE, property.WHERE))
     }
 
-    if (is.null(attribute)) {
+    if (is.null(returnAttribute)) {
       nodes4return <- "dbo" # return all attributes
     } else {
-      nodes4return <- paste0("dbo.", attribute)
+      nodes4return <- paste0("dbo.", returnAttribute)
     }
     c.RETURN <- .RETURN(nodes4return)
     return.names <- .goodName(nodes4return)
@@ -97,9 +102,10 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
   
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
-  # retrieve
+  # for generating error messages
   input.list <- list(id=id, name=displayName, class=schemaClass, species=species, database=databaseName)
-  .finalRes(query, return.names=return.names, type=type, unique, error.info=input.list)
+  # retrieve
+  .finalRes(query, return.names=return.names, type=type, unique=unique, error.info=input.list)
 }
 
 
@@ -427,7 +433,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
     
     # check if the instance is in Disease or not
     isInDisease <- matchObject(id=id, displayName=displayName, 
-                               attribute="isInDisease", species=species)
+                               returnAttribute="isInDisease", species=species)
     isInDisease <- isInDisease[["databaseObject"]][["isInDisease"]]
     
     if (!isInDisease) {
