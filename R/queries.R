@@ -46,7 +46,7 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
                         property=NULL, relationship=NULL, limit=NULL, databaseName="Reactome") {
   # check inputs
   type <- "row" # return row data only
-  if (databaseName != "Reactome") species <- NULL
+  if (is.null(databaseName) || databaseName != "Reactome") species <- NULL
   
   # check attributes in the db or not
   # NULL also returns TRUE
@@ -176,7 +176,7 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
   input.list <- .verifyInputs(id, displayName, species=species, database=databaseName, type=type)
   
   # get class
-  class <- .checkClass(id=id, displayName=displayName, stopOrNot=TRUE,
+  class <- .checkClass(id=id, displayName=displayName, stopOrNot=TRUE, database=databaseName,
                        class=c("Event", "ReferenceEntity", "PhysicalEntity"))
   
   # full query
@@ -339,7 +339,9 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
   )
   
   # select those really in the database
-  referral.list <- lapply(referral.list, function(class) class[sapply(class, function(rel) .checkInfo(rel, "relationship"))])
+  suppressMessages(
+    referral.list <- lapply(referral.list, function(class) class[sapply(class, function(rel) .checkInfo(rel, "relationship"))])
+  )
   
   # make sure it's one of our interested schema classes
   class <- .checkClass(id=id, displayName=displayName, class=names(referral.list), stopOrNot=TRUE)

@@ -9,8 +9,8 @@ matchObject(
   displayName = NULL,
   schemaClass = NULL,
   species = NULL,
-  attribute = NULL,
-  hasAttribute = NULL,
+  returnAttribute = NULL,
+  property = NULL,
   relationship = NULL,
   limit = NULL,
   databaseName = "Reactome"
@@ -25,9 +25,9 @@ matchObject(
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
-\item{attribute}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
+\item{returnAttribute}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
 
-\item{hasAttribute}{a property key. If specified, objects having the attribute(s) will be returned}
+\item{property}{a list of property keys and values}
 
 \item{relationship}{a relationships type}
 
@@ -47,7 +47,7 @@ or non-Reactome identifier/displayName
 all.species <- matchObject(schemaClass = "Species")
 
 # fetch instance by name
-matchObject(displayName = "RCOR1 [nucleoplasm]", attribute=c("stId", "speciesName"))
+matchObject(displayName = "RCOR1 [nucleoplasm]", returnAttribute=c("stId", "speciesName"))
 
 # fetch instance by id
 ## Reactome id
@@ -58,9 +58,11 @@ matchObject(id = "P60484", databaseName = "UniProt")
 # fecth instances by relationship
 matchObject(relationship="inferredTo", limit=10)
 
-# fetch instances by attribute
-matchObject(hasAttribute="isChimeric", attribute="displayName", species="chicken", limit=10)
-matchObject(hasAttribute="hasEHLD", limit=10)
+# fetch instances by property
+property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
+matchObject(property = property.list, 
+            returnAttribute = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+            limit=20)
 
 }
 \seealso{

@@ -22,9 +22,8 @@
   
   # list(`property` = arg)
   filters <- list(...)
-  filters <- filters[!sapply(filters, is.null)] # remove NULL elements
   
-  db <- "Reactome" # for .genIdTerm()
+  db <- "Reactome" # set as default, for .genIdTerm()
   if ("databaseName" %in% names(filters)) {
     # get database name
     db <- filters[["databaseName"]]
@@ -34,6 +33,9 @@
       filters <- filters[names(filters) != "databaseName"]
     }
   }
+  
+  # remove NULL elements in filters
+  filters <- filters[!sapply(filters, is.null)]
   
   # complete WHERE clause by adding filter arguments (eg. id, species) from a query function
   for (filter in names(filters)) {
@@ -104,7 +106,15 @@
   # remove blanks
   id <- gsub("\\s", "", id)
   
-  if (database == "Reactome") {
+  if (is.null(database) || !database %in% c("Reactome", "PubMed")) { 
+    # other non-Reactome ids
+    if (grepl("^[0-9]+$", id)) {
+      term <- paste0('.identifier = ', id)
+    } else {
+      # add quotes
+      term <- paste0('.identifier = "', id, '"')
+    }
+  } else if (database == "Reactome") {
     id <- toupper(id)
     if (grepl("^R-[A-Z]{3}-", id)) {
       term <- paste0('.stId = "', id, '"')
@@ -115,15 +125,7 @@
     }
   } else if (database == "PubMed") {
     term <- paste0('.pubMedIdentifier = ', id)
-  } else { 
-    # other non-Reactome ids
-    if (grepl("^[0-9]+$", id)) {
-      term <- paste0('.identifier = ', id)
-    } else {
-      # add quotes
-      term <- paste0('.identifier = "', id, '"')
-    }
-  }
+  } 
   term
 }
 

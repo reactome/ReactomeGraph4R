@@ -134,7 +134,7 @@
     stop("Must specify either 'id' or 'displayName'", call.=FALSE)
   }
 
-  if (database != "Reactome") {
+  if (is.null(database) || database != "Reactome") {
     # remove species filter for an external id
     species <- NULL
     with(parent.frame(), {species <- NULL})
