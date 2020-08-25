@@ -26,5 +26,9 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    stringr,
+    networkD3,
+    visNetwork,
+    wesanderson
 VignetteBuilder: knitr
