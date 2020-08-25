@@ -48,6 +48,9 @@
     } else if (filter == "speciesName") {
       # automatically change different forms of species names into 'displayName'
       add <- paste0(node, '.speciesName = "', .matchSpecies(filters[[filter]], "displayName"), '"')
+    } else if (filter == "schemaClass") {
+      # only for function matchObject() for now 
+      add <- paste0('"', filters[[filter]], '"', ' IN LABELS(', node, ')')
     } else {
       # add dquotes for those include alphabet
       tmp <- ifelse(grepl("^[0-9]+$", filters[[filter]]), filters[[filter]], paste0('"', filters[[filter]], '"'))

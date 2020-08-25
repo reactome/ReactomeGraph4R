@@ -125,8 +125,10 @@
 
 # turn list to data frame
 .rbindlist_to_df <- function(list) {
-  sublist.len <- sapply(list, length)
-  if (length(unique(sublist.len)) == 1) { # all lengths of sublists are same
+  # check if names of sublist are all the same
+  same.header <- all(sapply(list, function(x) identical(names(x), names(list[[1]])))) # list[[1]] as ref
+  
+  if (same.header) { 
     as.data.frame(data.table::rbindlist(list))
   } else {
     as.data.frame(data.table::rbindlist(list, fill = TRUE))
