@@ -16,11 +16,11 @@ vignette: >
 ---
 
 
-Pathways, reactions, and biological entities in Reactome knowledge are systematically represented as an ordered network of molecular reactions. Graph database technology is an effective tool for modeling highly connected data, hence Reactome database is imported in [Neo4j](https://neo4j.com/) to create one large interconnected graph. Instances are represented as nodes and relationships between nodes as edges.
+Pathways, reactions, and biological entities in Reactome knowledge are systematically represented as an ordered network of molecular reactions. Graph database technology is an effective tool for modeling highly connected data, hence Reactome database is imported in [Neo4j](https://neo4j.com/) to create one large interconnected graph. Instances are represented as _nodes_ and relationships between nodes as _edges_.
 
 The [`reactome.graphdb4r`](https://github.com/reactome/reactome.graphdb4r) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`reactome4r`](https://github.com/reactome/reactome4r) for querying **specific bits of information** to the Reactome Database through RESTful APIs in Content Service.
 
-With `reactome.graphdb4r`, you are able to fetch the interconnected data easily in R without the prerequisite of Neo4j's graph query language Cypher. This package is built on the Neo4j driver [`neo4r`](https://github.com/neo4j-rstats/neo4r), thus returned data are mainly same as those called by `neo4r` but with a little modifications, and are in these two formats:
+With `reactome.graphdb4r`, you are able to fetch the interconnected data easily using R without the prerequisite of Neo4j's graph query language Cypher. This package is built on the Neo4j driver [`neo4r`](https://github.com/neo4j-rstats/neo4r), thus returned data are mainly same as those called by `neo4r` but with a little modifications, and are in these two formats:
 
 - "row": a list of results in dataframes
 - "graph": a graph object with `nodes` and `relationships` information
@@ -44,7 +44,7 @@ library(reactome.graphdb4r)
 
 ## Basic query
 
-The function `matchObject` allows you to fetch Reactome objects using:
+The basic function `matchObject` allows you to fetch Reactome objects using:
 
 - `id`: Reactome or non-Reactome identifier 
 - `displayName`: display name of an object 
@@ -57,7 +57,7 @@ Note that this function only returns "row" data.
 
 ### Fetch by id
 
-The "id" input can be either non-Reactome or Reactome identifiers. If you use a non-Reactome id, remember that you _must_ specify `databaseName` as well since the default one is "Reactome". For example, to get the Reactome instance associated with the circadian rhythmic gene _PER2_:
+The "id" input can be either non-Reactome or Reactome identifiers. If you use a non-Reactome id, remember that you _must_ also specify `databaseName` since the default one is "Reactome". For example, to get the Reactome instance associated with the circadian rhythmic gene _PER2_:
 
 ```{r basic-id-1}
 # Retrieve the object of PER2 gene
@@ -83,7 +83,7 @@ matchObject(displayName = "SUMO1:TOP1 [nucleoplasm]", species = "C. elegans")
 When retrieving instances belong to one schema class, it's better specify the argument `limit` as well for restricting the number of returned instances. All available schema classes see Reactome [Data Schema](https://reactome.org/content/schema). For instance, to get 5 "EntitySets" in human and then return their display names and stId only:
 
 ```{r basic-class}
-# Get 5 instance in Class EntitySet
+# Get 5 instance in Class EntitySet and return displayName & stId
 entity.set <- matchObject(schemaClass = "EntitySet", species = "human",
                           returnAttribute = c("displayName", "stId"), limit = 5)
 entity.set[["databaseObject"]] # show as dataframe
@@ -100,7 +100,7 @@ matchObject(property = list(isChimeric = TRUE, isInDisease = TRUE), limit = 10)[
 
 ### Fetch by relationship
 
-The actual Cypher query for this command is `MATCH (n1)-[r:relationship]->(n2) RETURN n1,n2`, therefore `n1` and `n2` dataframes in the returned list have the same number of rows, and every two rows with the same index are connected with the given relationship.
+The actual Cypher query for this command is `MATCH (n1)-[r:relationship]->(n2) RETURN n1,n2`, therefore the `n1` and `n2` dataframes in the returned list have the same number of rows, and every two rows with the same index are connected with the given relationship.
 
 ```{r basic-rel}
 # Get nodes connected with 'hasComponent'
@@ -115,7 +115,7 @@ These following functions in the __MATCH__ family provide several commonly used 
 
 ### Hierarchy data 
 
-Reactome data are organized in a hierarchical way: `Pathway --> Reaction --> PhysicalEntity`, or sometimes it might be `Pathway --> Reaction --> PhysicalEntity --> ReferenceEntity` where the PhysicalEntity has links to external database objects. You could retrieve the hierarchical data of a given Event (Pathway or Reaction) or Entity (PhysicalEntity or ReferenceEntity) using `matchHierarchy`. In this example, we'll take a look at a RNA sequence (PhysicalEntity) "POU5F1 mRNA [cytosol]" with stable identifier "R-HSA-500358":
+Reactome data are organized in a hierarchical way: `Pathway --> Reaction --> PhysicalEntity`, or sometimes it might be `Pathway --> Reaction --> PhysicalEntity --> ReferenceEntity` where the PhysicalEntity has links to external database objects. You could retrieve the hierarchical data of a given __Event__ (Pathway or Reaction) or __Entity__ (PhysicalEntity or ReferenceEntity) using `matchHierarchy`. In this example, we'll take a look at a RNA sequence (PhysicalEntity) "POU5F1 mRNA [cytosol]" with stable identifier "R-HSA-500358":
 
 ```{r hierarchy}
 # Get hierarchy data of R-HSA-500358
@@ -133,7 +133,7 @@ pou5f1.hierarchy$relationships[,c(2,4,5,7,8)]
 
 ### Reactions in associated Pathway
 
-This method could find all ReactionLikeEvents (RLEs) connected with a given Pathway by the relationship "hasEvent". Additionally, the input can be a RLE, the result would be Pathway(s) linked via "hasEvent" together with other RLEs linked with the Pathways(s). Here we focus on a RLE "OAS1 oligomerizes" with identifier "R-HSA-8983688".
+This method could find all __ReactionLikeEvents__ (RLEs) connected with a given Pathway by the relationship "hasEvent". Additionally, the input can be a RLE, the result would be Pathway(s) linked via "hasEvent" together with other RLEs linked with the Pathways(s). Here we focus on a RLE "OAS1 oligomerizes" with identifier "R-HSA-8983688".
 
 ```{r r-in-p}
 # Find Reactions connected with R-HSA-8983688
@@ -147,15 +147,15 @@ rle$reactionLikeEvent
 rle$pathway
 ```
 
-`otherReactionLikeEvent` are RLEs connected with Pathway "OAS antiviral response".
+`otherReactionLikeEvent` are RLEs other than "OAS1 oligomerizes" connected with Pathway "OAS antiviral response".
 
 ```{r r-in-p-2}
 # Show displayNames of other RLEs
 rle$otherReactionLikeEvent[["displayName"]]
 ```
 
-These Event context can actually be visualized in R using the `exportImage` function from the `reactome4r` package! And it looks the same as that in [Pathway Browser](https://reactome.org/PathwayBrowser/#/R-HSA-8983711&PATH=R-HSA-168256,R-HSA-1280215,R-HSA-913531,R-HSA-1169410). 
-To get the pathway diagram of Pathway "OAS antiviral response" (stId: R-HSA-8983711), and highlight the RLE (stId: R-HSA-8983688) that we specified:
+The contect of these Events can actually be visualized in R using the `exportImage` function from the `reactome4r` package! And it looks the same as that in [Pathway Browser](https://reactome.org/PathwayBrowser/#/R-HSA-8983711&PATH=R-HSA-168256,R-HSA-1280215,R-HSA-913531,R-HSA-1169410). 
+To get the pathway diagram of Pathway "OAS antiviral response" (stId: R-HSA-8983711) that we just retrieved, and highlight the RLE (stId: R-HSA-8983688) that we specified:
 
 ```{r export-img}
 library(reactome4r)
@@ -179,7 +179,7 @@ str(rle.context, max.level = 1)
 
 ### Referrals
 
-Usually we query data in a way like parent to child `(parent) --> (child)`, where we only know information about the parent. But with the Graph Database, we are able to search in a reverse direction that is child to parent `(parent) <-- (child)` with child's information only. This "child-to-parent" relationship is called __Referral__. You could carry out the referral fetching by `matchReferrals` that supports Classes "Event", "PhysicalEntity", "Regulation", "CatalystActivity", "ReferenceEntity", "Interaction", "AbstractModifiedResidue" for now. Depth related arguments could also be specified here. More details sees `?matchReferrals`.
+Usually we query data in a way like parent to child `(parent) --> (child)`, where we only know information about the parent. But with the Graph Database, we are able to search in a reverse direction that is child to parent `(parent) <-- (child)` with child's information only. This "child-to-parent" relationship is called __Referral__. You could carry out the referral fetching by `matchReferrals` that supports Classes "Event", "PhysicalEntity", "Regulation", "CatalystActivity", "ReferenceEntity", "Interaction", "AbstractModifiedResidue". Depth related arguments could also be specified here. More details sees `?matchReferrals`.
 
 We would look at a Regulation "Negative gene expression regulation by 'EGR2 [nucleoplasm]" with dbId "6810147":
 
@@ -187,12 +187,12 @@ We would look at a Regulation "Negative gene expression regulation by 'EGR2 [nuc
 # Find referrals of the given Regulation
 matchReferrals(id = 6810147, type = "row")
 ```
-Note that the dbId of endNode (`endNode.dbId` in `$relationships`) is exactly the dbId we just specified.
+The dbId of _endNode_ (`endNode.dbId` in `$relationships`) is exactly the dbId we just specified.
 
 
 ### Interactors
 
-Interactions of a PhysicalEntity (PE) could be retrieved by `matchInteractors`. This method first finds the ReferenceEntity matched with the PE, then get the Interactions via "interactor" relationship. For example, to get interactions of "FANCM [nucleoplasm]" with stable id "R-HSA-419535":
+Interactions of a PhysicalEntity (PE) could be retrieved by `matchInteractors`. This method begins with finding the ReferenceEntity matched with the PE, then get the Interactions having "interactor" relationship with the ReferenceEntity. For example, to get interactions of "FANCM [nucleoplasm]" with stable id "R-HSA-419535":
 
 ```{r interactor}
 # Retrieve interaction data of the given PE
@@ -267,8 +267,7 @@ We will try the [`visNetwork`](https://datastorm-open.github.io/visNetwork/) pac
 graph <- matchHierarchy(displayName = "UniProt:P33992 MCM5", databaseName = "UniProt", type = "graph")
 relationships <- graph[["relationships"]]
 nodes <- graph[["nodes"]]
-# unnest the 'properties' column of lists
-nodes <- unnestListCol(df = nodes, column = "properties")
+nodes <- unnestListCol(df = nodes, column = "properties") # unnest the 'properties' column of lists
 
 head(nodes); head(relationships)
 
