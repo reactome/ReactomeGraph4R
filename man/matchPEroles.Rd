@@ -21,10 +21,16 @@ matchPEroles(
 \item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
 }
 \value{
-Reactions related to the given Pathway/Reaction
+information of the given PhysicalEntity and its role(s)
 }
 \description{
-MATCH roles of PhysicalEntity
+This method retrieve the role(s) of a given PhysicalEntity including:
+\itemize{
+\item Input
+\item Output
+\item Regulator
+\item Catalyst
+}
 }
 \examples{
 matchPEroles(pe.id = "R-HSA-8944354", type = "graph")

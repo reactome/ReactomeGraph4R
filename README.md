@@ -68,8 +68,8 @@ Then connect to local Neo4j server by answering two questions:
 
 Results are in these two formats:
 
-"row": a list of results in dataframes (default)
-"graph": a graph object with nodes and relationships information
+- "row": a list of results in dataframes (default)
+- "graph": a graph object with nodes and relationships information
 
 ### Row data
 

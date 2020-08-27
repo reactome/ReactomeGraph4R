@@ -24,7 +24,8 @@ matchDiseases(
 Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
 }
 \description{
-MATCH diseases of PhysicalEntity/Reaction/Pathway
+Find Diseases related to a PhysicalEntity or an Event or
+get PhysicalEntities/Events associated with a Disease in reverse
 }
 \examples{
 matchDiseases(displayName="neuropathy", species="M. musculus", type="row")

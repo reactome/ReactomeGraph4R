@@ -3,8 +3,11 @@
 
 #' Basic query for database object 
 #' 
-#' Fetch instance by Reactome dbId/stId/displayName/schemaClass 
-#' or non-Reactome identifier/displayName
+#' Fetch instance by:
+#' - Reactome dbId/stId/displayName/schemaClass
+#' - non-Reactome identifier/displayName
+#' - property
+#' - relationship
 #' 
 #' @param id Reactome stId or dbId, or non-Reactome identifier
 #' @param displayName displayName of a database object
@@ -15,7 +18,7 @@
 #' @param relationship a relationships type
 #' @param limit the limit of returned objects
 #' @param databaseName database name
-#' @return Reactome database object matched with the given conditions
+#' @return Reactome database object that meets the given conditions
 #' @examples
 #' # fetch instance by class
 #' all.species <- matchObject(schemaClass = "Species")
@@ -111,6 +114,8 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
 
 #' MATCH the preceding/following Events
 #' 
+#' To get Events connected with "precedingEvent" relationship
+#' 
 #' @param event.id a stable or db id of an Event
 #' @param event.displayName displayName of an Event
 #' @param species name or taxon id or dbId or abbreviation of specified species
@@ -153,7 +158,7 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
 
 #' MATCH hierarchy
 #' 
-#' Retrieve hierarchical data: Pathway-Reaction-Entity
+#' Retrieve hierarchical data in a manner of Pathway-Reaction-Entity
 #' 
 #' @param id stId or dbId of Event/PhysicalEntity; or id of an external database
 #' @param displayName displayName of Event/PhysicalEntity/ReferenceEntity
@@ -248,12 +253,14 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type
 
 #' MATCH Reactions in associated Pathway
 #' 
+#' This method could find all Reactions connected with a given Pathway by the relationship "hasEvent". 
+#' Also, the input can be a Reaction, the result would then be Pathway(s) linked via “hasEvent” together with other Reactions linked with the Pathways(s).
 #' 
 #' @param event.id stId or dbId of an Event
 #' @param event.displayName displayName of an Event
 #' @param species name or taxon id or dbId or abbreviation of the specified species
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
-#' @return Reactions related to the given Pathway/Reaction
+#' @return Reactions connected to the given Pathway/Reaction via "hasEvent" relationships
 #' @examples
 #' matchReactionsInPathway("R-HSA-1369062", type="graph")
 #' matchReactionsInPathway("R-HSA-5682285", type="row")
@@ -367,12 +374,17 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
 
 #' MATCH roles of PhysicalEntity
 #' 
+#' This method retrieve the role(s) of a given PhysicalEntity including:
+#' - Input
+#' - Output
+#' - Regulator
+#' - Catalyst
 #' 
 #' @param pe.id stId or dbId of a PhysicalEntity
 #' @param pe.displayName displayName of a PhysicalEntity
 #' @param species name or taxon id or dbId or abbreviation of the specified species
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
-#' @return Reactions related to the given Pathway/Reaction
+#' @return information of the given PhysicalEntity and its role(s)
 #' @examples
 #' matchPEroles(pe.id = "R-HSA-8944354", type = "graph")
 #' matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", species = "pig", type = "row")
@@ -403,6 +415,8 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL, species=NULL, type=c("
 
 #' MATCH diseases of PhysicalEntity/Reaction/Pathway
 #' 
+#' Find Diseases related to a PhysicalEntity or an Event or 
+#' get PhysicalEntities/Events associated with a Disease in reverse
 #' 
 #' @param id stId or dbId of a PhysicalEntity/Event/Disease
 #' @param displayName displayName of a PhysicalEntity/Event/Disease
@@ -459,10 +473,12 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
 
 #' MATCH objects related to a paper
 #' 
+#' Fetch Reactome instances related to a paper by its PubMed id or title
+#' 
 #' @param pubmed.id PubMed identifier of a paper
 #' @param displayName paper title
 #' @param type return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})
-#' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
+#' @return Reactome instances associated with a paper
 #' @examples
 #' # fetch Reactome instances by paper title
 #' matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance", type="row")

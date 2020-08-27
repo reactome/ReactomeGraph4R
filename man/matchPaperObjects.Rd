@@ -18,10 +18,10 @@ matchPaperObjects(
 \item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
 }
 \value{
-Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
+Reactome instances associated with a paper
 }
 \description{
-MATCH objects related to a paper
+Fetch Reactome instances related to a paper by its PubMed id or title
 }
 \examples{
 # fetch Reactome instances by paper title

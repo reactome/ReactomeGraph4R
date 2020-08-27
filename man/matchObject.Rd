@@ -36,11 +36,16 @@ matchObject(
 \item{databaseName}{database name}
 }
 \value{
-Reactome database object matched with the given conditions
+Reactome database object that meets the given conditions
 }
 \description{
-Fetch instance by Reactome dbId/stId/displayName/schemaClass
-or non-Reactome identifier/displayName
+Fetch instance by:
+\itemize{
+\item Reactome dbId/stId/displayName/schemaClass
+\item non-Reactome identifier/displayName
+\item property
+\item relationship
+}
 }
 \examples{
 # fetch instance by class

@@ -41,7 +41,7 @@ hierarchical instances of the given id and databaseName
 interactions of a given PhysicalEntity
 }
 \description{
-Retrieve hierarchical data: Pathway-Reaction-Entity
+Retrieve hierarchical data in a manner of Pathway-Reaction-Entity
 
 Retrieve interactions of a given PhysicalEntity
 }
