@@ -78,29 +78,29 @@ Using Reactome id:
 ``` r
 > matchPrecedingAndFollowingEvents(event.id = "R-HSA-8983688", type = "row")
 
-Retrieving immediately connected instances... Specify depth-related arguments for more depths
-$precedingEvent
-  schemaClass  speciesName isInDisease releaseDate            displayName     stIdVersion    dbId                   name isChimeric          stId
-1    Reaction Homo sapiens       FALSE  2018-09-12 OAS1 binds viral dsRNA R-HSA-8983671.1 8983671 OAS1 binds viral dsRNA      FALSE R-HSA-8983671
-  category isInferred
-1  binding      FALSE
-
-$event
-  schemaClass  speciesName isInDisease releaseDate       displayName     stIdVersion    dbId              name isChimeric          stId category
-1    Reaction Homo sapiens       FALSE  2018-09-12 OAS1 oligomerizes R-HSA-8983688.1 8983688 OAS1 oligomerizes      FALSE R-HSA-8983688  binding
-  isInferred
-1      FALSE
-
-$followingEvent
-     schemaClass  speciesName isInDisease releaseDate                   displayName     stIdVersion    dbId                          name isChimeric
-1 Polymerisation Homo sapiens       FALSE  2018-09-12 OAS1 produces oligoadenylates R-HSA-8983680.1 8983680 OAS1 produces oligoadenylates      FALSE
-           stId   category isInferred
-1 R-HSA-8983680 transition      FALSE
-
-$relationships
-  neo4jId           type startNode.neo4jId startNode.dbId startNode.schemaClass endNode.neo4jId endNode.dbId endNode.schemaClass properties
-1 7685968 precedingEvent           1808570        8983680        Polymerisation         1808457      8983688            Reaction       1, 0
-2 7685746 precedingEvent           1808457        8983688              Reaction         1808512      8983671            Reaction       1, 0
+# Retrieving immediately connected instances... Specify depth-related arguments for more depths
+# $precedingEvent
+#   schemaClass  speciesName isInDisease releaseDate            displayName     stIdVersion    dbId                   name isChimeric          stId
+# 1    Reaction Homo sapiens       FALSE  2018-09-12 OAS1 binds viral dsRNA R-HSA-8983671.1 8983671 OAS1 binds viral dsRNA      FALSE R-HSA-8983671
+#   category isInferred
+# 1  binding      FALSE
+# 
+# $event
+#   schemaClass  speciesName isInDisease releaseDate       displayName     stIdVersion    dbId              name isChimeric          stId category
+# 1    Reaction Homo sapiens       FALSE  2018-09-12 OAS1 oligomerizes R-HSA-8983688.1 8983688 OAS1 oligomerizes      FALSE R-HSA-8983688  binding
+#   isInferred
+# 1      FALSE
+# 
+# $followingEvent
+#      schemaClass  speciesName isInDisease releaseDate                   displayName     stIdVersion    dbId                          name isChimeric
+# 1 Polymerisation Homo sapiens       FALSE  2018-09-12 OAS1 produces oligoadenylates R-HSA-8983680.1 8983680 OAS1 produces oligoadenylates      FALSE
+#            stId   category isInferred
+# 1 R-HSA-8983680 transition      FALSE
+# 
+# $relationships
+#   neo4jId           type startNode.neo4jId startNode.dbId startNode.schemaClass endNode.neo4jId endNode.dbId endNode.schemaClass properties
+# 1 7685968 precedingEvent           1808570        8983680        Polymerisation         1808457      8983688            Reaction       1, 0
+# 2 7685746 precedingEvent           1808457        8983688              Reaction         1808512      8983671            Reaction       1, 0
 ```
 
 
@@ -108,12 +108,13 @@ Using non-Reactome id:
 ``` r
 > row <- matchHierarchy(id = "P33992", databaseName = "UniProt", type = "row")
 > str(row, max.level = 1)
-List of 5
- $ referenceEntity:'data.frame':	1 obs. of  17 variables:
- $ physicalEntity :'data.frame':	1 obs. of  12 variables:
- $ event          :'data.frame':	1 obs. of  12 variables:
- $ upperevent     :'data.frame':	6 obs. of  18 variables:
- $ relationships  :'data.frame':	8 obs. of  9 variables:
+
+# List of 5
+#  $ referenceEntity:'data.frame':	1 obs. of  17 variables:
+#  $ physicalEntity :'data.frame':	1 obs. of  12 variables:
+#  $ event          :'data.frame':	1 obs. of  12 variables:
+#  $ upperevent     :'data.frame':	6 obs. of  18 variables:
+#  $ relationships  :'data.frame':	8 obs. of  9 variables:
 ```
 
 `row` looks like the returned result of the last command.
@@ -125,17 +126,17 @@ Every graph result contains two dataframes - "nodes" and "relationships".
 > graph <- matchHierarchy(id = "P33992", databaseName = "UniProt", type = "graph")
 > str(graph, max.level = 2)
 
-List of 2
- $ nodes        :'data.frame':	9 obs. of  3 variables:
-  ..$ id        : chr [1:9] "422883" "90375" "422833" "90376" ...
-  ..$ label     :List of 9
-  ..$ properties:List of 9
- $ relationships:'data.frame':	8 obs. of  5 variables:
-  ..$ id        : chr [1:8] "1700863" "1701159" "360682" "1813950" ...
-  ..$ type      : chr [1:8] "output" "hasEvent" "referenceEntity" "hasEvent" ...
-  ..$ startNode : chr [1:8] "422833" "422883" "90375" "449402" ...
-  ..$ endNode   : chr [1:8] "90375" "422833" "90376" "422883" ...
-  ..$ properties:List of 8
+# List of 2
+#  $ nodes        :'data.frame':	9 obs. of  3 variables:
+#   ..$ id        : chr [1:9] "422883" "90375" "422833" "90376" ...
+#   ..$ label     :List of 9
+#   ..$ properties:List of 9
+#  $ relationships:'data.frame':	8 obs. of  5 variables:
+#   ..$ id        : chr [1:8] "1700863" "1701159" "360682" "1813950" ...
+#   ..$ type      : chr [1:8] "output" "hasEvent" "referenceEntity" "hasEvent" ...
+#   ..$ startNode : chr [1:8] "422833" "422883" "90375" "449402" ...
+#   ..$ endNode   : chr [1:8] "90375" "422833" "90376" "422883" ...
+#   ..$ properties:List of 8
 ```
 
 `graph` could then be converted to objects in network visualization packages. The following is an example to get a `visNetwork` object from `graph`.
