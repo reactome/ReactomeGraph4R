@@ -28,7 +28,7 @@
     # get database name
     db <- filters[["databaseName"]]
     
-    # can't fetch data if adding Reactome as databaseName so just remove it
+    # can't fetch data if adding Reactome/PubMed as databaseName so just remove it
     if (any(filters[["databaseName"]] %in% c("Reactome", "PubMed"))) {
       filters <- filters[names(filters) != "databaseName"]
     }

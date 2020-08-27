@@ -65,10 +65,10 @@
   
   # remove repeated rows
   if (unique) {
-    res <- lapply(res, function(x) {
-      x <- unique(x)
-      rownames(x) <- 1:nrow(x) # renew row names
-      x
+    res <- lapply(res, function(sublist) {
+      sublist <- unique(sublist)
+      rownames(sublist) <- 1:nrow(sublist) # renew row names
+      sublist
     })
   }
 
