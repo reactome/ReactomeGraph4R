@@ -10,14 +10,13 @@
 1. Get Docker: https://docs.docker.com/get-docker/
 2. Download and install Reactome Graph Database:
 ```
-mkdir $(pwd)/neo4j/data $(pwd)/neo4j/data/databases
-cd $(pwd)/neo4j/data/databases
+mkdir -p $(pwd)/neo4j/data/databases
 # download the file
-wget https://reactome.org/download/current/reactome.graphdb.tgz
+wget https://reactome.org/download/current/reactome.graphdb.tgz -P $(pwd)/neo4j/data/databases
 # extract
-tar -zxvf reactome.graphdb.tgz
+tar -zxvf $(pwd)/neo4j/data/databases/reactome.graphdb.tgz -C $(pwd)/neo4j/data/databases
 # run on docker
-docker run --name reactome_graph_db -p 7687:7687 -p 7474:7474 -e NEO4J_dbms_allow__upgrade=true -e NEO4J_AUTH=none -v "$target_data_dir:/data" neo4j:3.5.19
+docker run --name reactome_graph_db -p 7687:7687 -p 7474:7474 -e NEO4J_dbms_allow__upgrade=true -e NEO4J_AUTH=none -v $(pwd)/neo4j/data:/data neo4j:3.5.19
 ```
 
 3. Lauch Neo4j through browser:
