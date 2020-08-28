@@ -240,7 +240,7 @@ matchPaperObjects(displayName = "Aggresomes: a cellular response to misfolded pr
 
 ## Network graph
 
-__Graph__ is definitely a big advantage of a graph database. Fortunately, R has developed into a powerful tool for network analysis. There are a number of R packages targeted network analysis and visualization, therefore we are able to get a graph just like the one in Neo4j server, and even to set more visualization options! 
+The ability to view network graphs is definitely a big advantage of a graph database. Fortunately, R has developed into a powerful tool for network analysis. There are a number of R packages targeted network analysis and visualization, therefore we are able to get a graph just like the one in the Neo4j server, and even to set more visualization options! 
 
 Don't forget that results can also be returned in the "graph" format, which are used to create the network visualization in R! This comprehensive tutorial - [_Network visualization with R_](https://kateto.net/network-visualization) (Ognyanova, K., 2019) - walks through each step on the creation of network graphs in R. 
 
