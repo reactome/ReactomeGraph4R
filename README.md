@@ -1,7 +1,7 @@
-# R interface for Reactome Graph Database
+# ReactomeGraph4R: an R interface for Reactome Graph Database
 
 <!-- badges: start -->
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#>active)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
 
 
@@ -37,11 +37,11 @@ You could also try to explore the Graph Database and query Reactome data using C
 
 Install from GitHub:
 ```
-devtools::install_github("reactome/reactome.graphdb4r")
+devtools::install_github("reactome/ReactomeGraph4R")
 ```
 or from CRAN:
 ```
-install.packages("reactome/reactome.graphdb4r")
+install.packages("reactome/ReactomeGraph4R")
 ```
 
 👉 Note that package [`neo4r`](https://github.com/neo4j-rstats/neo4r) __(>= 0.1.3)__ is required, install the lastest one from GitHub:
@@ -58,7 +58,7 @@ Read complementary vignette at ___
 
 Load the package
 ```
-library(reactome.graphdb4r)
+library(ReactomeGraph4R)
 ```
 Then connect to local Neo4j server by answering two questions:
 
@@ -186,11 +186,11 @@ visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", width =
 
 <img src="vignettes/figs/readme_network.png" width="100%" />
 
-Find the interactive one in vignette!
+Find the interactive one in the vignette!
 
 
 ## Feedback
 
-We'd love to hear your feedback! Feel free to open an [issue](https://github.com/reactome/reactome4r/issues) on GitHub.
+We'd love to hear your feedback! Feel free to open an [issue](https://github.com/reactome/ReactomeGraph4R/issues) on GitHub.
 
 

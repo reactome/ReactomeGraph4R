@@ -2,14 +2,14 @@
 % Please edit documentation in R/queries.R
 \name{matchObject}
 \alias{matchObject}
-\title{Basic query for database object}
+\title{Basic query for database objects}
 \usage{
 matchObject(
   id = NULL,
   displayName = NULL,
   schemaClass = NULL,
   species = NULL,
-  returnAttribute = NULL,
+  returnedAttributes = NULL,
   property = NULL,
   relationship = NULL,
   limit = NULL,
@@ -25,7 +25,7 @@ matchObject(
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
-\item{returnAttribute}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
+\item{returnedAttributes}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
 
 \item{property}{a list of property keys and values}
 
@@ -52,7 +52,7 @@ Fetch instance by:
 all.species <- matchObject(schemaClass = "Species")
 
 # fetch instance by name
-matchObject(displayName = "RCOR1 [nucleoplasm]", returnAttribute=c("stId", "speciesName"))
+matchObject(displayName = "RCOR1 [nucleoplasm]", returnedAttributes=c("stId", "speciesName"))
 
 # fetch instance by id
 ## Reactome id
@@ -66,7 +66,7 @@ matchObject(relationship="inferredTo", limit=10)
 # fetch instances by property
 property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
 matchObject(property = property.list, 
-            returnAttribute = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+            returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
             limit=20)
 
 }

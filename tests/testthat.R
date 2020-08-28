@@ -1,4 +1,4 @@
 library(testthat)
-library(reactome.graphdb4r)
+library(ReactomeGraph4R)
 
-test_check("reactome.graphdb4r")
+test_check("ReactomeGraph4R")

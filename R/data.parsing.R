@@ -149,8 +149,7 @@
   for (node in c("startNode", "endNode")) {
     for (slot in c("dbId", "schemaClass")) {
       col.name <- paste0(node, ".", slot)
-      relationships[, col.name] <- sapply(as.character(relationships[, node]), function(x) 
-                                                    nodes[nodes$id == x, ]$properties[[1]][[slot]])               
+      relationships[, col.name] <- sapply(as.character(relationships[, node]), function(x) nodes[nodes$id == x, ]$properties[[1]][[slot]])               
     }
   }
   

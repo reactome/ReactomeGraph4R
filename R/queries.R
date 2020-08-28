@@ -1,7 +1,7 @@
 # easily access graph data without Cypher
 
 
-#' Basic query for database object 
+#' Basic query for database objects
 #' 
 #' Fetch instance by:
 #' - Reactome dbId/stId/displayName/schemaClass
@@ -13,7 +13,7 @@
 #' @param displayName displayName of a database object
 #' @param schemaClass schema class of a database object
 #' @param species name or taxon id or dbId or abbreviation of specified species
-#' @param returnAttribute specific attribute(s) to be returned. If set to `NULL`, all attributes returned
+#' @param returnedAttributes specific attribute(s) to be returned. If set to `NULL`, all attributes returned
 #' @param property a list of property keys and values
 #' @param relationship a relationships type
 #' @param limit the limit of returned objects
@@ -24,7 +24,7 @@
 #' all.species <- matchObject(schemaClass = "Species")
 #' 
 #' # fetch instance by name
-#' matchObject(displayName = "RCOR1 [nucleoplasm]", returnAttribute=c("stId", "speciesName"))
+#' matchObject(displayName = "RCOR1 [nucleoplasm]", returnedAttributes=c("stId", "speciesName"))
 #' 
 #' # fetch instance by id
 #' ## Reactome id
@@ -38,14 +38,14 @@
 #' # fetch instances by property
 #' property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
 #' matchObject(property = property.list, 
-#'             returnAttribute = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+#'             returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
 #'             limit=20)
 #' 
 #' @rdname matchObject
 #' @family match 
 #' @export 
 
-matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, returnAttribute=NULL, 
+matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NULL, returnedAttributes=NULL, 
                         property=NULL, relationship=NULL, limit=NULL, databaseName="Reactome") {
   # check inputs
   type <- "row" # return row data only
@@ -53,14 +53,14 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
   
   # check attributes in the db or not
   # NULL also returns TRUE
-  .checkInfo(returnAttribute, "property")
+  .checkInfo(returnedAttributes, "property")
   
   if (!is.null(relationship)) {
     # retrieve data based on relationship
     
     message("Note that other arguments except 'limit' should be NULL if you specify 'relationship'")
     message("Turn them into NULL")
-    id <- displayName <- schemaClass <- NULL -> species -> returnAttribute -> property
+    id <- displayName <- schemaClass <- NULL -> species -> returnedAttributes -> property
     
     # check if it's a correct relationship name
     .checkInfo(relationship, "relationship")
@@ -88,10 +88,10 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
       c.WHERE <- ifelse(grepl("=", c.WHERE), paste0(c.WHERE, " AND ", property.WHERE), paste0(c.WHERE, property.WHERE))
     }
 
-    if (is.null(returnAttribute)) {
+    if (is.null(returnedAttributes)) {
       nodes4return <- "dbo" # return all attributes
     } else {
-      nodes4return <- paste0("dbo.", returnAttribute)
+      nodes4return <- paste0("dbo.", returnedAttributes)
     }
     c.RETURN <- .RETURN(nodes4return)
     return.names <- .goodName(nodes4return)
@@ -449,7 +449,7 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL, type=c("row",
     
     # check if the instance is in Disease or not
     isInDisease <- matchObject(id=id, displayName=displayName, 
-                               returnAttribute="isInDisease", species=species)
+                               returnedAttributes="isInDisease", species=species)
     isInDisease <- isInDisease[["databaseObject"]][["isInDisease"]]
     
     if (!isInDisease) {

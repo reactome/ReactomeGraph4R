@@ -1,5 +1,5 @@
 ---
-title: "R Interface for Reactome Graph Database"
+title: "ReactomeGraph4R: an R Interface for Reactome Graph Database"
 author: Chi-Lam Poon
 date: "`r format(Sys.time(), '%m/%d/%Y')`"
 output: 
@@ -16,11 +16,11 @@ vignette: >
 ---
 
 
-Pathways, reactions, and biological entities in Reactome knowledge are systematically represented as an ordered network of molecular reactions. Graph database technology is an effective tool for modeling highly connected data, hence Reactome database is imported in [Neo4j](https://neo4j.com/) to create one large interconnected graph. Instances are represented as _nodes_ and relationships between nodes as _edges_.
+Pathways, reactions, and biological entities in Reactome knowledge are systematically represented as an ordered network of molecular reactions. Graph database technology is an effective tool for modeling highly connected data, hence Reactome's relational database is imported in [Neo4j](https://neo4j.com/) to create one large interconnected graph. Instances are represented as _nodes_ and relationships between nodes as _edges_.
 
-The [`reactome.graphdb4r`](https://github.com/reactome/reactome.graphdb4r) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`reactome4r`](https://github.com/reactome/reactome4r) for querying **specific bits of information** to the Reactome Database through RESTful APIs in Content Service.
+The [`ReactomeGraph4R`](https://github.com/reactome/ReactomeGraph4R) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`ReactomeContentService4R`](https://github.com/reactome/ReactomeContentService4R) for querying **specific bits of information** to the Reactome Database through the RESTful API in Content Service.
 
-With `reactome.graphdb4r`, you are able to fetch the interconnected data easily using R without the prerequisite of Neo4j's graph query language Cypher. This package is built on the Neo4j driver [`neo4r`](https://github.com/neo4j-rstats/neo4r), thus returned data are mainly same as those called by `neo4r` but with a little modifications, and are in these two formats:
+With `ReactomeGraph4R`, you are able to fetch the interconnected data easily using R without the prerequisite of Neo4j's graph query language Cypher. This package is built on the Neo4j driver [`neo4r`](https://github.com/neo4j-rstats/neo4r), thus returned data are mainly same as those called by `neo4r` but with a little modifications, and are in these two formats:
 
 - "row": a list of results in dataframes
 - "graph": a graph object with `nodes` and `relationships` information
@@ -28,17 +28,17 @@ With `reactome.graphdb4r`, you are able to fetch the interconnected data easily 
 
 ## Setups
 
-Follow this [instruction]() to download and setup Reactome Graph Database.
+Follow this [instruction](https://github.com/reactome/reactome.graphdb4r) to download and setup Reactome Graph Database.
 
-Then install `reactome.graphdb4r` package via CRAN:
+Then install `ReactomeGraph4R` package via CRAN:
 ```{r install, eval=FALSE}
-install.packages("reactome.graphdb4r")
+install.packages("ReactomeGraph4R")
 ```
 
 There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to login your local Neo4j database.
 
 ```{r setup}
-library(reactome.graphdb4r)
+library(ReactomeGraph4R)
 ```
 
 
@@ -52,7 +52,7 @@ The basic function `matchObject` allows you to fetch Reactome objects using:
 - `property`: attributes of Reactome objects
 - `relationship`: relationship between two nodes 
 
-Moreover, you could specify the argument `returnAttribute` for retrieving only a few attributes of the targeted object; `species` for specific species; and `limit` for the number of returned objects. 
+Moreover, you could specify the argument `returnedAttributes` for retrieving only a few attributes of the targeted object; `species` for specific species; and `limit` for the number of returned objects. 
 Note that this function only returns "row" data.
 
 ### Fetch by id
@@ -80,12 +80,12 @@ matchObject(displayName = "SUMO1:TOP1 [nucleoplasm]", species = "C. elegans")
 
 ### Fetch by class
 
-When retrieving instances belong to one schema class, it's better specify the argument `limit` as well for restricting the number of returned instances. All available schema classes see Reactome [Data Schema](https://reactome.org/content/schema). For instance, to get 5 "EntitySets" in human and then return their display names and stId only:
+When retrieving instances belonging to one schema class, it's better specify the argument `limit` as well for restricting the number of returned instances. For all available schema classes see Reactome [Data Schema](https://reactome.org/content/schema). For instance, to get 5 "EntitySets" in human and then return their display names and stId only:
 
 ```{r basic-class}
 # Get 5 instance in Class EntitySet and return displayName & stId
 entity.set <- matchObject(schemaClass = "EntitySet", species = "human",
-                          returnAttribute = c("displayName", "stId"), limit = 5)
+                          returnedAttributes = c("displayName", "stId"), limit = 5)
 entity.set[["databaseObject"]] # show as dataframe
 ```
 
@@ -115,7 +115,7 @@ These following functions in the __MATCH__ family provide several commonly used 
 
 ### Hierarchy data 
 
-Reactome data are organized in a hierarchical way: `Pathway --> Reaction --> PhysicalEntity`, or sometimes it might be `Pathway --> Reaction --> PhysicalEntity --> ReferenceEntity` where the PhysicalEntity has links to external database objects. You could retrieve the hierarchical data of a given __Event__ (Pathway or Reaction) or __Entity__ (PhysicalEntity or ReferenceEntity) using `matchHierarchy`. In this example, we'll take a look at a RNA sequence (PhysicalEntity) "POU5F1 mRNA [cytosol]" with stable identifier "R-HSA-500358":
+Reactome data are organized in a hierarchical way: `Pathway --> Reaction --> PhysicalEntity`, or sometimes it might be `Pathway --> Reaction --> PhysicalEntity --> ReferenceEntity` where the PhysicalEntity has links to external database information via the ReferenceEntity. You could retrieve the hierarchical data of a given __Event__ (Pathway or Reaction) or __Entity__ (PhysicalEntity or ReferenceEntity) using `matchHierarchy`. In this example, we'll take a look at a RNA sequence (PhysicalEntity) "POU5F1 mRNA [cytosol]" with stable identifier "R-HSA-500358":
 
 ```{r hierarchy}
 # Get hierarchy data of R-HSA-500358
@@ -133,7 +133,7 @@ pou5f1.hierarchy$relationships[,c(2,4,5,7,8)]
 
 ### Reactions in associated Pathway
 
-This method could find all __ReactionLikeEvents__ (RLEs) connected with a given Pathway by the relationship "hasEvent". Additionally, the input can be a RLE, the result would be Pathway(s) linked via "hasEvent" together with other RLEs linked with the Pathways(s). Here we focus on a RLE "OAS1 oligomerizes" with identifier "R-HSA-8983688".
+This method can find all __ReactionLikeEvents__ (RLEs) connected with a given Pathway by the relationship "hasEvent". Additionally, the input can be a RLE, the result would be Pathway(s) linked via "hasEvent" together with other RLEs linked with the Pathways(s). Here we focus on a RLE "OAS1 oligomerizes" with identifier "R-HSA-8983688".
 
 ```{r r-in-p}
 # Find Reactions connected with R-HSA-8983688
@@ -154,11 +154,11 @@ rle$pathway
 rle$otherReactionLikeEvent[["displayName"]]
 ```
 
-The contect of these Events can actually be visualized in R using the `exportImage` function from the `reactome4r` package! And it looks the same as that in [Pathway Browser](https://reactome.org/PathwayBrowser/#/R-HSA-8983711&PATH=R-HSA-168256,R-HSA-1280215,R-HSA-913531,R-HSA-1169410). 
+The contect of these Events can actually be visualized in R using the `exportImage` function from the `ReactomeContentService4R` package! And it looks the same as that in [Pathway Browser](https://reactome.org/PathwayBrowser/#/R-HSA-8983711&PATH=R-HSA-168256,R-HSA-1280215,R-HSA-913531,R-HSA-1169410). 
 To get the pathway diagram of Pathway "OAS antiviral response" (stId: R-HSA-8983711) that we just retrieved, and highlight the RLE (stId: R-HSA-8983688) that we specified:
 
 ```{r export-img}
-library(reactome4r)
+library(ReactomeContentService4R)
 
 # Export pathway diagram of "OAS antiviral response"
 exportImage(id = "R-HSA-8983711", output = "diagram", 
@@ -168,7 +168,7 @@ exportImage(id = "R-HSA-8983711", output = "diagram",
 
 ### Preceding/following Events 
 
-With the diagram shown above, we can see that the Reaction highlighted in blue is in the middle of somewhere and is immediately connected with two other RLEs. In order to know what these preceding and following Reactions are, we can use function `matchPrecedingAndFollowingEvents` to find RLEs linked via "precedingEvent". The argument `depth` is used to describe the "variable length relationships", the default value is 1 (i.e. immediately connected); or you can set `all.depth = TRUE` for retrieving the whole context. Details see `?matchPrecedingAndFollowingEvents`.
+With the diagram shown above, we can see that the Reaction highlighted in blue is in the middle of a Reaction cascade, with other RLEs immediately preceding and following it. In order to know what these preceding and following Reactions are, we can use function `matchPrecedingAndFollowingEvents` to find RLEs linked via "precedingEvent". The argument `depth` is used to describe the "variable length relationships", the default value is 1 (i.e. immediately connected); or you can set `all.depth = TRUE` for retrieving the whole context. Details see `?matchPrecedingAndFollowingEvents`.
 
 ```{r p-f-event-1}
 # Retrieve RLE context with depth = 2
@@ -179,7 +179,7 @@ str(rle.context, max.level = 1)
 
 ### Referrals
 
-Usually we query data in a way like parent to child `(parent) --> (child)`, where we only know information about the parent. But with the Graph Database, we are able to search in a reverse direction that is child to parent `(parent) <-- (child)` with child's information only. This "child-to-parent" relationship is called __Referral__. You could carry out the referral fetching by `matchReferrals` that supports Classes "Event", "PhysicalEntity", "Regulation", "CatalystActivity", "ReferenceEntity", "Interaction", "AbstractModifiedResidue". Depth related arguments could also be specified here. More details sees `?matchReferrals`.
+Usually we query data in a way like parent to child `(parent) --> (child)`, where we provide information about the parent. But with the Graph Database, we are able to search in a reverse direction that is child to parent `(parent) <-- (child)` with child's information only. This "child-to-parent" relationship is called __Referral__. You could carry out the referral fetching by `matchReferrals` that supports Classes "Event", "PhysicalEntity", "Regulation", "CatalystActivity", "ReferenceEntity", "Interaction", "AbstractModifiedResidue". Depth related arguments could also be specified here. More details sees `?matchReferrals`.
 
 We would look at a Regulation "Negative gene expression regulation by 'EGR2 [nucleoplasm]" with dbId "6810147":
 
@@ -223,7 +223,7 @@ Diseases related to a PhysicalEntity or an Event could be found using function `
 
 ```{r disease}
 # Fetch Reactome instances associated with 'neuropathy' in sheep
-matchDiseases(displayName = "neuropathy", species = "sheep", type = "row")
+matchDiseases(displayName = "neuropathy", species = "human", type = "row")
 ```
 
 
@@ -244,9 +244,11 @@ __Graph__ is definitely a big advantage of a graph database. Fortunately, R has 
 
 Don't forget that results can also be returned in the "graph" format, which are used to create the network visualization in R! This comprehensive tutorial - [_Network visualization with R_](https://kateto.net/network-visualization) (Ognyanova, K., 2019) - walks through each step on the creation of network graphs in R. 
 
-Here we will show a could of examples to generate an interactive network graph after retrieving the specific Reactome graph data. Let's say we want to visualize the hierarchical data of a ReferenceEntity "UniProt:P33992 MCM5".
+Here we will show a couple of examples to generate an interactive network graph after retrieving the specific Reactome graph data. Let's say we want to visualize the hierarchical data of a ReferenceEntity "UniProt:P33992 MCM5".
 
 First install and load the following packages.
+
+### Installing packages for visualization
 
 ```{r vis-loading}
 # install packages

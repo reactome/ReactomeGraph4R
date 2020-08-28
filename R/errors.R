@@ -6,7 +6,7 @@
   con <- getOption("con")
   
   # get the spellCheck function
-  spellCheck <- utils::getFromNamespace(".spellCheck", "reactome4r")
+  spellCheck <- utils::getFromNamespace(".spellCheck", "ReactomeContentService4R")
   
   # spell check id
   if (!is.null(input.list[["id"]])) {
