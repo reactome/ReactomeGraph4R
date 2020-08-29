@@ -2,30 +2,82 @@
 % Please edit documentation in R/queries.R
 \name{matchObject}
 \alias{matchObject}
-\title{Basic query for database object}
+\title{Basic query for database objects}
 \usage{
-matchObject(id = NULL, name = NULL, species = "human")
+matchObject(
+  id = NULL,
+  displayName = NULL,
+  schemaClass = NULL,
+  species = NULL,
+  returnedAttributes = NULL,
+  property = NULL,
+  relationship = NULL,
+  limit = NULL,
+  databaseName = "Reactome"
+)
 }
 \arguments{
-\item{id}{stId or dbId of database object}
+\item{id}{Reactome stId or dbId, or non-Reactome identifier}
 
-\item{name}{name of database object}
+\item{displayName}{displayName of a database object}
+
+\item{schemaClass}{schema class of a database object}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
+
+\item{returnedAttributes}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
+
+\item{property}{a list of property keys and values}
+
+\item{relationship}{a relationships type}
+
+\item{limit}{the limit of returned objects}
+
+\item{databaseName}{database name}
 }
 \value{
-data of the given id or name
+Reactome database object that meets the given conditions
 }
 \description{
-Fetch instance by dbId/stId/displayName
+Fetch instance by:
+\itemize{
+\item Reactome dbId/stId/displayName/schemaClass
+\item non-Reactome identifier/displayName
+\item property
+\item relationship
+}
 }
 \examples{
-matchObject(name = "RCOR1 [nucleoplasm]")
+# fetch instance by class
+all.species <- matchObject(schemaClass = "Species")
+
+# fetch instance by name
+matchObject(displayName = "RCOR1 [nucleoplasm]", returnedAttributes=c("stId", "speciesName"))
+
+# fetch instance by id
+## Reactome id
+matchObject(id = "R-HSA-9626034")
+## non-Reactome id
+matchObject(id = "P60484", databaseName = "UniProt")
+
+# fecth instances by relationship
+matchObject(relationship="inferredTo", limit=10)
+
+# fetch instances by property
+property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
+matchObject(property = property.list, 
+            returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+            limit=20)
+
 }
 \seealso{
 Other match: 
+\code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
+\code{\link{matchPEroles}()},
+\code{\link{matchPaperObjects}()},
 \code{\link{matchPrecedingAndFollowingEvents}()},
-\code{\link{matchReactionsInPathway}()}
+\code{\link{matchReactionsInPathway}()},
+\code{\link{matchReferrals}()}
 }
 \concept{match}

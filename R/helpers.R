@@ -44,6 +44,50 @@
 }
 
 
+# call neo4j API
+.callAPI <- function(query, return.names=NULL, type, unique=TRUE, error.info=NULL, ...) {
+  # get the connexion object locally
+  con <- getOption("con")
+  
+  # call API
+  if (type == "row") {
+    # return in json format since neo4r would raise errors (from tibble)
+    json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
+    # parse json data
+    res <- .parseJSON(json.res, return.names=return.names, unique=unique, error.info=error.info)
+  } else {
+    # graph data can use neo4r R output
+    res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
+    res <- lapply(res, as.data.frame) # turn tibble df to df
+  }
+  res
+}
+
+
+# get final results for queries
+.finalRes <- function(query, return.names=NULL, type, unique=TRUE, error.info=NULL, ...) {
+  if (type == "row") {
+    # retrieve graph data first
+    suppressMessages( # suppress if retrieving attributes
+      graph.res <- .callAPI(query, return.names, "graph", error.info=error.info, ...)
+    )
+    
+    # retrieve row data
+    res.query <- gsub(",relationships\\s*\\([^\\)]+\\)", "", query) # remove ',relationships(p)' in RETURN clause
+    res <- .callAPI(res.query, return.names, "row", unique, error.info, ...)
+    
+    if ("relationships" %in% names(graph.res)) {
+      # add relationships from graph data into row data if any
+      res <- .processRowOutput(list(row = res, graph = graph.res))
+    }
+  } else {
+    res <- .callAPI(query, return.names, "graph", error.info=error.info, ...)
+  }
+  res
+}
+
+
+
 # match species names (similar to that one in CS pkg)
 .matchSpecies <- function(species, output=c("displayName", "taxId", "dbId", "name", "abbreviation")) {
   # ensure correct input
@@ -60,8 +104,9 @@
   
   # to see what data type this species arg is by checking which column it belongs to
   species.data.type <- colnames(all.species)[apply(all.species, 2, function(col) species %in% unlist(col))]
-  if (length(species.data.type) == 0) stop(paste0(sQuote(species), " not listed in Reactome"))
-
+  if (length(species.data.type) == 0) {
+    stop(sQuote(species), ' not listed in Reactome. Try `matchObject(schemaClass="Species")` to get valid species inputs', call.=FALSE)
+  }
   # output
   species.data.type <- species.data.type[1] # in case type==c("displayName","name")
   species.row <- all.species[all.species[[species.data.type]] == species, ] 
@@ -75,79 +120,8 @@
 }
 
 
-# check if value(s) in db or not (mostly used in internal checks)
-# info is a character, not vector
-.checkInfo <- function(info, type=c("label", "relationship", "property")) {
-  type <- match.arg(type, several.ok = FALSE)
-  info <- gsub("^:", "", info)
-  
-  con <- getOption("con") # get connexion
-  if (type == "label") {
-    info <- strsplit(info, split=':', fixed=TRUE)[[1]]
-    terms <- con$get_labels()
-  } else if (type == "relationship") {
-    info <- strsplit(info, split='|', fixed=TRUE)[[1]]
-    terms <- con$get_relationships()
-  } else if (type == "property") {
-    terms <- con$get_property_keys()
-  }
-  terms <- terms$labels # to character
-  
-  throw <- info[!info %in% terms]
-  throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier'
-  if (length(throw) > 0) {
-    throw <- paste(throw, collapse = ", ")
-    return(FALSE)
-    warning(paste0("The ", type, " '", throw, "' is not in this database"), call.=FALSE)
-  } else {
-    return(TRUE)
-  }
-}
-
-
-# call neo4j API
-.callAPI <- function(query, return.names=NULL, type, verbose=FALSE, msg=NULL, ...) {
-  # being wordy if 'type' arg missing
-  if (verbose) message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
-
-  # get the connexion object locally
-  con <- getOption("con")
-  
-  # call API
-  json.res <- neo4r::call_neo4j(query = query,
-                                con = con,
-                                type = type,
-                                output = "json", # output in json format
-                                ...)
-  # parse json data
-  .parseJSON(json.res, return.names=return.names, type=type)
-}
-
-
-# get value of specific attribute(s) with a given id/name
-.getSlotValue <- function(dbObject, dbObject.type=c("id", "name"), resource="Reactome", slot) {
-  # assign value
-  id <- NULL -> name
-  if (dbObject.type == "id") {
-    id <- dbObject
-  } else {
-    name <- dbObject
-  }
-  
-  # check info
-  .checkInfo(slot, "property")
-  
-  # retrieve
-  c.MATCH <- .MATCH(list('(dbo:DatabaseObject)'))
-  c.WHERE <- .WHERE("dbo", id=id, displayName=name, databaseName=resource)
-  c.RETURN <- .RETURN(paste0("dbo.", slot), type="row") # can input >1 slots!
-  query <- paste(c.MATCH, c.WHERE, c.RETURN)
-  
-  .callAPI(query, return.names=slot, type="row")
-}
-
-
 # get all labels/keys of node(s)
+# species not required
 # more info types to be added
 .getNodeInfo <- function(node.where, info=c("keys", "labels")) {
   info <- match.arg(info)
@@ -156,7 +130,7 @@
                  paste0('UNWIND ', info, '(dbo) AS info'),
                  'RETURN distinct(info)')
   res <- .callAPI(query, return.names=info, type="row")
-  res[[1]][[info]]
+  res[[1]][ ,1]
 }
 
 
@@ -170,4 +144,5 @@
   name <- gsub('\\<lr\\>', 'literatureReference', name)
   name
 }
+
 

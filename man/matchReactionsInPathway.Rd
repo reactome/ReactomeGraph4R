@@ -6,25 +6,26 @@
 \usage{
 matchReactionsInPathway(
   event.id = NULL,
-  event.name = NULL,
+  event.displayName = NULL,
   species = NULL,
   type = c("row", "graph")
 )
 }
 \arguments{
-\item{event.id}{stId or dbId of Event}
+\item{event.id}{stId or dbId of an Event}
 
-\item{event.name}{name of Event}
+\item{event.displayName}{displayName of an Event}
 
-\item{species}{name or taxon id or dbId or abbreviation of specified species}
+\item{species}{name or taxon id or dbId or abbreviation of the specified species}
 
 \item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
 }
 \value{
-Reactions related to the given Pathway/Reaction
+Reactions connected to the given Pathway/Reaction via "hasEvent" relationships
 }
 \description{
-MATCH Reactions in associated Pathway
+This method could find all Reactions connected with a given Pathway by the relationship "hasEvent".
+Also, the input can be a Reaction, the result would then be Pathway(s) linked via “hasEvent” together with other Reactions linked with the Pathways(s).
 }
 \examples{
 matchReactionsInPathway("R-HSA-1369062", type="graph")
@@ -32,8 +33,12 @@ matchReactionsInPathway("R-HSA-5682285", type="row")
 }
 \seealso{
 Other match: 
+\code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
 \code{\link{matchObject}()},
-\code{\link{matchPrecedingAndFollowingEvents}()}
+\code{\link{matchPEroles}()},
+\code{\link{matchPaperObjects}()},
+\code{\link{matchPrecedingAndFollowingEvents}()},
+\code{\link{matchReferrals}()}
 }
 \concept{match}

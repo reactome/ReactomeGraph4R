@@ -2,38 +2,30 @@
 # impudently copied and modified some functions from: 
 # https://github.com/neo4j-rstats/neo4r/blob/master/R/api_result_parsing.R
 
-# Note: neo4r 0.1.3 doesn't return syntax errors of cypher queries when format='json'
+
+# Note: can't handle path data
+# e.g. MATCH p=()-[r:output]->() RETURN p
 
 # not include stats & meta
-.parseJSON <- function(json.res, type, return.names, msg=NULL) {
-
+.parseJSON <- function(json.res, return.names, unique, error.info) {
+  # return query syntax error if any
+  if ("error_code" %in% names(json.res)) {
+    stop(json.res[["error_code"]], "\n", json.res[["error_message"]], call.=FALSE)
+  }
+  
   # transform into list
   json.list <- jsonlite::fromJSON(json.res)
   
   # Get the result element
   json.results <- as.list(json.list[[1]])
   
-  # check & send error/msg if any
-  .errMsg(json.results, msg)
+  # send errors if '(no changes, no records)'
+  .sendErrors(json.results, error.info)
   
   # Turn NULL to NA & get the data
   res.data <- .null_to_na(json.results)
   
-  .parse_row(res.data, return.names)
-}
-
-
-# error messages
-.errMsg <- function(res, msg=NULL) {
-  if (length(res) == 0) {
-    # (no changes, no records)
-    message("No data returned")
-    # send custom info
-    if(!is.null(msg)) stop(msg, call.=FALSE)
-  } else if ("error_message" %in% names(res)) {
-    # query syntax error
-    stop(paste0(res[["error_code"]], "\n", res[["error_message"]]), call.=FALSE)
-  }
+  .parse_row(res.data, return.names, unique)
 }
 
 
@@ -58,7 +50,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom purrr transpose map_depth map
 
-.parse_row <- function(res.data, res.names) {
+.parse_row <- function(res.data, res.names, unique) {
   # flatten & discard 'meta' data
   res.data <- res.data[["row"]]
   
@@ -72,11 +64,14 @@
           map(.rbindlist_to_df)
   
   # remove repeated rows
-  res <- lapply(res, function(x) {
-                      x <- unique(x)
-                      rownames(x) <- 1:nrow(x) # renew row names
-                      x
-                     })
+  if (unique) {
+    res <- lapply(res, function(sublist) {
+      sublist <- unique(sublist)
+      rownames(sublist) <- 1:nrow(sublist) # renew row names
+      sublist
+    })
+  }
+
   # add names
   if (!is.null(res.names) && length(res) > 0) {
     if (any(grepl("\\.", res.names))) {
@@ -130,8 +125,10 @@
 
 # turn list to data frame
 .rbindlist_to_df <- function(list) {
-  sublist.len <- sapply(list, length)
-  if (length(unique(sublist.len)) == 1) { # all lengths of sublists are same
+  # check if names of sublist are all the same
+  same.header <- all(sapply(list, function(x) identical(names(x), names(list[[1]])))) # list[[1]] as ref
+  
+  if (same.header) { 
     as.data.frame(data.table::rbindlist(list))
   } else {
     as.data.frame(data.table::rbindlist(list, fill = TRUE))
@@ -139,6 +136,32 @@
 }
 
 
-### include relationships data
+# include relationships in 'row' data
+.processRowOutput <- function(res.list) {
+  # get data
+  row <- res.list[["row"]]
+  graph <- res.list[["graph"]]
+  nodes <- as.data.frame(graph[["nodes"]])
+  relationships <- as.data.frame(graph[["relationships"]])
+  
+  # add columns in relationships
+  # grab the slots from properties list
+  for (node in c("startNode", "endNode")) {
+    for (slot in c("dbId", "schemaClass")) {
+      col.name <- paste0(node, ".", slot)
+      relationships[, col.name] <- sapply(as.character(relationships[, node]), function(x) nodes[nodes$id == x, ]$properties[[1]][[slot]])               
+    }
+  }
+  
+  # rearrange columns
+  relationships <- relationships[ ,c("id", "type", "startNode", "startNode.dbId", "startNode.schemaClass",
+                                     "endNode", "endNode.dbId", "endNode.schemaClass", "properties")]
+  # rename columns
+  colnames(relationships)[which(colnames(relationships) %in% c("id", "startNode", "endNode"))] <- c("neo4jId", "startNode.neo4jId", "endNode.neo4jId")
+  
+  # add relationships to row list
+  row[["relationships"]] <- as.data.frame(relationships)
+  row
+}
 
 
