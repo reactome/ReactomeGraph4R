@@ -39,10 +39,6 @@ Install from GitHub:
 ```
 devtools::install_github("reactome/ReactomeGraph4R")
 ```
-or from CRAN:
-```
-install.packages("reactome/ReactomeGraph4R")
-```
 
 👉 Note that package [`neo4r`](https://github.com/neo4j-rstats/neo4r) __(>= 0.1.3)__ is required, install the lastest one from GitHub:
 ```
