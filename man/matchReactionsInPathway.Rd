@@ -21,10 +21,11 @@ matchReactionsInPathway(
 \item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
 }
 \value{
-Reactions related to the given Pathway/Reaction
+Reactions connected to the given Pathway/Reaction via "hasEvent" relationships
 }
 \description{
-MATCH Reactions in associated Pathway
+This method could find all Reactions connected with a given Pathway by the relationship "hasEvent".
+Also, the input can be a Reaction, the result would then be Pathway(s) linked via “hasEvent” together with other Reactions linked with the Pathways(s).
 }
 \examples{
 matchReactionsInPathway("R-HSA-1369062", type="graph")

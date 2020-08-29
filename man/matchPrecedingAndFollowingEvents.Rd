@@ -30,7 +30,7 @@ matchPrecedingAndFollowingEvents(
 preceding/following Events connected to the given Event in specified depth(s), default depth = 1
 }
 \description{
-MATCH the preceding/following Events
+To get Events connected with "precedingEvent" relationship
 }
 \examples{
 matchPrecedingAndFollowingEvents("R-HSA-983150", all.depth=TRUE, type="row")

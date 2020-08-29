@@ -1,12 +1,12 @@
-Package: reactome.graphdb4r
+Package: ReactomeGraph4R
 Title: R Interface for Reactome Graph Database
 Version: 0.0.0.9000
 Authors@R: 
-    c(person("Chi-Lam", "Poon", role = c("aut", "cre"), email = "clpoon807@gmail.com", 
+    c(person("Chi-Lam", "Poon", role = "aut", email = "clpoon807@gmail.com", 
               comment = structure("0000-0001-6298-7099", .Names = "ORCID")),
-      person("Reactome", role = "cph", email = "help@reactome.org"))
+      person("Reactome", role = "cre", email = "help@reactome.org"))
 Description: This package is to provide an interface to query data with the network structure
-    in Reactome Graph Database. There is also another package, reactome4r, for queries in 
+    in Reactome Graph Database. There is also another package, ReactomeContentService4R, for queries in 
     Reactome Content Service.
 License: file LICENSE
 Encoding: UTF-8
@@ -21,10 +21,14 @@ Imports:
     purrr,
     magrittr,
     data.table,
-    reactome4r,
+    ReactomeContentService4R,
     rlang
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    stringr,
+    networkD3,
+    visNetwork,
+    wesanderson
 VignetteBuilder: knitr
