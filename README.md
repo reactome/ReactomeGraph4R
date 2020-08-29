@@ -52,7 +52,7 @@ devtools::install_github("neo4j-rstats/neo4r")
 
 ## Examples
 
-Read complementary vignette at ___
+Read complementary vignette at https://chilampoon.github.io/projects/ReactomeGraph4R.html
 
 ### Loading and connection
 

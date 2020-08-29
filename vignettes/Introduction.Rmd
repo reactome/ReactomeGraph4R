@@ -28,7 +28,7 @@ With `ReactomeGraph4R`, you are able to fetch the interconnected data easily usi
 
 ## Setups
 
-Follow this [instruction](https://github.com/reactome/reactome.graphdb4r) to download and setup Reactome Graph Database.
+Follow this [instruction](https://github.com/reactome/ReactomeGraph4R/blob/develop/README.md) to download and setup Reactome Graph Database.
 
 Then install `ReactomeGraph4R` package via CRAN:
 ```{r install, eval=FALSE}
@@ -326,7 +326,7 @@ visOptions(visnet, highlightNearest = TRUE, selectedBy = "Class")
 
 ### networkD3
 
-We can also take a look at another package [`networkD3`](http://christophergandrud.github.io/networkD3/), which generates network graphs using D3 javascript library.
+We can also take a look at another package [`networkD3`](http://christophergandrud.github.io/networkD3/), which generates network graphs using [D3](http://d3js.org/) javascript library.
 
 ```{r d3-1}
 # the node ids MUST be numeric, and start from 0
