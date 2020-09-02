@@ -35,6 +35,7 @@ matchReactionsInPathway("R-HSA-5682285", type="row")
 Other match: 
 \code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
+\code{\link{matchInteractors}()},
 \code{\link{matchObject}()},
 \code{\link{matchPEroles}()},
 \code{\link{matchPaperObjects}()},

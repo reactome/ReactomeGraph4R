@@ -2,20 +2,12 @@
 % Please edit documentation in R/queries.R
 \name{matchHierarchy}
 \alias{matchHierarchy}
-\alias{matchInteractors}
 \title{MATCH hierarchy}
 \usage{
 matchHierarchy(
   id = NULL,
   displayName = NULL,
   databaseName = "Reactome",
-  species = NULL,
-  type = c("row", "graph")
-)
-
-matchInteractors(
-  pe.id = NULL,
-  pe.displayName = NULL,
   species = NULL,
   type = c("row", "graph")
 )
@@ -30,40 +22,23 @@ matchInteractors(
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
 \item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
-
-\item{pe.id}{stId or dbId of a PhysicalEntity}
-
-\item{pe.displayName}{displayName of a PhysicalEntity}
 }
 \value{
 hierarchical instances of the given id and databaseName
-
-interactions of a given PhysicalEntity
 }
 \description{
 Retrieve hierarchical data in a manner of Pathway-Reaction-Entity
-
-Retrieve interactions of a given PhysicalEntity
 }
 \examples{
 # use the Reactome displayName of a UniProt object
 matchHierarchy(displayName="UniProt:P04637 TP53", databaseName="UniProt", type="row")
 matchHierarchy(id="R-HSA-196015", type="row")
 matchHierarchy(id="R-HSA-1369062", type="graph")
-matchInteractors(996766)
 }
 \seealso{
 Other match: 
 \code{\link{matchDiseases}()},
-\code{\link{matchObject}()},
-\code{\link{matchPEroles}()},
-\code{\link{matchPaperObjects}()},
-\code{\link{matchPrecedingAndFollowingEvents}()},
-\code{\link{matchReactionsInPathway}()},
-\code{\link{matchReferrals}()}
-
-Other match: 
-\code{\link{matchDiseases}()},
+\code{\link{matchInteractors}()},
 \code{\link{matchObject}()},
 \code{\link{matchPEroles}()},
 \code{\link{matchPaperObjects}()},

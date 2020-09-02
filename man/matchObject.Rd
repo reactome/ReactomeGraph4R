@@ -74,6 +74,7 @@ matchObject(property = property.list,
 Other match: 
 \code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
+\code{\link{matchInteractors}()},
 \code{\link{matchPEroles}()},
 \code{\link{matchPaperObjects}()},
 \code{\link{matchPrecedingAndFollowingEvents}()},

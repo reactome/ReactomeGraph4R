@@ -34,6 +34,7 @@ matchDiseases(id="R-HSA-162588", type="graph")
 \seealso{
 Other match: 
 \code{\link{matchHierarchy}()},
+\code{\link{matchInteractors}()},
 \code{\link{matchObject}()},
 \code{\link{matchPEroles}()},
 \code{\link{matchPaperObjects}()},

@@ -39,6 +39,7 @@ matchPrecedingAndFollowingEvents("R-HSA-983150", all.depth=TRUE, type="row")
 Other match: 
 \code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},
+\code{\link{matchInteractors}()},
 \code{\link{matchObject}()},
 \code{\link{matchPEroles}()},
 \code{\link{matchPaperObjects}()},

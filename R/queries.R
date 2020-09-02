@@ -226,7 +226,7 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
 #' @return interactions of a given PhysicalEntity
 #' @examples
 #' matchInteractors(996766)
-#' @rdname matchHierarchy
+#' @rdname matchInteractors
 #' @family match
 #' @export 
 

@@ -24,7 +24,7 @@ docker run --name reactome_graph_db -p 7687:7687 -p 7474:7474 -e NEO4J_dbms_allo
 http://localhost:7474
 ```
 
-If you want to set a password, you can remove `NEO4J_AUTH=none` in the command. The default username and password are both `neo4j`, after login you will be prompted the change the new password.
+If you want to set a password, you can remove `NEO4J_AUTH=none` in the command. The default username and password are both `neo4j`, after login you will be prompted to change the new password.
 
 The next time you run the Graph Database, you can just start running docker and type:
 ```
