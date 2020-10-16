@@ -7,7 +7,7 @@
 
 ## Local Reactome Graph Database setup
 
-1. Get Docker: https://docs.docker.com/get-docker/
+1. Get Docker: https://docs.docker.com/get-docker
 2. Download and install current [Reactome Graph Database](https://reactome.org/download/current):
 ```
 mkdir -p $(pwd)/neo4j/data/databases

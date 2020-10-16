@@ -1,5 +1,5 @@
 ---
-title: "ReactomeGraph4R: an R Interface for Reactome Graph Database"
+title: "ReactomeGraph4R: an R Interface for the Reactome Graph Database"
 author: Chi-Lam Poon
 date: "`r format(Sys.time(), '%m/%d/%Y')`"
 output: 
@@ -18,7 +18,7 @@ vignette: >
 
 Pathways, reactions, and biological entities in Reactome knowledge are systematically represented as an ordered network of molecular reactions. Graph database technology is an effective tool for modeling highly connected data, hence Reactome's relational database is imported in [Neo4j](https://neo4j.com/) to create one large interconnected graph. Instances are represented as _nodes_ and relationships between nodes as _edges_.
 
-The [`ReactomeGraph4R`](https://github.com/reactome/ReactomeGraph4R) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`ReactomeContentService4R`](https://github.com/reactome/ReactomeContentService4R) for querying **specific bits of information** to the Reactome Database through the RESTful API in Content Service.
+The [`ReactomeGraph4R`](https://github.com/reactome/ReactomeGraph4R) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`ReactomeContentService4R`](https://github.com/reactome/ReactomeContentService4R) for querying **specific bits of information** to the Reactome Database through the RESTful API in the Content Service.
 
 With `ReactomeGraph4R`, you are able to fetch the interconnected data easily using R without the prerequisite of Neo4j's graph query language Cypher. This package is built on the Neo4j driver [`neo4r`](https://github.com/neo4j-rstats/neo4r), thus returned data are mainly same as those called by `neo4r` but with a little modifications, and are in these two formats:
 
@@ -32,7 +32,7 @@ Follow this [instruction](https://github.com/reactome/ReactomeGraph4R/blob/devel
 
 Then install `ReactomeGraph4R` package via CRAN:
 ```{r install, eval=FALSE}
-install.packages("ReactomeGraph4R")
+devtools::install_github("ReactomeGraph4R")
 ```
 
 There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to login your local Neo4j database.
@@ -158,6 +158,9 @@ The contect of these Events can actually be visualized in R using the `exportIma
 To get the pathway diagram of Pathway "OAS antiviral response" (stId: R-HSA-8983711) that we just retrieved, and highlight the RLE (stId: R-HSA-8983688) that we specified:
 
 ```{r export-img}
+if (!"ReactomeContentService4R" %in% installed.packages()[ ,"Package"]) {
+  install.packages(ReactomeContentService4R)
+}
 library(ReactomeContentService4R)
 
 # Export pathway diagram of "OAS antiviral response"
@@ -254,7 +257,9 @@ First install and load the following packages.
 # install packages
 list.pkg <- c("stringr", "visNetwork", "networkD3", "wesanderson")
 new.pkg <- list.pkg[!(list.pkg %in% installed.packages()[ ,"Package"])]
-if (length(new.pkg)) install.packages(new.pkg)
+if (length(new.pkg)) {
+  install.packages(new.pkg)
+}
 # load
 invisible(suppressPackageStartupMessages(lapply(list.pkg, library, character.only = T)))
 ```
@@ -283,7 +288,9 @@ vis.nodes <- data.frame(id = nodes$id,
 
 vis.edges <- data.frame(from = relationships$startNode,
                         to = relationships$endNode,
-                        label = relationships$type)
+                        label = relationships$type,
+                        font.size = 16,
+                        font.color = 'steelblue')
 
 head(vis.nodes); head(vis.edges)
 ```
@@ -294,7 +301,7 @@ We are going to change the visual parameters of nodes and edges by adding them a
 # nodes parameters
 ## get palette colors with package 'wesanderson'
 node.colors <- as.character(wes_palette(n = length(unique(vis.nodes$group)), name = "Darjeeling2"))
-names(node.colors) <- unique(vis.nodes$group)
+names(node.colors) <- levels(factor(vis.nodes$group))
 ## NOTE: don't use `str_replace_all` here since 'TopLevelPathway' & 'Pathway' share the string 'Pathway' 
 vis.nodes$color.background <- node.colors[as.numeric(factor(vis.nodes$group))] # node color
 vis.nodes$color.border <- "lightgray"
@@ -311,7 +318,9 @@ vis.edges$color <- str_replace_all(vis.edges$label, edges.colors) # line color
 vis.edges$arrows <- "to" # arrows: 'from', 'to', or 'middle'
 vis.edges$smooth <- TRUE    # should the edges be curved?
 
-visnet <- visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", width = "100%")
+# can set the height & width here
+visnet <- visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", 
+                     height = "500px", width = "100%")
 visnet
 ```
 
