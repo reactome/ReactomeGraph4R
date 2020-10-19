@@ -7,38 +7,35 @@
   
   # get the spellCheck function
   spellCheck <- utils::getFromNamespace(".spellCheck", "ReactomeContentService4R")
+  errBullets <- utils::getFromNamespace("format_error_bullets", "rlang")
   
   # spell check id
   if (!is.null(input.list[["id"]])) {
     id.spellcheck <- spellCheck(input.list[["id"]])
     if (!is.null(id.spellcheck)) {
-      message(
-        rlang::format_error_bullets(c("i" = "'id' check:",
-                                      id.spellcheck))
-      )
+      message(errBullets(c("i" = "'id' check:", id.spellcheck)))
     }
   }
   # spell check name
   if (!is.null(input.list[["name"]])) {
     name.spellcheck <- spellCheck(input.list[["name"]])
     if (!is.null(name.spellcheck)) {
-      message(
-        rlang::format_error_bullets(c("i" = "'displayName' check (note that the space is required):",
-                                      name.spellcheck))
-      )
+      message(errBullets(
+          c("i" = "'displayName' check (note that the space is required):",
+             name.spellcheck)))
     }
   }
   # correct schemaClass name
   if (!is.null(input.list[["class"]])) {
-    message(
-      rlang::format_error_bullets(c("i" = "'schemaClass': details see https://reactome.org/content/schema"))
+    message(errBullets(
+      c("i" = "'schemaClass': details see https://reactome.org/content/schema"))
     )
   }
   # correct database name
   if (input.list[["database"]] != "Reactome") {
-    message(
-      rlang::format_error_bullets(c("i" = "'databaseName': try `matchObject(schemaClass='ReferenceDatabase')` to get details"))
-    )                          
+    message(errBullets(
+      c("i" = "'databaseName': try `matchObject(schemaClass='ReferenceDatabase')` to get details"))
+    )   
   }
   # check species
   if (!is.null(input.list[["species"]])) {
@@ -47,16 +44,18 @@
     # if species not correct, an error pops out & stop here <--
     
     # get all associated species
-    tmp.WHERE <- .WHERE('dbo', id=input.list[["id"]], displayName=input.list[["name"]], 
-                        schemaClass=input.list[["class"]], databaseName=input.list[["database"]])
-    all.species <- neo4r::call_neo4j(paste0('MATCH (dbo:DatabaseObject) ', tmp.WHERE, ' RETURN dbo.speciesName'), con)
+    tmp.WHERE <- .WHERE('dbo', id=input.list[["id"]], 
+                        displayName=input.list[["name"]], 
+                        schemaClass=input.list[["class"]], 
+                        databaseName=input.list[["database"]])
+    all.species <- neo4r::call_neo4j(paste0('MATCH (dbo:DatabaseObject) ', 
+                                    tmp.WHERE, ' RETURN dbo.speciesName'), con)
     # check if the given species matched or not
     if (!species.name %in% all.species) {
-      message(
-        rlang::format_error_bullets(c("x" = paste0("Species " ,sQuote(species), ":"),
-                                      paste0(sQuote(species.name), " is not in the Species attribute of the given object"))
-                                   )
-      
+      message(errBullets(
+          c("x" = paste0("Species " ,sQuote(species), ":"),
+            paste0(sQuote(species.name), 
+            " is not in the Species attribute of the given object")))
       )
     }
   }
@@ -73,7 +72,7 @@
     if(!is.null(error.info)) {
       .basicErrMsgs(error.info)
       stop("Try to check above argument inputs. \n", 
-           "  Or perhaps no result object can be found at all (`-_-)", call.=FALSE)
+           "  Or perhaps just no result object can be found", call.=FALSE)
     }
   }
 }
@@ -103,10 +102,12 @@
   
   # get those not in db
   throw <- info[!info %in% terms]
-  throw <- throw[throw != "id"] # exclude 'id' which represents 'dbId' & 'stId' & 'identifier' in this pkg
+  # exclude 'id' which represents 'dbId' & 'stId' & 'identifier' in this pkg
+  throw <- throw[throw != "id"]
   if (length(throw) > 0) {
     throw <- paste(throw, collapse = ", ")
-    message(rlang::format_error_bullets(c("x" = paste0("The ", type, " '", throw, "' is not in this database"))))
+    message(rlang::format_error_bullets(c("x" = paste0("The ", type, " '", 
+                                        throw, "' is not in this database"))))
     return(FALSE)
   } else {
     return(TRUE)
@@ -115,7 +116,8 @@
 
 
 # verify the main input arguments & output a list
-.verifyInputs <- function(id=NULL, name=NULL, class=NULL, species=NULL, database="Reactome", type) {
+.verifyInputs <- function(id=NULL, name=NULL, class=NULL, species=NULL, 
+                          database="Reactome", type) {
   # being wordy if 'type' arg missing
   # `with(parent.frame())` -- execute in the parent environment
   if (!is.null(type)) {
@@ -148,17 +150,20 @@
 # check the class input matching with specific Class(es) or not
 .checkClass <- function(id, displayName, class, database="Reactome", stopOrNot=FALSE) {
   # get labels of the node
-  labels <- .getNodeInfo(.WHERE('dbo', id=id, displayName=displayName, databaseName=database), "labels")
+  labels <- .getNodeInfo(.WHERE('dbo', id=id, displayName=displayName, 
+                                databaseName=database), "labels")
   
   # send error
   if (!any(class %in% labels)) {
     if (stopOrNot) {
       stop(rlang::format_error_bullets(
-              c("x" = paste0("Please specify an instance of Class ", paste(sQuote(class), collapse=",")))),
+              c("x" = paste0("Please specify an instance of Class ", 
+                             paste(sQuote(class), collapse=",")))),
           call.=FALSE)
     } else {
       message(rlang::format_error_bullets(
-              c("x" = paste0("This is not an instance of Class ", paste(sQuote(class), collapse=","))))
+              c("x" = paste0("This is not an instance of Class ", 
+                             paste(sQuote(class), collapse=","))))
              )
       # will return NULL
     }
