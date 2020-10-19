@@ -10,7 +10,7 @@
 .parseJSON <- function(json.res, return.names, unique, error.info) {
   # return query syntax error if any
   if ("error_code" %in% names(json.res)) {
-    stop(json.res[["error_code"]], "\n", json.res[["error_message"]], call.=FALSE)
+    stop(json.res[["error_code"]],"\n",json.res[["error_message"]], call.=FALSE)
   }
   
   # transform into list
@@ -56,7 +56,7 @@
   
   # transform data (based on the logic in neo4r)
   res.data <- lapply(res.data, as.list)
-  res.data <- lapply(res.data, transpose)
+  res.data <- lapply(res.data, purrr::transpose)
   t.res.data <- transpose(res.data)
   
   # manipulate lists in 2nd depth & merge these lists into a dataframe
@@ -149,13 +149,15 @@
   for (node in c("startNode", "endNode")) {
     for (slot in c("dbId", "schemaClass")) {
       col.name <- paste0(node, ".", slot)
-      relationships[, col.name] <- sapply(as.character(relationships[, node]), function(x) nodes[nodes$id == x, ]$properties[[1]][[slot]])               
+      relationships[, col.name] <- sapply(as.character(relationships[, node]), 
+                    function(x) nodes[nodes$id == x, ]$properties[[1]][[slot]])               
     }
   }
   
   # rearrange columns
-  relationships <- relationships[ ,c("id", "type", "startNode", "startNode.dbId", "startNode.schemaClass",
-                                     "endNode", "endNode.dbId", "endNode.schemaClass", "properties")]
+  relationships <- relationships[ ,c("id", "type", "startNode", "startNode.dbId", 
+                            "startNode.schemaClass", "endNode", "endNode.dbId",
+                            "endNode.schemaClass", "properties")]
   # rename columns
   colnames(relationships)[which(colnames(relationships) %in% c("id", "startNode", "endNode"))] <- c("neo4jId", "startNode.neo4jId", "endNode.neo4jId")
   

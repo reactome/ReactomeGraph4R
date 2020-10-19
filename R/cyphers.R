@@ -124,7 +124,8 @@
     } else if (grepl("^[0-9]+$", id)) {
       term <- paste0('.dbId = ', id)
     } else {
-      stop("Is this id correct?", call.=FALSE)
+      stop("Is this id correct?", 
+           "For non-Reactome id, please specify databaseName", call.=FALSE)
     }
   } else if (database == "PubMed") {
     term <- paste0('.pubMedIdentifier = ', id)

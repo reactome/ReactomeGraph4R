@@ -4,18 +4,18 @@
 \name{ReactomeGraph4R-package}
 \alias{ReactomeGraph4R}
 \alias{ReactomeGraph4R-package}
-\title{ReactomeGraph4R: R Interface for Reactome Graph Database}
+\title{ReactomeGraph4R: R Interface for the Reactome Graph Database}
 \description{
-This package is to provide an interface to query data with the network structure
-    in Reactome Graph Database. There is also another package, ReactomeContentService4R, for queries in 
-    Reactome Content Service.
+This package is to provide an interface to query data with the 
+      network structure in the Reactome Graph Database. There is also another 
+      package, ReactomeContentService4R, for queries in the Content Service.
 }
 \author{
-\strong{Maintainer}: Reactome \email{help@reactome.org}
+\strong{Maintainer}: Chi-Lam Poon \email{clpoon807@gmail.com} (\href{https://orcid.org/0000-0001-6298-7099}{ORCID})
 
-Authors:
+Other contributors:
 \itemize{
-  \item Chi-Lam Poon \email{clpoon807@gmail.com} (\href{https://orcid.org/0000-0001-6298-7099}{ORCID})
+  \item Reactome \email{help@reactome.org} [copyright holder]
 }
 
 }

@@ -25,7 +25,8 @@ matchObject(
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
-\item{returnedAttributes}{specific attribute(s) to be returned. If set to \code{NULL}, all attributes returned}
+\item{returnedAttributes}{specific attribute(s) to be returned.
+If set to \code{NULL}, all attributes returned}
 
 \item{property}{a list of property keys and values}
 
@@ -52,7 +53,8 @@ Fetch instance by:
 all.species <- matchObject(schemaClass = "Species")
 
 # fetch instance by name
-matchObject(displayName = "RCOR1 [nucleoplasm]", returnedAttributes=c("stId", "speciesName"))
+matchObject(displayName = "RCOR1 [nucleoplasm]", 
+           returnedAttributes=c("stId", "speciesName"))
 
 # fetch instance by id
 ## Reactome id
