@@ -31,7 +31,8 @@
   }
   
   # get user & pwd if NEO4J_AUTH is not none
-  if (utils::askYesNo("Does Neo4J require authentication?")) {
+  auth <- utils::askYesNo("Does Neo4J require authentication?", default=FALSE)
+  if (auth) {
     user <- readline(prompt="Username: ")
     # prevent warnings in R CHECK
     suppressMessages(password <- getPass::getPass("Password: "))
