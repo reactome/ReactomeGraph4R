@@ -13,7 +13,8 @@
 #' @param displayName displayName of a database object
 #' @param schemaClass schema class of a database object
 #' @param species name or taxon id or dbId or abbreviation of specified species
-#' @param returnedAttributes specific attribute(s) to be returned. If set to `NULL`, all attributes returned
+#' @param returnedAttributes specific attribute(s) to be returned. 
+#' If set to `NULL`, all attributes returned
 #' @param property a list of property keys and values
 #' @param relationship a relationships type
 #' @param limit the limit of returned objects
@@ -24,7 +25,8 @@
 #' all.species <- matchObject(schemaClass = "Species")
 #' 
 #' # fetch instance by name
-#' matchObject(displayName = "RCOR1 [nucleoplasm]", returnedAttributes=c("stId", "speciesName"))
+#' matchObject(displayName = "RCOR1 [nucleoplasm]", 
+#'            returnedAttributes=c("stId", "speciesName"))
 #' 
 #' # fetch instance by id
 #' ## Reactome id
@@ -58,8 +60,8 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
   if (!is.null(relationship)) {
     # retrieve data based on relationship
     
-    message("Note that other arguments except 'limit' should be NULL if you specify 'relationship'")
-    message("Turn them into NULL")
+    message("INFO - Note that other arguments except 'limit' should be NULL if you specify 'relationship'")
+    message("INFO - Turn them into NULL")
     id <- displayName <- schemaClass <- NULL -> species -> returnedAttributes -> property
     
     # check if it's a correct relationship name
@@ -106,10 +108,64 @@ matchObject <- function(id=NULL, displayName=NULL, schemaClass=NULL, species=NUL
   query <- paste(c.MATCH, c.WHERE, c.RETURN)
   
   # for generating error messages
-  input.list <- list(id=id, name=displayName, class=schemaClass, species=species, database=databaseName)
+  input.list <- list(id=id, name=displayName, class=schemaClass, 
+                     species=species, database=databaseName)
   # retrieve
-  .finalRes(query, return.names=return.names, type=type, unique=unique, error.info=input.list)
+  .finalRes(query, return.names=return.names, type=type, unique=unique, 
+            error.info=input.list, basicQuery=TRUE)
 }
+
+
+
+#' Retrieve multiple Reactome objects
+#' 
+#' 
+#' @param ids Reactome stIds or dbIds, or non-Reactome ids
+#' @param databaseName database name
+#' @param speedUp if set to `TRUE`, doParallel method will be used
+#' @param cluster the number of cluster in doParallel
+#' @return Reactome database objects for the given ids
+#' @rdname multiObjects
+#' @importFrom data.table rbindlist
+#' @importFrom purrr flatten
+#' @importFrom foreach foreach %dopar%
+#' @importFrom parallel makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @export 
+#' @examples
+#' # "ids" can be Reactome or non-Reactome ids
+#' ids <- c("P02741", "P08887", "P08505", "Q9GZQ8", "Q9NZH6")
+#' res <- multiObjects(ids, databaseName = "UniProt", speedUp = TRUE)
+#' 
+
+multiObjects <- function(ids, databaseName=NULL,
+                         speedUp=FALSE, cluster=2) {
+  if (speedUp) {
+    # use doParallel
+    cl <- makeCluster(cluster)
+    registerDoParallel(cl)
+    
+    # combine dataframes
+    dfcomb <- function(...) {
+      rbindlist(list(...), fill=TRUE)
+    }
+    
+    id <- NULL # prevent note in R CMD Check
+    res <- foreach(id=ids, .packages=c("ReactomeGraph4R", "purrr"), .combine=dfcomb) %dopar% {
+      object <- matchObject(id, databaseName=databaseName)
+      object[['databaseObject']]
+    }
+    stopCluster(cl)
+  } else {
+    # use lapply instead
+    all.list <- lapply(seq_along(ids), function(index) 
+                        matchObject(id=ids[index], databaseName=databaseName))
+    all.list <- flatten(all.list)
+    res <- rbindlist(all.list, fill=TRUE)
+  }
+  res
+}
+
 
 
 #' MATCH the preceding/following Events
