@@ -10,7 +10,8 @@
     # an error msg has been printed in the above line `con$ping()`
     stop("FYI - tutorials for graph db: https://reactome.org/dev/graph-database", call.=FALSE)
   } else {
-    dbi <- neo4r::call_neo4j('MATCH (dbi:DBInfo) RETURN dbi.version', con) # get version
+    # get version
+    dbi <- neo4r::call_neo4j('MATCH (dbi:DBInfo) RETURN dbi.version', con)
     packageStartupMessage(paste0("Connection built, welcome to Reactome Graph Database v", dbi[["dbi.version"]]$value, "!"))
   }
 }
@@ -32,7 +33,8 @@
   # get user & pwd if NEO4J_AUTH is not none
   if (utils::askYesNo("Does Neo4J require authentication?")) {
     user <- readline(prompt="Username: ")
-    suppressMessages(password <- getPass::getPass("Password: ")) # prevent warnings in R CHECK
+    # prevent warnings in R CHECK
+    suppressMessages(password <- getPass::getPass("Password: "))
   } else {
     user <- "neo4j"
     password <- "neo4j"
@@ -45,16 +47,19 @@
 
 
 # call neo4j API
-.callAPI <- function(query, return.names=NULL, type, unique=TRUE, error.info=NULL, ...) {
+.callAPI <- function(query, return.names=NULL, type, unique=TRUE, 
+                     error.info=NULL, ...) {
   # get the connexion object locally
   con <- getOption("con")
   
   # call API
   if (type == "row") {
     # return in json format since neo4r would raise errors (from tibble)
-    json.res <- neo4r::call_neo4j(query=query, con=con, type=type, output="json", ...)
+    json.res <- neo4r::call_neo4j(query=query, con=con, 
+                                  type=type, output="json", ...)
     # parse json data
-    res <- .parseJSON(json.res, return.names=return.names, unique=unique, error.info=error.info)
+    res <- .parseJSON(json.res, return.names=return.names, 
+                      unique=unique, error.info=error.info)
   } else {
     # graph data can use neo4r R output
     res <- neo4r::call_neo4j(query=query, con=con, type=type, output="r", ...)
@@ -65,18 +70,23 @@
 
 
 # get final results for queries
-.finalRes <- function(query, return.names=NULL, type, unique=TRUE, error.info=NULL, ...) {
+.finalRes <- function(query, return.names=NULL, type, unique=TRUE, 
+                      error.info=NULL, basicQuery=FALSE, ...) {
   if (type == "row") {
-    # retrieve graph data first
-    suppressMessages( # suppress if retrieving attributes
-      graph.res <- .callAPI(query, return.names, "graph", error.info=error.info, ...)
-    )
+    if (!basicQuery) {
+      # retrieve graph data first except matchObject()
+      suppressMessages( # suppress if retrieving attributes
+        graph.res <- .callAPI(query, return.names, "graph", 
+                              error.info=error.info, ...)
+      )
+    }
     
-    # retrieve row data
-    res.query <- gsub(",relationships\\s*\\([^\\)]+\\)", "", query) # remove ',relationships(p)' in RETURN clause
+    # (then) retrieve row data
+    # remove ',relationships(p)' in RETURN clause
+    res.query <- gsub(",relationships\\s*\\([^\\)]+\\)", "", query)
     res <- .callAPI(res.query, return.names, "row", unique, error.info, ...)
     
-    if ("relationships" %in% names(graph.res)) {
+    if (!basicQuery && "relationships" %in% names(graph.res)) {
       # add relationships from graph data into row data if any
       res <- .processRowOutput(list(row = res, graph = graph.res))
     }
@@ -89,7 +99,8 @@
 
 
 # match species names (similar to that one in CS pkg)
-.matchSpecies <- function(species, output=c("displayName", "taxId", "dbId", "name", "abbreviation")) {
+.matchSpecies <- function(species, output=c("displayName", "taxId", "dbId", 
+                                            "name", "abbreviation")) {
   # ensure correct input
   output <- match.arg(output, several.ok = TRUE)
   species <- as.character(species)
@@ -105,7 +116,9 @@
   # to see what data type this species arg is by checking which column it belongs to
   species.data.type <- colnames(all.species)[apply(all.species, 2, function(col) species %in% unlist(col))]
   if (length(species.data.type) == 0) {
-    stop(sQuote(species), ' not listed in Reactome. Try `matchObject(schemaClass="Species")` to get valid species inputs', call.=FALSE)
+    stop(sQuote(species), ' not listed in Reactome.",
+         "Try `matchObject(schemaClass="Species")` to get valid species inputs',
+         call.=FALSE)
   }
   # output
   species.data.type <- species.data.type[1] # in case type==c("displayName","name")
