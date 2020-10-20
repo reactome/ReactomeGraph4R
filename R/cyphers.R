@@ -6,7 +6,7 @@
   final.clause <- ""
   
   # glue clauses in the list
-  for (list.idx in 1:length(clause.list)) {
+  for (list.idx in seq(1, length(clause.list))) {
     clause <- as.character(clause.list[[list.idx]])
     clause <- paste0("MATCH p", list.idx, " = ", clause) # no need to worry about names of elements in the list
     final.clause <- ifelse(list.idx == 1, clause, paste(final.clause, clause))
@@ -35,7 +35,7 @@
   }
   
   # remove NULL elements in filters
-  filters <- filters[!sapply(filters, is.null)]
+  filters <- filters[!vapply(filters, is.null, logical(1))]
   
   # complete WHERE clause by adding filter arguments (eg. id, species) from a query function
   for (filter in names(filters)) {
