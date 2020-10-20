@@ -8,6 +8,7 @@
 #' }
 #' @importFrom purrr map
 #' @importFrom data.table rbindlist
+#' @return an unnested dataframe for network visualization
 #' @export 
 #' @rdname unnestListCol
 

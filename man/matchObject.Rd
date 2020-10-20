@@ -28,24 +28,34 @@ matchObject(
 \item{returnedAttributes}{specific attribute(s) to be returned.
 If set to \code{NULL}, all attributes returned}
 
-\item{property}{a list of property keys and values}
+\item{property}{a list of property keys and values,
+e.g. \code{list(isChimeric = TRUE, isInDisease = TRUE)}}
 
-\item{relationship}{a relationships type}
+\item{relationship}{a relationship type}
 
-\item{limit}{the limit of returned objects}
+\item{limit}{the number of returned objects}
 
-\item{databaseName}{database name}
+\item{databaseName}{database name. All databases see
+\href{https://reactome.org/content/schema/objects/ReferenceDatabase}{here}}
 }
 \value{
-Reactome database object that meets the given conditions
+Reactome database object(s) that meets all specified conditions
 }
 \description{
-Fetch instance by:
+This function can fetch instance by setting arguments:
 \itemize{
-\item Reactome dbId/stId/displayName/schemaClass
-\item non-Reactome identifier/displayName
-\item property
-\item relationship
+\item \strong{id}: a Reactome dbId/stId, or non-Reactome id
+\item \strong{displayName}: a display name of a Reactome object
+\item \strong{schemaClass}: a specific schema class,
+see \href{https://reactome.org/content/schema/DatabaseObject}{Data Schema}
+\item \strong{property}: a property of a node or relationship, access the full
+list of properties: \verb{con <- getOption("con"); con$get_property_keys()}
+\item \strong{relationship}: a relationship between nodes, access the full
+list of relationships: \verb{con <- getOption("con"); con$get_relationships()}
+\item Species information can see
+\href{https://reactome.org/content/schema/objects/Species}{here}, or run
+\code{View(matchObject(schemaClass = "Species"))[['databaseObject']]} to view a
+full table
 }
 }
 \examples{
@@ -68,11 +78,13 @@ matchObject(relationship="inferredTo", limit=10)
 # fetch instances by property
 property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
 matchObject(property = property.list, 
-            returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
-            limit=20)
+    returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+    limit=20)
 
 }
 \seealso{
+\link{multiObjects} for multiple ids
+
 Other match: 
 \code{\link{matchDiseases}()},
 \code{\link{matchHierarchy}()},

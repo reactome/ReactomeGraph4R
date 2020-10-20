@@ -4,26 +4,31 @@
 \alias{multiObjects}
 \title{Retrieve multiple Reactome objects}
 \usage{
-multiObjects(ids, databaseName = NULL, speedUp = FALSE, cluster = 2)
+multiObjects(ids, databaseName = "Reactome", speedUp = FALSE, cluster = 2)
 }
 \arguments{
-\item{ids}{Reactome stIds or dbIds, or non-Reactome ids}
+\item{ids}{Reactome stIds/dbIds, or non-Reactome ids}
 
 \item{databaseName}{database name}
 
-\item{speedUp}{if set to \code{TRUE}, doParallel method will be used}
+\item{speedUp}{set \code{TRUE} to use \code{\link[doParallel]{doParallel}} method}
 
-\item{cluster}{the number of cluster in doParallel}
+\item{cluster}{the number of cluster in \code{\link[parallel]{makeCluster}}}
 }
 \value{
 Reactome database objects for the given ids
 }
 \description{
-Retrieve multiple Reactome objects
+The \link{matchObject} function takes only one id/name at a time, this method
+allows you to input many ids and get an aggregated table for their detailed
+information. It can only accept \strong{ids} for now.
 }
 \examples{
 # "ids" can be Reactome or non-Reactome ids
 ids <- c("P02741", "P08887", "P08505", "Q9GZQ8", "Q9NZH6")
 res <- multiObjects(ids, databaseName = "UniProt", speedUp = TRUE)
 
+}
+\seealso{
+\link{matchObject} for details
 }

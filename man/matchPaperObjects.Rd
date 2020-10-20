@@ -15,7 +15,8 @@ matchPaperObjects(
 
 \item{displayName}{paper title}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
 Reactome instances associated with a paper
@@ -25,7 +26,7 @@ Fetch Reactome instances related to a paper by its PubMed id or title
 }
 \examples{
 # fetch Reactome instances by paper title
-matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance", type="row")
+matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance")
 
 # fetch Reactome instances by pubmed id
 matchPaperObjects(pubmed.id="20797626", type="graph")

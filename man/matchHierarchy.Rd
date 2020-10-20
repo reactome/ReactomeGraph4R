@@ -13,26 +13,29 @@ matchHierarchy(
 )
 }
 \arguments{
-\item{id}{stId or dbId of Event/PhysicalEntity; or id of an external database}
+\item{id}{stId or dbId of an Event/Entity; or an external id}
 
 \item{displayName}{displayName of Event/PhysicalEntity/ReferenceEntity}
 
-\item{databaseName}{database name. All listed databases see \href{here}{https://reactome.org/content/schema/objects/ReferenceDatabase}}
+\item{databaseName}{database name}
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
 hierarchical instances of the given id and databaseName
 }
 \description{
-Retrieve hierarchical data in a manner of Pathway-Reaction-Entity
+Reactome data are organized in a hierarchical way: Pathway-Reaction-Entity.
+This function retrieves the hierarchical data of a given Event
+(Pathway or Reaction) or Entity (PhysicalEntity or ReferenceEntity).
 }
 \examples{
 # use the Reactome displayName of a UniProt object
-matchHierarchy(displayName="UniProt:P04637 TP53", databaseName="UniProt", type="row")
-matchHierarchy(id="R-HSA-196015", type="row")
+matchHierarchy(displayName="UniProt:P04637 TP53", 
+               databaseName="UniProt", type="row")
 matchHierarchy(id="R-HSA-1369062", type="graph")
 }
 \seealso{

@@ -25,25 +25,29 @@ matchReferrals(
 
 \item{all.depth}{if set to \code{TRUE}, connected objects in all depths returned}
 
-\item{species}{name or taxon id or dbId or abbreviation of the specified species}
+\item{species}{name or taxon id or dbId or abbreviation of a species}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
 referrals of the given instance
 }
 \description{
-This method retrieves Reactome objects that are connected with the given object
-in a reverse relationship. For example, to find Pathways contained the given Reaction.
+This method retrieves Reactome objects that are connected with the given
+object in a \emph{reverse} relationship. For example, to find Pathways contained
+the given Reaction.
 }
 \details{
 For now it just focuses on biological referrals in the following Classes:
-"Event", "PhysicalEntity", "Regulation", "CatalystActivity", "ReferenceEntity"
-"Interaction", "AbstractModifiedResidue".
+"Event", "PhysicalEntity", "Regulation", "CatalystActivity","ReferenceEntity"
+, "Interaction", "AbstractModifiedResidue".
 }
 \examples{
 matchReferrals("113454", type="row")
+\dontrun{
 matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
+}
 }
 \seealso{
 Other match: 
