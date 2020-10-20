@@ -38,4 +38,4 @@ Suggests:
     visNetwork,
     wesanderson
 VignetteBuilder: knitr
-biocViews: DataImport, Pathways, Reactome, Network
+biocViews: DataImport, Pathways, Reactome, Network, GraphAndNetwork
