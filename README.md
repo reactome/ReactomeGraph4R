@@ -151,7 +151,9 @@ vis.nodes <- data.frame(id = nodes$id,
 
 vis.edges <- data.frame(from = relationships$startNode,
                         to = relationships$endNode,
-                        label = relationships$type)
+                        label = relationships$type,
+                        font.size = 16,
+                        font.color = 'steelblue')
 ```
 
 Add parameters for nodes:
@@ -164,7 +166,7 @@ vis.nodes$color.background <- node.colors[as.numeric(factor(vis.nodes$group))]
 vis.nodes$color.border <- "lightgray"
 vis.nodes$color.border[vis.nodes$label == "UniProt:P33992 MCM5"] <- "pink"
 vis.nodes$color.highlight.border <- "darkred"
-vis.nodes$borderWidth <- 2 #> Node border width
+vis.nodes$borderWidth <- 2 # Node border width
 ```
 
 Add parameters for edges:
@@ -177,12 +179,13 @@ vis.edges$arrows <- "to"
 vis.edges$smooth <- TRUE
 
 library(visNetwork)
-visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", width = "100%")
+visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5",
+           height = "500px", width = "100%")
 ```
 
 <img src="vignettes/figs/readme_network.png" width="100%" />
 
-Find the interactive one in the vignette!
+Find interactive graphs in the vignette!
 
 
 ## Feedback
