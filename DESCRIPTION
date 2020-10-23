@@ -25,6 +25,7 @@ Imports:
     magrittr,
     data.table,
     rlang,
+    ReactomeContentService4R,
     doParallel,
     parallel,
     foreach
@@ -32,7 +33,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
-    ReactomeContentService4R,
     stringr,
     networkD3,
     visNetwork,

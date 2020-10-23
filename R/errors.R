@@ -1,4 +1,5 @@
 # basic error messages
+#' @import ReactomeContentService4R 
 .basicErrMsgs <- function(input.list) {
   message("  Finding possible errors...")
   

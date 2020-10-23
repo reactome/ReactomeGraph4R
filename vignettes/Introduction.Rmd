@@ -165,11 +165,6 @@ rle$otherReactionLikeEvent[["displayName"]]
 The contect of these Events can actually be visualized in R using the `exportImage` function from the `ReactomeContentService4R` package! And it looks the same as that in [Pathway Browser](https://reactome.org/PathwayBrowser/#/R-HSA-8983711&PATH=R-HSA-168256,R-HSA-1280215,R-HSA-913531,R-HSA-1169410). 
 To get the pathway diagram of Pathway "OAS antiviral response" (stId: R-HSA-8983711) that we just retrieved, and highlight the RLE (stId: R-HSA-8983688) that we specified:
 
-``` r
-if (!"ReactomeContentService4R" %in% installed.packages()[ ,"Package"]) {
-  devtools::install_github("reactome/ReactomeContentService4R")
-}
-```
 ```{r export-img}
 library(ReactomeContentService4R)
 
@@ -248,7 +243,6 @@ Given the PubMed id or the title for a paper, Reactome instances related to this
 # fetch objects by paper title
 matchPaperObjects(displayName = "Aggresomes: a cellular response to misfolded proteins", type = "row")
 ```
-
 
 
 ## Network graph
