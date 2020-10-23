@@ -417,7 +417,7 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL,
 #' MATCH biological referrals
 #' 
 #' This method retrieves Reactome objects that are connected with the given 
-#' object in a _reverse_ relationship. For example, to find Pathways contained 
+#' object in a _reverse_ relationship. For example, to find Pathways containing 
 #' the given Reaction.
 #' 
 #' For now it just focuses on biological referrals in the following Classes: 
