@@ -1,5 +1,5 @@
 ---
-title: "ReactomeGraph4R: an R Interface for Reactome Graph Database"
+title: "ReactomeGraph4R: an R Interface for the Reactome Graph Database"
 author: Chi-Lam Poon
 date: "`r format(Sys.time(), '%m/%d/%Y')`"
 output: 
@@ -18,7 +18,7 @@ vignette: >
 
 Pathways, reactions, and biological entities in Reactome knowledge are systematically represented as an ordered network of molecular reactions. Graph database technology is an effective tool for modeling highly connected data, hence Reactome's relational database is imported in [Neo4j](https://neo4j.com/) to create one large interconnected graph. Instances are represented as _nodes_ and relationships between nodes as _edges_.
 
-The [`ReactomeGraph4R`](https://github.com/reactome/ReactomeGraph4R) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`ReactomeContentService4R`](https://github.com/reactome/ReactomeContentService4R) for querying **specific bits of information** to the Reactome Database through the RESTful API in Content Service.
+The [`ReactomeGraph4R`](https://github.com/reactome/ReactomeGraph4R) package is an R interface for retrieving **data with network structure** from [Reactome Graph Database](https://reactome.org/dev/graph-database). There is another R package [`ReactomeContentService4R`](https://github.com/reactome/ReactomeContentService4R) for querying **specific bits of information** to the Reactome Database through the RESTful API in the Content Service.
 
 With `ReactomeGraph4R`, you are able to fetch the interconnected data easily using R without the prerequisite of Neo4j's graph query language Cypher. This package is built on the Neo4j driver [`neo4r`](https://github.com/neo4j-rstats/neo4r), thus returned data are mainly same as those called by `neo4r` but with a little modifications, and are in these two formats:
 
@@ -28,11 +28,11 @@ With `ReactomeGraph4R`, you are able to fetch the interconnected data easily usi
 
 ## Setups
 
-Follow this [instruction](https://github.com/reactome/ReactomeGraph4R/blob/develop/README.md) to download and setup Reactome Graph Database.
+Follow this [instruction](https://github.com/reactome/ReactomeGraph4R/blob/develop/README.md) to download and setup the Reactome Graph Database.
 
-Then install `ReactomeGraph4R` package via CRAN:
+Then install `ReactomeGraph4R` package:
 ```{r install, eval=FALSE}
-install.packages("ReactomeGraph4R")
+devtools::install_github("reactome/ReactomeGraph4R")
 ```
 
 There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to login your local Neo4j database.
@@ -57,7 +57,7 @@ Note that this function only returns "row" data.
 
 ### Fetch by id
 
-The "id" input can be either non-Reactome or Reactome identifiers. If you use a non-Reactome id, remember that you _must_ also specify `databaseName` since the default one is "Reactome". For example, to get the Reactome instance associated with the circadian rhythmic gene _PER2_:
+The "id" input can be either non-Reactome or Reactome identifiers. If you use a non-Reactome id, remember that you _must_ also specify `databaseName` since the default one is "Reactome". For example, to get the Reactome instance associated with a circadian rhythmic gene _PER2_:
 
 ```{r basic-id-1}
 # Retrieve the object of PER2 gene
@@ -68,6 +68,14 @@ Now we know that the database name should be "COSMIC (genes)"! We can also try w
 
 ```{r basic-id-2}
 matchObject(id = 'R-HSA-400219')
+```
+
+For multiple ids, say you want to get more information for your significantly enriched pathways, you can use function `multiObjects`. The `speedUp` option can determine to use the [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) method or not, details see `?multiObjects`.
+
+```{r multi-ids}
+# retrieve multiple objects
+ids <- c('R-HSA-74158', 'R-HSA-1566977', 'R-HSA-3000157', 'R-HSA-3000178', 'R-HSA-216083')
+multiObjects(ids)
 ```
 
 ### Fetch by name
@@ -222,7 +230,7 @@ unique(roles$relationships$type)
 Diseases related to a PhysicalEntity or an Event could be found using function `matchDisease`. In reverse, you can also get PhysicalEntities/Events associated with a Disease.
 
 ```{r disease}
-# Fetch Reactome instances associated with 'neuropathy' in sheep
+# Fetch Reactome instances associated with 'neuropathy' in human
 matchDiseases(displayName = "neuropathy", species = "human", type = "row")
 ```
 
@@ -237,7 +245,6 @@ matchPaperObjects(displayName = "Aggresomes: a cellular response to misfolded pr
 ```
 
 
-
 ## Network graph
 
 The ability to view network graphs is definitely a big advantage of a graph database. Fortunately, R has developed into a powerful tool for network analysis. There are a number of R packages targeted network analysis and visualization, therefore we are able to get a graph just like the one in the Neo4j server, and even to set more visualization options! 
@@ -248,15 +255,17 @@ Here we will show a couple of examples to generate an interactive network graph 
 
 First install and load the following packages.
 
-### Installing packages for visualization
+### Package installation
 
 ```{r vis-loading}
 # install packages
 list.pkg <- c("stringr", "visNetwork", "networkD3", "wesanderson")
 new.pkg <- list.pkg[!(list.pkg %in% installed.packages()[ ,"Package"])]
-if (length(new.pkg)) install.packages(new.pkg)
+if (length(new.pkg)) {
+  install.packages(new.pkg, repos = "https://cloud.r-project.org/")
+}
 # load
-invisible(suppressPackageStartupMessages(lapply(list.pkg, library, character.only = T)))
+invisible(suppressPackageStartupMessages(lapply(list.pkg, library, character.only = TRUE)))
 ```
 
 
@@ -283,7 +292,9 @@ vis.nodes <- data.frame(id = nodes$id,
 
 vis.edges <- data.frame(from = relationships$startNode,
                         to = relationships$endNode,
-                        label = relationships$type)
+                        label = relationships$type,
+                        font.size = 16,
+                        font.color = 'steelblue')
 
 head(vis.nodes); head(vis.edges)
 ```
@@ -294,7 +305,7 @@ We are going to change the visual parameters of nodes and edges by adding them a
 # nodes parameters
 ## get palette colors with package 'wesanderson'
 node.colors <- as.character(wes_palette(n = length(unique(vis.nodes$group)), name = "Darjeeling2"))
-names(node.colors) <- unique(vis.nodes$group)
+names(node.colors) <- levels(factor(vis.nodes$group))
 ## NOTE: don't use `str_replace_all` here since 'TopLevelPathway' & 'Pathway' share the string 'Pathway' 
 vis.nodes$color.background <- node.colors[as.numeric(factor(vis.nodes$group))] # node color
 vis.nodes$color.border <- "lightgray"
@@ -311,7 +322,9 @@ vis.edges$color <- str_replace_all(vis.edges$label, edges.colors) # line color
 vis.edges$arrows <- "to" # arrows: 'from', 'to', or 'middle'
 vis.edges$smooth <- TRUE    # should the edges be curved?
 
-visnet <- visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", width = "100%")
+# height & width of the plot can be set here
+visnet <- visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", 
+                     height = "500px", width = "100%")
 visnet
 ```
 

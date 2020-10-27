@@ -1,4 +1,4 @@
-# ReactomeGraph4R: an R interface for Reactome Graph Database
+# ReactomeGraph4R: an R interface for the Reactome Graph Database
 
 <!-- badges: start -->
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
@@ -7,8 +7,8 @@
 
 ## Local Reactome Graph Database setup
 
-1. Get Docker: https://docs.docker.com/get-docker/
-2. Download and install Reactome Graph Database:
+1. Get Docker: https://docs.docker.com/get-docker
+2. Download and install current [Reactome Graph Database](https://reactome.org/download/current):
 ```
 mkdir -p $(pwd)/neo4j/data/databases
 # download the file
@@ -18,6 +18,7 @@ tar -zxvf $(pwd)/neo4j/data/databases/reactome.graphdb.tgz -C $(pwd)/neo4j/data/
 # run on docker
 docker run --name reactome_graph_db -p 7687:7687 -p 7474:7474 -e NEO4J_dbms_allow__upgrade=true -e NEO4J_AUTH=none -v $(pwd)/neo4j/data:/data neo4j:3.5.19
 ```
+For re-downloading a new release file, remember to remove the old container if using the same container name, and do note the owner and group of the directories.
 
 3. Lauch Neo4j through browser:
 ```
@@ -26,12 +27,11 @@ http://localhost:7474
 
 If you want to set a password, you can remove `NEO4J_AUTH=none` in the command. The default username and password are both `neo4j`, after login you will be prompted to change the new password.
 
-The next time you run the Graph Database, you can just start running docker and type:
+The next time you run the Graph Database, you can just start running docker and run:
 ```
 docker start reactome_graph_db
 ```
-
-You could also try to explore the Graph Database and query Reactome data using Cypher, more details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
+You could also try to explore the Graph Database and query data using Cypher, e.g. `MATCH (dbi:DBInfo) RETURN dbi.version`, more details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
 
 ## Installation
 
@@ -151,7 +151,9 @@ vis.nodes <- data.frame(id = nodes$id,
 
 vis.edges <- data.frame(from = relationships$startNode,
                         to = relationships$endNode,
-                        label = relationships$type)
+                        label = relationships$type,
+                        font.size = 16,
+                        font.color = 'steelblue')
 ```
 
 Add parameters for nodes:
@@ -159,12 +161,12 @@ Add parameters for nodes:
 library(wesanderson) # for color palette
 
 node.colors <- as.character(wes_palette(n = length(unique(vis.nodes$group)), name = "Darjeeling2"))
-names(node.colors) <- unique(vis.nodes$group)
+names(node.colors) <- levels(factor(vis.nodes$group))
 vis.nodes$color.background <- node.colors[as.numeric(factor(vis.nodes$group))]
 vis.nodes$color.border <- "lightgray"
 vis.nodes$color.border[vis.nodes$label == "UniProt:P33992 MCM5"] <- "pink"
 vis.nodes$color.highlight.border <- "darkred"
-vis.nodes$borderWidth <- 2 #> Node border width
+vis.nodes$borderWidth <- 2 # Node border width
 ```
 
 Add parameters for edges:
@@ -177,12 +179,13 @@ vis.edges$arrows <- "to"
 vis.edges$smooth <- TRUE
 
 library(visNetwork)
-visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5", width = "100%")
+visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5",
+           height = "500px", width = "100%")
 ```
 
 <img src="vignettes/figs/readme_network.png" width="100%" />
 
-Find the interactive one in the vignette!
+Find interactive graphs in the vignette!
 
 
 ## Feedback

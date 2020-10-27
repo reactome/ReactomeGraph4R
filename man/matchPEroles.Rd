@@ -16,15 +16,16 @@ matchPEroles(
 
 \item{pe.displayName}{displayName of a PhysicalEntity}
 
-\item{species}{name or taxon id or dbId or abbreviation of the specified species}
+\item{species}{name or taxon id or dbId or abbreviation of a species}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
 information of the given PhysicalEntity and its role(s)
 }
 \description{
-This method retrieve the role(s) of a given PhysicalEntity including:
+This function retrieves the role(s) of a given PhysicalEntity including:
 \itemize{
 \item Input
 \item Output
@@ -34,7 +35,8 @@ This method retrieve the role(s) of a given PhysicalEntity including:
 }
 \examples{
 matchPEroles(pe.id = "R-HSA-8944354", type = "graph")
-matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", species = "pig", type = "row")
+matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", 
+             species = "pig", type = "row")
 }
 \seealso{
 Other match: 

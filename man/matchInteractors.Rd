@@ -18,13 +18,16 @@ matchInteractors(
 
 \item{species}{name or taxon id or dbId or abbreviation of specified species}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
 interactions of a given PhysicalEntity
 }
 \description{
-Retrieve interactions of a given PhysicalEntity
+To retrieve interactions of a given PhysicalEntity (PE), it first finds the
+ReferenceEntity matched with the PE, then get the Interactions having
+"interactor" relationship with the ReferenceEntity.
 }
 \examples{
 matchInteractors(996766)

@@ -16,16 +16,20 @@ matchReactionsInPathway(
 
 \item{event.displayName}{displayName of an Event}
 
-\item{species}{name or taxon id or dbId or abbreviation of the specified species}
+\item{species}{name or taxon id or dbId or abbreviation of a species}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
-Reactions connected to the given Pathway/Reaction via "hasEvent" relationships
+Reactions connected to the given Pathway/Reaction via
+'hasEvent' relationships
 }
 \description{
-This method could find all Reactions connected with a given Pathway by the relationship "hasEvent".
-Also, the input can be a Reaction, the result would then be Pathway(s) linked via “hasEvent” together with other Reactions linked with the Pathways(s).
+This method could find all Reactions connected with a given Pathway by
+the relationship 'hasEvent'. Also, the input can be a Reaction, the result
+would then be Pathway(s) linked via 'hasEvent' together with other Reactions
+linked with the Pathways(s).
 }
 \examples{
 matchReactionsInPathway("R-HSA-1369062", type="graph")

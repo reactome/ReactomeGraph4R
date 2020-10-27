@@ -14,7 +14,7 @@ matchPrecedingAndFollowingEvents(
 )
 }
 \arguments{
-\item{event.id}{a stable or db id of an Event}
+\item{event.id}{stId/dbId of an Event}
 
 \item{event.displayName}{displayName of an Event}
 
@@ -22,18 +22,25 @@ matchPrecedingAndFollowingEvents(
 
 \item{depth}{number of depths}
 
-\item{all.depth}{if set to \code{TRUE}, all RLEs connected to the given Event in all depths returned}
+\item{all.depth}{if set to \code{TRUE}, all RLE(s) connected to the given Event
+in all depths returned}
 
-\item{type}{to return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{to return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
-preceding/following Events connected to the given Event in specified depth(s), default depth = 1
+preceding/following Events connected to the given Event in specified
+depth(s), default depth = 1
 }
 \description{
-To get Events connected with "precedingEvent" relationship
+This method can find preceding and following ReactionLikeEvents (RLEs) of a
+specific Event with the relationship 'precedingEvent'.
+The argument "depth" is used to describe the "variable length relationships"
+in Neo4j, default is 1 (i.e. immediately connected); or you can set
+\code{all.depth = TRUE} to retrieve the whole context.
 }
 \examples{
-matchPrecedingAndFollowingEvents("R-HSA-983150", all.depth=TRUE, type="row")
+matchPrecedingAndFollowingEvents("R-HSA-983150", depth=2, type="row")
 }
 \seealso{
 Other match: 

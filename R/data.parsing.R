@@ -10,7 +10,7 @@
 .parseJSON <- function(json.res, return.names, unique, error.info) {
   # return query syntax error if any
   if ("error_code" %in% names(json.res)) {
-    stop(json.res[["error_code"]], "\n", json.res[["error_message"]], call.=FALSE)
+    stop(json.res[["error_code"]],"\n",json.res[["error_message"]], call.=FALSE)
   }
   
   # transform into list
@@ -30,7 +30,7 @@
 
 
 .null_to_na <- function(list) {
-  for (i in 1:purrr::vec_depth(list) - 1){
+  for (i in seq(1, purrr::vec_depth(list)) - 1){
     list <- purrr::modify_depth(
       list, i, function(x){
         if (is.null(x)){
@@ -56,7 +56,7 @@
   
   # transform data (based on the logic in neo4r)
   res.data <- lapply(res.data, as.list)
-  res.data <- lapply(res.data, transpose)
+  res.data <- lapply(res.data, purrr::transpose)
   t.res.data <- transpose(res.data)
   
   # manipulate lists in 2nd depth & merge these lists into a dataframe
@@ -67,7 +67,7 @@
   if (unique) {
     res <- lapply(res, function(sublist) {
       sublist <- unique(sublist)
-      rownames(sublist) <- 1:nrow(sublist) # renew row names
+      rownames(sublist) <- seq(1, nrow(sublist)) # renew row names
       sublist
     })
   }
@@ -79,14 +79,14 @@
       # eg: matchObject(displayName="RCOR1 [nucleoplasm]", attribute=c("dbId", "displayName"))
       
       # get unique node names
-      node.names <- unique(sapply(strsplit(res.names, split="\\."), function(x) x[[1]]))
+      node.names <- unique(vapply(strsplit(res.names, split="\\."), function(x) x[[1]], character(1)))
       names(res) <- .goodName(node.names)
       if (length(node.names) != length(res)) {
         stop("Check inputed return names & RETURN clause")
       }
       
       # name the columns with specified attributes
-      node.names.with.dot <- unique(sapply(strsplit(res.names[grep("\\.", res.names)], split="\\."), function(x) x[[1]]))
+      node.names.with.dot <- unique(vapply(strsplit(res.names[grep("\\.", res.names)], split="\\."), function(x) x[[1]], character(1)))
       for (name in node.names.with.dot) {
         attr.name <- res.names[grep(name, res.names)]
         attr.name <- gsub(paste0(name, "."), "", attr.name)
@@ -115,8 +115,8 @@
   })
   
   # remove NA element if any
-  if (!all(!unlist(sapply(list, is.na)))) {
-    list <- list[!unlist(sapply(list, is.na))] 
+  if (!all(!unlist(vapply(list, is.na, logical(1))))) {
+    list <- list[!unlist(vapply(list, is.na, logical(1)))] 
   }
   
   list
@@ -126,7 +126,7 @@
 # turn list to data frame
 .rbindlist_to_df <- function(list) {
   # check if names of sublist are all the same
-  same.header <- all(sapply(list, function(x) identical(names(x), names(list[[1]])))) # list[[1]] as ref
+  same.header <- all(vapply(list, function(x) identical(names(x), names(list[[1]])), logical(1))) # list[[1]] as ref
   
   if (same.header) { 
     as.data.frame(data.table::rbindlist(list))
@@ -149,13 +149,17 @@
   for (node in c("startNode", "endNode")) {
     for (slot in c("dbId", "schemaClass")) {
       col.name <- paste0(node, ".", slot)
-      relationships[, col.name] <- sapply(as.character(relationships[, node]), function(x) nodes[nodes$id == x, ]$properties[[1]][[slot]])               
+      fun.value <- ifelse(slot == 'dbId', integer(1), character(1))
+      relationships[, col.name] <- vapply(as.character(relationships[, node]), 
+                    function(x) nodes[nodes$id == x, ]$properties[[1]][[slot]], 
+                    FUN.VALUE = fun.value)
     }
   }
   
   # rearrange columns
-  relationships <- relationships[ ,c("id", "type", "startNode", "startNode.dbId", "startNode.schemaClass",
-                                     "endNode", "endNode.dbId", "endNode.schemaClass", "properties")]
+  relationships <- relationships[ ,c("id", "type", "startNode", "startNode.dbId", 
+                            "startNode.schemaClass", "endNode", "endNode.dbId",
+                            "endNode.schemaClass", "properties")]
   # rename columns
   colnames(relationships)[which(colnames(relationships) %in% c("id", "startNode", "endNode"))] <- c("neo4jId", "startNode.neo4jId", "endNode.neo4jId")
   

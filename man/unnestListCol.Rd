@@ -11,6 +11,9 @@ unnestListCol(df, column = "properties")
 
 \item{column}{specific column to be unnested}
 }
+\value{
+an unnested dataframe for network visualization
+}
 \description{
 Unnest a column of lists in a dataframe
 }

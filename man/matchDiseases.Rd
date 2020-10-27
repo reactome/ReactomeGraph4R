@@ -16,15 +16,17 @@ matchDiseases(
 
 \item{displayName}{displayName of a PhysicalEntity/Event/Disease}
 
-\item{species}{name or taxon id or dbId or abbreviation of the specified species}
+\item{species}{name or taxon id or dbId or abbreviation of aspecies}
 
-\item{type}{return results as a list of dataframes (\strong{'row'}) or as a graph object (\strong{'graph'})}
+\item{type}{return results as a list of dataframes (\strong{'row'}),
+or as a graph object (\strong{'graph'})}
 }
 \value{
-Disease(s) related to the given PhysicalEntity/Reaction/Pathway; or instances related to the given Disease
+Disease(s) related to the given PhysicalEntity/Reaction/Pathway;
+or instances related to the given Disease
 }
 \description{
-Find Diseases related to a PhysicalEntity or an Event or
+To find Diseases related to a PhysicalEntity or an Event, or
 get PhysicalEntities/Events associated with a Disease in reverse
 }
 \examples{
