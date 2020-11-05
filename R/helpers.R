@@ -12,7 +12,7 @@
   } else {
     # get version
     dbi <- neo4r::call_neo4j('MATCH (dbi:DBInfo) RETURN dbi.version', con)
-    packageStartupMessage(paste0("Connection built, welcome to Reactome Graph Database v", dbi[["dbi.version"]]$value, "!"))
+    packageStartupMessage(paste0("Successfully connected to the local Reactome Graph Database v", dbi[["dbi.version"]]$value, "!"))
   }
 }
 
