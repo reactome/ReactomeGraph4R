@@ -20,12 +20,15 @@
   json.results <- as.list(json.list[[1]])
   
   # send errors if '(no changes, no records)'
-  .sendErrors(json.results, error.info)
+  any.err <- .sendErrors(json.results, error.info)
   
-  # Turn NULL to NA & get the data
-  res.data <- .null_to_na(json.results)
-  
-  .parse_row(res.data, return.names, unique)
+  if (any.err) {
+    return(NULL)
+  } else {
+    # Turn NULL to NA & get the data
+    res.data <- .null_to_na(json.results)
+    .parse_row(res.data, return.names, unique)
+  }
 }
 
 
@@ -57,7 +60,7 @@
   # transform data (based on the logic in neo4r)
   res.data <- lapply(res.data, as.list)
   res.data <- lapply(res.data, purrr::transpose)
-  t.res.data <- transpose(res.data)
+  t.res.data <- purrr::transpose(res.data)
   
   # manipulate lists in 2nd depth & merge these lists into a dataframe
   res <- map_depth(t.res.data, 2, .manipulate_list) %>%

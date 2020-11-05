@@ -180,17 +180,21 @@ multiObjects <- function(ids, databaseName="Reactome",
     }
     
     id <- NULL # prevent note in R CMD Check
-    res <- foreach(id=ids, .packages=c("ReactomeGraph4R", "purrr"), .combine=dfcomb) %dopar% {
+    res <- foreach(id=ids, .packages=c("ReactomeGraph4R", "purrr", 
+                   "ReactomeContentService4R"), .combine=dfcomb) %dopar% {
       object <- matchObject(id, databaseName=databaseName)
-      object[['databaseObject']]
+      if (!is.null(object)) {
+        return(object[['databaseObject']])
+      }
     }
     stopCluster(cl)
   } else {
     # use lapply instead
     all.list <- lapply(seq_along(ids), function(index) 
                         matchObject(id=ids[index], databaseName=databaseName))
-    all.list <- flatten(all.list)
+    all.list <- flatten(all.list) # automatically drops NULL elements
     res <- rbindlist(all.list, fill=TRUE)
+    # it returns 'Null data.table (0 rows and 0 cols)' for an empty list
   }
   res
 }

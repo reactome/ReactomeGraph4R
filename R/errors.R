@@ -1,12 +1,10 @@
 # basic error messages
-#' @import ReactomeContentService4R 
 .basicErrMsgs <- function(input.list) {
-  message("  Finding possible errors...")
-  
   # get local connexion object
   con <- getOption("con")
   
   # get the spellCheck function
+  options(base.address = "https://reactome.org/ContentService")
   spellCheck <- utils::getFromNamespace(".spellCheck", "ReactomeContentService4R")
   errBullets <- utils::getFromNamespace("format_error_bullets", "rlang")
   
@@ -33,7 +31,7 @@
     )
   }
   # correct database name
-  if (input.list[["database"]] != "Reactome") {
+  if (!is.null(input.list[["database"]]) && input.list[["database"]] != "Reactome") {
     message(errBullets(
       c("i" = "'databaseName': try `matchObject(schemaClass='ReferenceDatabase')` to get details"))
     )   
@@ -67,14 +65,25 @@
 .sendErrors <- function(res, error.info=NULL) {
   if (length(res) == 0) {
     # (no changes, no records)
-    message(rlang::format_error_bullets(c("x"="No data returned")))
+    message(rlang::format_error_bullets(
+      c("x" = "No data returned, finding possible errors...")))
     
     # send custom errors
     if(!is.null(error.info)) {
+      info <- purrr::discard(error.info, is.null)
+      info.list <- lapply(seq_along(info), function(idx) {
+        paste0(names(info)[idx], ": ", sQuote(info[[idx]]))
+      })
+      # print non-null input(s)
+      message(paste(info.list, collapse = ", "))
       .basicErrMsgs(error.info)
-      stop("Try to check above argument inputs. \n", 
-           "  Or perhaps just no result object can be found", call.=FALSE)
+      message(rlang::format_error_bullets(
+        c("i" = "Try to check above arguments, or it's not found in the current database")))
     }
+    return(TRUE)
+  } else {
+    # no error sent
+    return(FALSE)
   }
 }
 
