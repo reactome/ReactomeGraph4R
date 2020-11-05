@@ -35,7 +35,7 @@ referrals of the given instance
 }
 \description{
 This method retrieves Reactome objects that are connected with the given
-object in a \emph{reverse} relationship. For example, to find Pathways contained
+object in a \emph{reverse} relationship. For example, to find Pathways containing
 the given Reaction.
 }
 \details{
