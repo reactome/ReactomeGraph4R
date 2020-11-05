@@ -5,7 +5,7 @@
   
   # get the spellCheck function
   options(base.address = "https://reactome.org/ContentService")
-  spellCheck <- utils::getFromNamespace(".spellCheck", "ReactomeContentService4R")
+  spellCheck <- utils::getFromNamespace("spellCheck", "ReactomeContentService4R")
   errBullets <- utils::getFromNamespace("format_error_bullets", "rlang")
   
   # spell check id
