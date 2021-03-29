@@ -8,30 +8,33 @@
 ## Local Reactome Graph Database setup
 
 1. Get Docker: https://docs.docker.com/get-docker
-2. Download and install current [Reactome Graph Database](https://reactome.org/download/current):
+2. Download and install the current [Reactome Graph Database](https://reactome.org/download/current):
 ```
 mkdir -p $(pwd)/neo4j/data/databases
+
 # download the file
 wget https://reactome.org/download/current/reactome.graphdb.tgz -P $(pwd)/neo4j/data/databases
+
 # extract
 tar -zxvf $(pwd)/neo4j/data/databases/reactome.graphdb.tgz -C $(pwd)/neo4j/data/databases
+
 # run on docker
 docker run --name reactome_graph_db -p 7687:7687 -p 7474:7474 -e NEO4J_dbms_allow__upgrade=true -e NEO4J_AUTH=none -v $(pwd)/neo4j/data:/data neo4j:3.5.19
 ```
-For re-downloading a new release file, remember to remove the old container if using the same container name, and do note the owner and group of the directories.
+For re-downloading a new release file, remember to remove the old container if using the same container name, and do note the owner and group of the directories. You can also list all containers by `docker ps -a`.
 
 3. Lauch Neo4j through browser:
 ```
 http://localhost:7474
 ```
-
 If you want to set a password, you can remove `NEO4J_AUTH=none` in the command. The default username and password are both `neo4j`, after login you will be prompted to change the new password.
 
-The next time you run the Graph Database, you can just start running docker and run:
+The next time you run the Graph Database, you can just start running docker and execute:
 ```
 docker start reactome_graph_db
 ```
-You could also try to explore the Graph Database and query data using Cypher, e.g. `MATCH (dbi:DBInfo) RETURN dbi.version`, more details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
+
+Try to explore the Graph Database and query data using Cypher, e.g. `MATCH (dbi:DBInfo) RETURN dbi.version`, more details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
 
 ## Installation
 
@@ -50,11 +53,12 @@ devtools::install_github("neo4j-rstats/neo4r")
 
 Read complementary vignette at https://chilampoon.github.io/projects/ReactomeGraph4R.html
 
-### Loading and connection
+### Loading and connecting
 
 Load the package
 ```
 library(ReactomeGraph4R)
+login()
 ```
 Then connect to local Neo4j server by answering two questions:
 
@@ -185,7 +189,7 @@ visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5",
 
 <img src="vignettes/figs/readme_network.png" width="100%" />
 
-Find interactive graphs in the vignette!
+Find the interactive graphs in the vignette!
 
 
 ## Feedback

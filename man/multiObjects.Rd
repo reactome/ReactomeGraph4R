@@ -25,8 +25,8 @@ information. It can only accept \strong{ids} for now.
 }
 \examples{
 # "ids" can be Reactome or non-Reactome ids
-ids <- c("P02741", "P08887", "P08505", "Q9GZQ8", "Q9NZH6")
-res <- multiObjects(ids, databaseName = "UniProt", speedUp = TRUE)
+ids <- c("P02741", "P08887", "P08505", "Q9GZQ8")
+res <- multiObjects(ids, databaseName="UniProt", speedUp=TRUE)
 
 }
 \seealso{

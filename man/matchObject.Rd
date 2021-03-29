@@ -42,7 +42,7 @@ e.g. \code{list(isChimeric = TRUE, isInDisease = TRUE)}}
 Reactome database object(s) that meets all specified conditions
 }
 \description{
-This function can fetch instance by setting arguments:
+This function can fetch instance by setting the following arguments:
 \itemize{
 \item \strong{id}: a Reactome dbId/stId, or non-Reactome id
 \item \strong{displayName}: a display name of a Reactome object

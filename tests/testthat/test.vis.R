@@ -23,6 +23,3 @@ test_that("Visualize returned graph object", {
   expect_is(vis, c("visNetwork", "htmlwidget"))
   expect_output(str(vis), "List of 8")
 })
-
-
-

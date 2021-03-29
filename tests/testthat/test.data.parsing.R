@@ -27,4 +27,3 @@ test_that("graph data returned from neo4r", {
   expect_is(unnested.nodes, "data.frame")
 })
 
-
