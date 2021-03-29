@@ -3,7 +3,7 @@
 
 #' Basic query for database objects
 #' 
-#' This function can fetch instance by setting arguments:
+#' This function can fetch instance by setting the following arguments:
 #' - \strong{id}: a Reactome dbId/stId, or non-Reactome id
 #' - \strong{displayName}: a display name of a Reactome object
 #' - \strong{schemaClass}: a specific schema class, 
@@ -163,8 +163,8 @@ matchObject <- function(id=NULL,displayName=NULL,schemaClass=NULL,species=NULL,
 #' @seealso [matchObject] for details
 #' @examples
 #' # "ids" can be Reactome or non-Reactome ids
-#' ids <- c("P02741", "P08887", "P08505", "Q9GZQ8", "Q9NZH6")
-#' res <- multiObjects(ids, databaseName = "UniProt", speedUp = TRUE)
+#' ids <- c("P02741", "P08887", "P08505", "Q9GZQ8")
+#' res <- multiObjects(ids, databaseName="UniProt", speedUp=TRUE)
 #' 
 
 multiObjects <- function(ids, databaseName="Reactome",
@@ -179,9 +179,12 @@ multiObjects <- function(ids, databaseName="Reactome",
       rbindlist(list(...), fill=TRUE)
     }
     
+    con <- getOption("con")
     id <- NULL # prevent note in R CMD Check
-    res <- foreach(id=ids, .packages=c("ReactomeGraph4R", "purrr", 
-                   "ReactomeContentService4R"), .combine=dfcomb) %dopar% {
+    res <- foreach(id=ids, .packages=c("ReactomeGraph4R","purrr", 
+                      "ReactomeContentService4R"), .combine=dfcomb) %dopar% {
+      # log in again using user's id & password
+      login(con)
       object <- matchObject(id, databaseName=databaseName)
       if (!is.null(object)) {
         return(object[['databaseObject']])

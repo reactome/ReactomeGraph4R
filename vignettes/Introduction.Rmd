@@ -39,10 +39,11 @@ Then install `ReactomeGraph4R` package:
 devtools::install_github("reactome/ReactomeGraph4R")
 ```
 
-There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to login your local Neo4j database.
+There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to log in your local Neo4j database.
 
 ```{r setup}
 library(ReactomeGraph4R)
+login()
 ```
 
 

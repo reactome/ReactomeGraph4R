@@ -1,49 +1,76 @@
 ## helper functions
 
-# hooks
-.onAttach <- function(libname, pkgname) {
-  # connect and store the variable to namespace
-  con <- .login()
-  options(con = con)
-  
-  if (con$ping() != 200) {
-    # an error msg has been printed in the above line `con$ping()`
-    stop("FYI - tutorials for graph db: https://reactome.org/dev/graph-database", call.=FALSE)
-  } else {
-    # get version
-    dbi <- neo4r::call_neo4j('MATCH (dbi:DBInfo) RETURN dbi.version', con)
-    packageStartupMessage(paste0("Successfully connected to the local Reactome Graph Database v", dbi[["dbi.version"]]$value, "!"))
-  }
-}
+
+#' Log in to the local neo4j server
+#' 
+#' Before running `login()`, you have to successfully finish the Reactome Neo4j 
+#' database setup and build a connection on your local machine (details see: 
+#' https://github.com/reactome/ReactomeGraph4R). This command is to create a 
+#' neo4r object that is used to communicate between R and Neo4j, also to do a 
+#' sanity check for the connection.
+#' 
+#' @param con an existed connexion object. It is not necessary to log in 
+#' for the first time.
+#' @return connection to the local neo4j database
+#' @importFrom utils askYesNo
+#' @importFrom getPass getPass
+#' @importFrom neo4r neo4j_api call_neo4j
+#' @export
+#' @examples
+#' # The first step to the graph database!
+#' login()
+#' \dontrun{
+#' # you can also check the neo4r connexion object by running:
+#' getOption("con")
+#' }
 
 
-# log into local neo4j server
-.login <- function() {
-  # specify port
-  port <- 7474
-  while (TRUE) {
-    url <- paste0("http://localhost:", port)
-    ans <- utils::askYesNo(paste0("Is the url '", url, "'?"))
+login <- function(con=NULL) {
+  if (is.null(con)) {
+    # specify port, default is 7474
+    port <- 7474
+    while (TRUE) {
+      url <- paste0("http://localhost:", port)
+      ans <- askYesNo(paste0("Is the url '", url, "'?"))
+      
+      if (ans) break
+      if (is.na(ans)) stop("Cancel", call.=FALSE)
+      port <- readline(prompt="specify port: ")
+    }
     
-    if (ans) break
-    if (is.na(ans)) stop("Cancel", call.=FALSE)
-    port <- readline(prompt="specify port: ")
-  }
-  
-  # get user & pwd if NEO4J_AUTH is not none
-  auth <- utils::askYesNo("Does Neo4J require authentication?", default=FALSE)
-  if (auth) {
-    user <- readline(prompt="Username: ")
-    # prevent warnings in R CHECK
-    suppressMessages(password <- getPass::getPass("Password: "))
+    # get user & pwd if NEO4J_AUTH is not none
+    auth <- askYesNo("Does Neo4J require authentication?", default=FALSE)
+    if (auth) {
+      user <- readline(prompt="Username: ")
+      # prevent warnings in R CHECK
+      suppressMessages(password <- getPass("Password: "))
+    } else {
+      user <- "neo4j"
+      password <- "neo4j"
+    }
+    
+    # get neo4r connexion object
+    con <- neo4j_api$new(url=url, user=user, password=password)
+    
+    # connect and store the variable to namespace
+    options(con = con)
+    
+    if (con$ping() != 200) {
+      # an error msg has been printed in the above line `con$ping()`
+      stop("FYI - tutorials for graph db: https://reactome.org/dev/graph-database", call.=FALSE)
+    } else {
+      # get version
+      dbi <- call_neo4j('MATCH (dbi:DBInfo) RETURN dbi.version', con)
+      packageStartupMessage(paste0("Successfully connected to the local Reactome Graph Database v", dbi[["dbi.version"]]$value, "!"))
+    } 
   } else {
-    user <- "neo4j"
-    password <- "neo4j"
+    # for doParallel workers that don't access the global env
+    url <- con$.__enclos_env__$self$url
+    user <- con$.__enclos_env__$self$user
+    pwd <- con$.__enclos_env__$private$password
+    new.con <- neo4j_api$new(url=url, user=user, password=pwd)
+    options(con = new.con)
   }
-  
-  # get neo4r connexion object
-  con <- neo4r::neo4j_api$new(url=url, user=user, password=password)
-  con
 }
 
 
