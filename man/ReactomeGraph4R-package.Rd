@@ -7,10 +7,9 @@
 \title{ReactomeGraph4R: R Interface for the Reactome Graph Database}
 \description{
 Pathways, reactions, and biological entities in Reactome knowledge 
-    are systematically represented as an ordered network and stored in the Reactome 
-    Graph Database. This package is provides an interface to query interconnected 
-    datain the Reactome Graph Database. There is also another package, 
-    ReactomeContentService4R, for queries in the Content Service.
+    are systematically represented as an ordered network and stored in the 
+    Reactome Graph Database. This package provides an interface to query 
+    interconnected data in the local Neo4j database.
 }
 \seealso{
 Useful links:

@@ -6,7 +6,6 @@
 
 
 ## Local Reactome Graph Database setup
-
 1. Get Docker: https://docs.docker.com/get-docker
 2. Download and install the current [Reactome Graph Database](https://reactome.org/download/current):
 ```
@@ -27,7 +26,7 @@ For re-downloading a new release file, remember to remove the old container if u
 ```
 http://localhost:7474
 ```
-If you want to set a password, you can remove `NEO4J_AUTH=none` in the command. The default username and password are both `neo4j`, after login you will be prompted to change the new password.
+If you want to set a password, you can remove `NEO4J_AUTH=none` in the `docker run` command. The default username and password are both `neo4j`, after login you will be prompted to change the new password.
 
 The next time you run the Graph Database, you can just start running docker and execute:
 ```
@@ -37,34 +36,24 @@ docker start reactome_graph_db
 Try to explore the Graph Database and query data using Cypher, e.g. `MATCH (dbi:DBInfo) RETURN dbi.version`, more details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
 
 ## Installation
-
 Install from GitHub:
 ```
 devtools::install_github("reactome/ReactomeGraph4R")
 ```
 
-👉 Note that package [`neo4r`](https://github.com/neo4j-rstats/neo4r) __(>= 0.1.3)__ is required, install the lastest one from GitHub:
-```
-devtools::install_github("neo4j-rstats/neo4r")
-```
-
-
 ## Examples
-
-Read complementary vignette at https://chilampoon.github.io/projects/ReactomeGraph4R.html
+Read the complementary vignette at https://chilampoon.github.io/projects/ReactomeGraph4R.html
 
 ### Loading and connecting
-
 Load the package
 ```
 library(ReactomeGraph4R)
 login()
 ```
-Then connect to local Neo4j server by answering two questions:
+The `login()` is a required step that allows you to connect to your local Neo4j server by answering two questions:
 
 - Is the url 'http://localhost:7474'? (Yes/no/cancel)
 - Does Neo4J require authentication? (Yes/no/cancel)
-
 
 Results are in these two formats:
 
@@ -72,7 +61,6 @@ Results are in these two formats:
 - "graph": a graph object with nodes and relationships information
 
 ### Row data
-
 Using Reactome id:
 ``` r
 matchPrecedingAndFollowingEvents(event.id = "R-HSA-8983688", type = "row")
