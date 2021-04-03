@@ -75,7 +75,6 @@ matchObject <- function(id=NULL,displayName=NULL,schemaClass=NULL,species=NULL,
   
   if (!is.null(relationship)) {
     # retrieve data based on relationship
-    
     message(infoBullets(c("i" = paste0("Note that other arguments except ",
                     "'limit' should be NULL if you specify 'relationship'"))))
     message(infoBullets(c("i" = "Turn them into NULL")))
@@ -84,6 +83,7 @@ matchObject <- function(id=NULL,displayName=NULL,schemaClass=NULL,species=NULL,
     # check if it's a correct relationship name
     .checkInfo(relationship, "relationship")
     
+    relatoinship <- paste(relationship, collapse =  "|")
     c.MATCH <- paste0('MATCH (n1)-[r:', relationship, ']->(n2)')
     c.WHERE <- ""
     c.RETURN <- 'RETURN n1,n2'
