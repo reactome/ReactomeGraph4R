@@ -182,5 +182,3 @@
     return(labels[labels %in% class])
   }
 }
-
-

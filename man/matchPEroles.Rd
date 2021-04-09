@@ -34,9 +34,11 @@ This function retrieves the role(s) of a given PhysicalEntity including:
 }
 }
 \examples{
+\dontrun{
 matchPEroles(pe.id = "R-HSA-8944354", type = "graph")
 matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", 
              species = "pig", type = "row")
+}
 }
 \seealso{
 Other match: 

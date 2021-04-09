@@ -4,7 +4,7 @@
 \name{ReactomeGraph4R-package}
 \alias{ReactomeGraph4R}
 \alias{ReactomeGraph4R-package}
-\title{ReactomeGraph4R: R Interface for the Reactome Graph Database}
+\title{ReactomeGraph4R: Interface for the Reactome Graph Database}
 \description{
 Pathways, reactions, and biological entities in Reactome knowledge 
     are systematically represented as an ordered network and stored in the 

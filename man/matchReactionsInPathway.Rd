@@ -32,8 +32,10 @@ would then be Pathway(s) linked via 'hasEvent' together with other Reactions
 linked with the Pathways(s).
 }
 \examples{
+\dontrun{
 matchReactionsInPathway("R-HSA-1369062", type="graph")
 matchReactionsInPathway("R-HSA-5682285", type="row")
+}
 }
 \seealso{
 Other match: 

@@ -31,7 +31,7 @@ If set to \code{NULL}, all attributes returned}
 \item{property}{a list of property keys and values,
 e.g. \code{list(isChimeric = TRUE, isInDisease = TRUE)}}
 
-\item{relationship}{a relationship type}
+\item{relationship}{relationship type(s)}
 
 \item{limit}{the number of returned objects}
 
@@ -54,11 +54,12 @@ list of properties: \verb{con <- getOption("con"); con$get_property_keys()}
 list of relationships: \verb{con <- getOption("con"); con$get_relationships()}
 \item Species information can see
 \href{https://reactome.org/content/schema/objects/Species}{here}, or run
-\code{View(matchObject(schemaClass = "Species"))[['databaseObject']]} to view a
+\code{View(matchObject(schemaClass = "Species")[['databaseObject']])} to view a
 full table
 }
 }
 \examples{
+\dontrun{
 # fetch instance by class
 all.species <- matchObject(schemaClass = "Species")
 
@@ -80,7 +81,7 @@ property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
 matchObject(property = property.list, 
     returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
     limit=20)
-
+}
 }
 \seealso{
 \link{multiObjects} for multiple ids

@@ -17,9 +17,10 @@
 #' @importFrom neo4r neo4j_api call_neo4j
 #' @export
 #' @examples
+#' \dontrun{
 #' # The first step to the graph database!
 #' login()
-#' \dontrun{
+#' 
 #' # you can also check the neo4r connexion object by running:
 #' getOption("con")
 #' }
@@ -185,5 +186,4 @@ login <- function(con=NULL) {
   name <- gsub('\\<lr\\>', 'literatureReference', name)
   name
 }
-
 
