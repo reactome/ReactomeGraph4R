@@ -7,11 +7,11 @@
 
 ## Local Reactome Graph Database setup
 1. Get Docker: https://docs.docker.com/get-docker
-2. Download and install the current [Reactome Graph Database](https://reactome.org/download/current):
+2. Download and install the current Reactome Graph Database:
 ```
 mkdir -p $(pwd)/neo4j/data/databases
 
-# download the file
+# download the db file
 wget https://reactome.org/download/current/reactome.graphdb.tgz -P $(pwd)/neo4j/data/databases
 
 # extract
@@ -20,20 +20,25 @@ tar -zxvf $(pwd)/neo4j/data/databases/reactome.graphdb.tgz -C $(pwd)/neo4j/data/
 # run on docker
 docker run --name reactome_graph_db -p 7687:7687 -p 7474:7474 -e NEO4J_dbms_allow__upgrade=true -e NEO4J_AUTH=none -v $(pwd)/neo4j/data:/data neo4j:3.5.19
 ```
-For re-downloading a new release file, remember to remove the old container if using the same container name, and do note the owner and group of the directories. You can also list all containers by `docker ps -a`.
+For re-downloading a new release file, remember to remove (`docker rm`) the old container if using the same container name, and do note the owner and group of the directories. You can also list all containers by `docker ps -a`.
 
-3. Lauch Neo4j through browser:
+3. Launch Neo4j through browser:
 ```
 http://localhost:7474
 ```
 If you want to set a password, you can remove `NEO4J_AUTH=none` in the `docker run` command. The default username and password are both `neo4j`, after login you will be prompted to change the new password.
 
+Try to explore the Graph Database and query data using Cypher, e.g. getting the database version:
+```
+MATCH (dbi:DBInfo) RETURN dbi.version
+```
+More details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
+
+
 The next time you run the Graph Database, you can just start running docker and execute:
 ```
 docker start reactome_graph_db
 ```
-
-Try to explore the Graph Database and query data using Cypher, e.g. `MATCH (dbi:DBInfo) RETURN dbi.version`, more details see this [tutorial](https://reactome.org/dev/graph-database/extract-participating-molecules).
 
 ## Installation
 Install from GitHub:
@@ -50,7 +55,7 @@ Load the package
 library(ReactomeGraph4R)
 login()
 ```
-The `login()` is a required step that allows you to connect to your local Neo4j server by answering two questions:
+The `login()` is a _required_ step that allows you to connect to your local Neo4j server, by answering two questions:
 
 - Is the url 'http://localhost:7474'? (Yes/no/cancel)
 - Does Neo4J require authentication? (Yes/no/cancel)
@@ -183,5 +188,4 @@ Find the interactive graphs in the vignette!
 ## Feedback
 
 We'd love to hear your feedback! Feel free to open an [issue](https://github.com/reactome/ReactomeGraph4R/issues) on GitHub.
-
 

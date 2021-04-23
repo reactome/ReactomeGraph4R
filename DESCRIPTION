@@ -2,8 +2,10 @@ Package: ReactomeGraph4R
 Title: Interface for the Reactome Graph Database
 Version: 0.99.1
 Authors@R: c(
-    person("Chi-Lam", "Poon", role = c("aut", "cre"), email = "clpoon807@gmail.com", 
+    person("Chi-Lam", "Poon", role = c("aut", "cre"), 
+            email = "clpoon807@gmail.com", 
             comment = c(ORCID = "0000-0001-6298-7099")),
+    person("Robin", "Haw", role = "aut", email = "Robin.Haw@oicr.on.ca"),
     person("Reactome", role = "cph", email = "help@reactome.org"))
 Description: Pathways, reactions, and biological entities in Reactome knowledge 
     are systematically represented as an ordered network and stored in the 
@@ -15,6 +17,8 @@ URL: https://github.com/reactome/ReactomeGraph4R
 BugReports: https://github.com/reactome/ReactomeGraph4R/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Depends:
+    R (>= 3.5.0)
 Imports:
     neo4r,
     utils,
