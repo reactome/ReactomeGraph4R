@@ -4,7 +4,7 @@
 #' Basic query for database objects
 #' 
 #' This function can fetch instance by setting the following arguments:
-#' - \strong{id}: a Reactome dbId/stId, or non-Reactome id
+#' - \strong{id}: a Reactome dbId/stId, or non-Reactome id (e.g. UniProt)
 #' - \strong{displayName}: a display name of a Reactome object
 #' - \strong{schemaClass}: a specific schema class, 
 #' see \href{https://reactome.org/content/schema/DatabaseObject}{Data Schema}
@@ -451,8 +451,8 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL,
 #' or as a graph object (\strong{'graph'})
 #' @return referrals of the given instance
 #' @examples
-#' matchReferrals("113454", type="row")
 #' \dontrun{
+#' matchReferrals("113454", type="row")
 #' matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
 #' }
 #' @rdname matchReferrals

@@ -21,9 +21,10 @@ neo4r object that is used to communicate between R and Neo4j, also to do a
 sanity check for the connection.
 }
 \examples{
+\dontrun{
 # The first step to the graph database!
 login()
-\dontrun{
+
 # you can also check the neo4r connexion object by running:
 getOption("con")
 }
