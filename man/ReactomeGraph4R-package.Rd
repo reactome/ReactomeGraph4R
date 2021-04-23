@@ -22,11 +22,6 @@ Useful links:
 \author{
 \strong{Maintainer}: Chi-Lam Poon \email{clpoon807@gmail.com} (\href{https://orcid.org/0000-0001-6298-7099}{ORCID})
 
-Authors:
-\itemize{
-  \item Robin Haw \email{Robin.Haw@oicr.on.ca}
-}
-
 Other contributors:
 \itemize{
   \item Reactome \email{help@reactome.org} [copyright holder]
