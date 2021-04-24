@@ -8,7 +8,8 @@
   # glue clauses in the list
   for (list.idx in seq(1, length(clause.list))) {
     clause <- as.character(clause.list[[list.idx]])
-    clause <- paste0("MATCH p", list.idx, " = ", clause) # no need to worry about names of elements in the list
+    # no need to worry about names of elements in the list
+    clause <- paste0("MATCH p", list.idx, " = ", clause)
     final.clause <- ifelse(list.idx == 1, clause, paste(final.clause, clause))
   }
   final.clause
@@ -28,7 +29,7 @@
     # get database name
     db <- filters[["databaseName"]]
     
-    # can't fetch data if adding Reactome/PubMed as databaseName so just remove it
+    # can't fetch data if adding Reactome/PubMed as databaseName so just remove
     if (any(filters[["databaseName"]] %in% c("Reactome", "PubMed"))) {
       filters <- filters[names(filters) != "databaseName"]
     }
@@ -37,7 +38,8 @@
   # remove NULL elements in filters
   filters <- filters[!vapply(filters, is.null, logical(1))]
   
-  # complete WHERE clause by adding filter arguments (eg. id, species) from a query function
+  # complete WHERE clause by adding filter arguments (eg. id, species) 
+  # from a query function
   for (filter in names(filters)) {
     # check if the property name correct
     .checkInfo(filter, "property")
@@ -47,18 +49,22 @@
       add <- paste0(node, .genIdTerm(filters[[filter]], database = db))
     } else if (filter == "speciesName") {
       # automatically change different forms of species names into 'displayName'
-      add <- paste0(node, '.speciesName = "', .matchSpecies(filters[[filter]], "displayName"), '"')
+      add <- paste0(node, '.speciesName = "', 
+                    .matchSpecies(filters[[filter]], "displayName"), '"')
     } else if (filter == "schemaClass") {
       # only for function matchObject() for now 
       add <- paste0('"', filters[[filter]], '"', ' IN LABELS(', node, ')')
     } else {
       # add dquotes for those include alphabet
-      tmp <- ifelse(grepl("^[0-9]+$", filters[[filter]]), filters[[filter]], paste0('"', filters[[filter]], '"'))
+      tmp <- ifelse(grepl("^[0-9]+$", filters[[filter]]), 
+                    filters[[filter]], 
+                    paste0('"', filters[[filter]], '"'))
       add <- paste0(node, ".", filter, " = ", tmp)
     }
     
     # glue the elements
-    clause <- ifelse(!grepl(node, clause), paste0(clause, add), paste0(clause, " AND ", add))
+    clause <- ifelse(!grepl(node, clause), paste0(clause, add), 
+                                           paste0(clause, " AND ", add))
   }
   clause
 }
@@ -88,7 +94,8 @@
   
   # since depth = 1 by default
   if (!all && depth == 1) {
-    message("Retrieving immediately connected instances... Specify depth-related arguments for more depths")
+    message("Retrieving immediately connected instances... ", 
+            "Specify depth-related arguments for more depths")
   }
   
   # replace

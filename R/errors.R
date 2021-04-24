@@ -1,4 +1,6 @@
 # basic error messages
+#' @importFrom ReactomeContentService4R spellCheck
+#' @importFrom rlang format_error_bullets
 .basicErrMsgs <- function(input.list) {
   # get local connexion object
   con <- getOption("con")
@@ -51,11 +53,10 @@
                                     tmp.WHERE, ' RETURN dbo.speciesName'), con)
     # check if the given species matched or not
     if (!species.name %in% all.species) {
-      message(errBullets(
-          c("x" = paste0("Species " ,sQuote(species), ":"),
-            paste0(sQuote(species.name), 
-            " is not in the Species attribute of the given object")))
-      )
+      tmp.msg.1 <- paste0("Species " ,sQuote(species), ":")
+      tmp.msg.2 <- paste0(sQuote(species.name), 
+                        " is not in the Species attribute of the given object")
+      message(errBullets(c("x" = tmp.msg.1, tmp.msg.2)))
     }
   }
 }
@@ -64,7 +65,7 @@
 # send basic error messages if no data returned, or print syntax error
 .sendErrors <- function(res, error.info=NULL) {
   if (length(res) == 0) {
-    # (no changes, no records)
+    # "(no changes, no records)"
     message(rlang::format_error_bullets(
       c("x" = "No data returned, finding possible errors...")))
     
@@ -78,7 +79,7 @@
       message(paste(info.list, collapse = ", "))
       .basicErrMsgs(error.info)
       message(rlang::format_error_bullets(
-        c("i" = "Try to check above arguments, or it's not found in the current database")))
+        c("i" = "Please check the above arguments; or it's not in the current database")))
     }
     return(TRUE)
   } else {
@@ -116,8 +117,8 @@
   throw <- throw[throw != "id"]
   if (length(throw) > 0) {
     throw <- paste(throw, collapse = ", ")
-    message(rlang::format_error_bullets(c("x" = paste0("The ", type, " '", 
-                                        throw, "' is not in this database"))))
+    tmp.msg <- paste0("The ", type, " '", throw, "' is not in this database")
+    message(rlang::format_error_bullets(c("x" = tmp.msg)))
     return(FALSE)
   } else {
     return(TRUE)
@@ -133,7 +134,8 @@
   if (!is.null(type)) {
     with(parent.frame(), {
       if (missing(type)) {
-        message("Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'")
+        message("Type argument not specified, retrieving 'row' data... ",
+                "For graph data, specify type='graph'")
       }
       type <- match.arg(type, several.ok=FALSE)
     })
@@ -166,14 +168,14 @@
   # send error
   if (!any(class %in% labels)) {
     if (stopOrNot) {
-      stop(rlang::format_error_bullets(
-              c("x" = paste0("Please specify an instance of Class ", 
-                             paste(sQuote(class), collapse=",")))),
-          call.=FALSE)
+      tmp.msg <- paste0("Please specify an instance of Class ", 
+                        paste(sQuote(class), collapse=","))
+      stop(rlang::format_error_bullets(c("x" = tmp.msg)), call.=FALSE)
     } else {
+      tmp.msg <- paste0("This is not an instance of Class ", 
+                        paste(sQuote(class), collapse=","))
       message(rlang::format_error_bullets(
-              c("x" = paste0("This is not an instance of Class ", 
-                             paste(sQuote(class), collapse=","))))
+              c("x" = tmp.msg))
              )
       # will return NULL
     }

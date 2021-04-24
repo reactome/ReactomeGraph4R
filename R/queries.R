@@ -76,8 +76,9 @@ matchObject <- function(id=NULL,displayName=NULL,schemaClass=NULL,species=NULL,
   
   if (!is.null(relationship)) {
     # retrieve data based on relationship
-    message(infoBullets(c("i" = paste0("Note that other arguments except ",
-                    "'limit' should be NULL if you specify 'relationship'"))))
+    tmp.info <- paste0("Note that other arguments except ",
+                       "'limit' should be NULL if you specify 'relationship'")
+    message(infoBullets(c("i" = tmp.info)))
     message(infoBullets(c("i" = "Turn them into NULL")))
     id <- displayName <- schemaClass <- NULL -> species -> returnedAttributes -> property
     
@@ -100,8 +101,9 @@ matchObject <- function(id=NULL,displayName=NULL,schemaClass=NULL,species=NULL,
     # modify WHERE clause if 'property' specified
     if (!is.null(property)) {
       if (!is.null(id) || !is.null(displayName)) {
-        message(infoBullets(c("i" = paste0("Do not input 'id' or 'displayName'",
-                              " if you've specified 'property'"))))
+        tmp.info <- paste0("Do not input 'id' or 'displayName'",
+                           " if you've specified 'property'")
+        message(infoBullets(c("i" = tmp.info)))
         message(infoBullets(c("i" = "Turn them into NULL")))
       }
       .checkInfo(names(property), "property")

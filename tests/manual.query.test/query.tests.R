@@ -7,6 +7,9 @@ login() # already built a connection to the reactome neo4j database
 url <- matchObject(schemaClass = "URL")
 head(url[["databaseObject"]])
 
+# check error
+matchObject(schemaClass = "haha")
+
 # fetch instance by name
 matchObject(displayName = "RCOR1 [nucleoplasm]", 
             returnedAttributes=c("stId", "speciesName"))
