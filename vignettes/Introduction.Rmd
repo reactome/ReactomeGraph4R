@@ -40,6 +40,10 @@ devtools::install_github("reactome/ReactomeGraph4R")
 
 There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to log in your local Neo4j database.
 
+```{r lib, echo=FALSE}
+library(ReactomeGraph4R)
+```
+
 ```{r setup, eval=FALSE}
 library(ReactomeGraph4R)
 login()
@@ -52,6 +56,10 @@ login()
 
 ```
 ## Successfully connected to the local Reactome Graph Database v76!
+```
+
+```{r getData, echo=FALSE}
+load("data/vignette.Rdata")
 ```
 
 ## Basic query
@@ -109,6 +117,10 @@ ids <- c('R-HSA-74158', 'R-HSA-1566977', 'R-HSA-3000157', 'R-HSA-3000178', 'R-HS
 multiObjects(ids)
 ```
 
+```{r multi-ids-data, echo=FALSE}
+multiObj
+```
+
 ### Fetch by name
 
 Instances can also be fetched by their "displayNames". Do note that **spaces** and **symbols** within the name are required. Here we focus on the complex SUMO1:TOP1 in nucleoplasm "SUMO1:TOP1 [nucleoplasm]" in _C. elegans_:
@@ -136,6 +148,10 @@ entity.set <- matchObject(schemaClass = "EntitySet", species = "human",
 entity.set[["databaseObject"]] # show as dataframe
 ```
 
+```{r basic-class-data, echo=FALSE}
+entity.set[["databaseObject"]]
+```
+
 ### Fetch by property
 
 By specifying the `property`, nodes with the given property (or properties), which are actually attributes/slots of Reactome instances, could be returned. Let's try to get instances that are chimeric and are in disease.
@@ -145,6 +161,10 @@ By specifying the `property`, nodes with the given property (or properties), whi
 matchObject(property = list(isChimeric = TRUE, isInDisease = TRUE), limit = 10)[["databaseObject"]]
 ```
 
+```{r basic-property-data, echo=FALSE}
+property
+```
+
 ### Fetch by relationship
 
 The actual Cypher query for this command is `MATCH (n1)-[r:relationship]->(n2) RETURN n1,n2`, therefore the `n1` and `n2` dataframes in the returned list have the same number of rows, and every two rows with the same index are connected with the given relationship.
@@ -152,6 +172,10 @@ The actual Cypher query for this command is `MATCH (n1)-[r:relationship]->(n2) R
 ```{r basic-rel, eval=FALSE}
 # Get nodes connected with 'hasComponent'
 matchObject(relationship = "hasComponent", limit = 3)
+```
+
+```{r basic-rel-data, echo=FALSE}
+rleObj
 ```
 
 
@@ -170,9 +194,13 @@ pou5f1.hierarchy <- matchHierarchy(id = "R-HSA-500358", type = "row")
 str(pou5f1.hierarchy, max.level = 1)
 ```
 
+```{r hierarchy-data, echo=FALSE}
+str(pou5f1.hierarchy, max.level = 1)
+```
+
 The RNA sequence we specified is in the `physicalEntity` dataframe of the result list. It's directly connected with those Events in the `event` dataframe, which are then connected with Events in the `upperevent`. Relationships between all these objects are in `relationship` dataframe:
 
-```{r hierarchy-2, eval=FALSE}
+```{r hierarchy-2}
 # select essential columns to show
 pou5f1.hierarchy$relationships[,c(2,4,5,7,8)]
 ```
@@ -185,6 +213,9 @@ This method can find all __ReactionLikeEvents__ (RLEs) connected with a given Pa
 ```{r r-in-p, eval=FALSE}
 # Find Reactions connected with R-HSA-8983688
 rle <- matchReactionsInPathway(event.id = "R-HSA-8983688", type = "row")
+```
+
+```{r r-in-p-data}
 str(rle, max.level = 1)
 
 # The one in reactionLikeEvent is what we search for
@@ -196,7 +227,7 @@ rle$pathway
 
 `otherReactionLikeEvent` are RLEs other than "OAS1 oligomerizes" connected with Pathway "OAS antiviral response".
 
-```{r r-in-p-2, eval=FALSE}
+```{r r-in-p-2}
 # Show displayNames of other RLEs
 rle$otherReactionLikeEvent[["displayName"]]
 ```
@@ -204,7 +235,7 @@ rle$otherReactionLikeEvent[["displayName"]]
 The contect of these Events can actually be visualized in R using the `exportImage` function from the `ReactomeContentService4R` package! And it looks the same as that in [Pathway Browser](https://reactome.org/PathwayBrowser/#/R-HSA-8983711&PATH=R-HSA-168256,R-HSA-1280215,R-HSA-913531,R-HSA-1169410). 
 To get the pathway diagram of Pathway "OAS antiviral response" (stId: R-HSA-8983711) that we just retrieved, and highlight the RLE (stId: R-HSA-8983688) that we specified:
 
-```{r export-img, eval=FALSE}
+```{r export-img}
 library(ReactomeContentService4R)
 
 # Export pathway diagram of "OAS antiviral response"
@@ -223,6 +254,10 @@ rle.context <- matchPrecedingAndFollowingEvents(event.id = "R-HSA-8983688", dept
 str(rle.context, max.level = 1)
 ```
 
+```{r p-f-event-1-data, echo=FALSE}
+str(rle.context, max.level = 1)
+```
+
 
 ### Referrals
 
@@ -234,6 +269,33 @@ We would look at a Regulation "Negative gene expression regulation by 'EGR2 [nuc
 # Find referrals of the given Regulation
 matchReferrals(id = 6810147, type = "row")
 ```
+
+```
+## Retrieving immediately connected instances... Specify depth-related arguments for more depths
+```
+```
+## $Regulation
+##                        schemaClass
+## 1 NegativeGeneExpressionRegulation
+##                                                   displayName     stIdVersion
+## 1 Negative gene expression regulation by 'EGR2 [nucleoplasm]' R-HSA-6810147.1
+##      dbId          stId
+## 1 6810147 R-HSA-6810147
+## 
+## $databaseObject
+##     schemaClass               displayName     stIdVersion    dbId          stId
+## 1 BlackBoxEvent HOXB1 gene is transcribed R-HSA-5617454.3 5617454 R-HSA-5617454
+##    speciesName isInDisease releaseDate                      name isChimeric
+## 1 Homo sapiens       FALSE  2015-12-15 HOXB1 gene is transcribed      FALSE
+##   category isInferred
+## 1  omitted       TRUE
+## 
+## $relationships
+##   neo4jId        type startNode.neo4jId startNode.dbId startNode.schemaClass
+## 1 5505941 regulatedBy           1330001        5617454         BlackBoxEvent
+##   endNode.neo4jId endNode.dbId              endNode.schemaClass properties
+## 1         1330002      6810147 NegativeGeneExpressionRegulation       1, 4
+```
 The dbId of _endNode_ (`endNode.dbId` in `$relationships`) is exactly the dbId we just specified.
 
 
@@ -244,6 +306,13 @@ Interactions of a PhysicalEntity (PE) could be retrieved by `matchInteractors`. 
 ```{r interactor, eval=FALSE}
 # Retrieve interaction data of the given PE
 interactors <- matchInteractors(pe.id = "R-HSA-419535")
+```
+
+```
+## Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'
+```
+
+```{r interactor-2}
 str(interactors, max.level = 1)
 interactors$interaction
 ```
@@ -254,9 +323,16 @@ interactors$interaction
 The roles of PhysicalEntities include "input", "output", "regulator", "catalyst", which are represented as relationships "input" ,"output", "regulatedBy", "catalystActivity" respectively. Therefore, we could retrieve instances that are possibly connected with the given PhysicalEntity via these relationships, and see the exact role(s) from the existing relationships. 
 We'll take a look at a Polymer "HSBP1 oligomer [cytosol]" and input it into `matchPEroles`. Either `id` or `displayName` could be specified.
 
-```{r, eval=FALSE}
+```{r PEroles, eval=FALSE}
 # Find possible roles of the given PE
 roles <- matchPEroles(pe.displayName = "HSBP1 oligomer [cytosol]")
+```
+
+```
+## Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'
+```
+
+```{r PEroles-data}
 str(roles, max.level = 1)
 
 # get the roles (relationships type)
@@ -273,6 +349,13 @@ Diseases related to a PhysicalEntity or an Event could be found using function `
 matchDiseases(displayName = "neuropathy", species = "human", type = "row")
 ```
 
+```
+## Retrieving instances associated with the given Disease...
+```
+
+```{r disease-data, echo=FALSE}
+disease
+```
 
 ### Papers
 
@@ -281,6 +364,10 @@ Given the PubMed id or the title for a paper, Reactome instances related to this
 ```{r paper, eval=FALSE}
 # fetch objects by paper title
 matchPaperObjects(displayName = "Aggresomes: a cellular response to misfolded proteins", type = "row")
+```
+
+```{r paper=data, echo=FALSE}
+papers
 ```
 
 
@@ -296,7 +383,7 @@ First install and load the following packages.
 
 ### Package installation
 
-```{r vis-loading, eval=FALSE}
+```{r vis-loading}
 # install packages
 list.pkg <- c("stringr", "visNetwork", "networkD3", "wesanderson")
 new.pkg <- list.pkg[!(list.pkg %in% installed.packages()[ ,"Package"])]
@@ -315,10 +402,12 @@ We will try the [`visNetwork`](https://datastorm-open.github.io/visNetwork/) pac
 ```{r vis-1, eval=FALSE}
 # Get graph output data
 graph <- matchHierarchy(displayName = "UniProt:P33992 MCM5", databaseName = "UniProt", type = "graph")
+```
+
+```{r vis-1-data}
 relationships <- graph[["relationships"]]
 nodes <- graph[["nodes"]]
 nodes <- unnestListCol(df = nodes, column = "properties") # unnest the 'properties' column of lists
-
 head(nodes); head(relationships)
 
 
@@ -340,7 +429,7 @@ head(vis.nodes); head(vis.edges)
 
 We are going to change the visual parameters of nodes and edges by adding them as columns in the dataframes. More customizations see the `visNetwork` [documentation](http://datastorm-open.github.io/visNetwork/) or `?vignette("Introduction-to-visNetwork")`.
 
-```{r vis-2, eval=FALSE}
+```{r vis-2}
 # nodes parameters
 ## get palette colors with package 'wesanderson'
 node.colors <- as.character(wes_palette(n = length(unique(vis.nodes$group)), name = "Darjeeling2"))
@@ -369,7 +458,7 @@ visnet
 
 Add a drop-down menu:
 
-```{r vis-drop-down, eval=FALSE}
+```{r vis-drop-down}
 # Rename column name 'group' to 'Class' for displaying in the window
 names(visnet[["x"]][["nodes"]]) <- gsub("group", "Class", names(visnet[["x"]][["nodes"]]))
 visOptions(visnet, highlightNearest = TRUE, selectedBy = "Class")
@@ -380,7 +469,7 @@ visOptions(visnet, highlightNearest = TRUE, selectedBy = "Class")
 
 We can also take a look at another package [`networkD3`](http://christophergandrud.github.io/networkD3/), which generates network graphs using [D3](http://d3js.org/) javascript library.
 
-```{r d3-1, eval=FALSE}
+```{r d3-1}
 # the node ids MUST be numeric, and start from 0
 nodes.idx <- as.character(as.numeric(factor(nodes$id)) - 1)
 names(nodes.idx) <- nodes$id
