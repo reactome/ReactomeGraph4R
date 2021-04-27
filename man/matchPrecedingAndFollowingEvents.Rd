@@ -40,9 +40,8 @@ in Neo4j, default is 1 (i.e. immediately connected); or you can set
 \code{all.depth = TRUE} to retrieve the whole context.
 }
 \examples{
-\dontrun{
-matchPrecedingAndFollowingEvents("R-HSA-983150", depth=2, type="row")
-}
+stId <- "R-HSA-983150"
+# matchPrecedingAndFollowingEvents(event.id=stId, depth=2, type="row")
 }
 \seealso{
 Other match: 

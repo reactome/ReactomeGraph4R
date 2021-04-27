@@ -24,11 +24,10 @@ allows you to input many ids and get an aggregated table for their detailed
 information. It can only accept \strong{ids} for now.
 }
 \examples{
-\dontrun{
-# "ids" can be Reactome or non-Reactome ids
+## "ids" can be Reactome or non-Reactome ids
 ids <- c("P02741", "P08887", "P08505", "Q9GZQ8")
-res <- multiObjects(ids, databaseName="UniProt", speedUp=TRUE)
-}
+#res <- multiObjects(ids, databaseName="UniProt", speedUp=TRUE)
+
 }
 \seealso{
 \link{matchObject} for details

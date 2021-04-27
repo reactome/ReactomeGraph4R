@@ -30,9 +30,8 @@ ReferenceEntity matched with the PE, then get the Interactions having
 "interactor" relationship with the ReferenceEntity.
 }
 \examples{
-\dontrun{
-matchInteractors(996766)
-}
+pe.id <- 996766
+# matchInteractors(pe.id)
 }
 \seealso{
 Other match: 

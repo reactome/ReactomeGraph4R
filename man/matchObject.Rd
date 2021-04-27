@@ -59,29 +59,28 @@ full table
 }
 }
 \examples{
-\dontrun{
-# fetch instance by class
-all.species <- matchObject(schemaClass = "Species")
+## fetch instance by class
+# all.species <- matchObject(schemaClass = "Species")
 
-# fetch instance by name
-matchObject(displayName = "RCOR1 [nucleoplasm]", 
-           returnedAttributes=c("stId", "speciesName"))
+## fetch instance by name
+# matchObject(displayName = "RCOR1 [nucleoplasm]", 
+#           returnedAttributes=c("stId", "speciesName"))
 
-# fetch instance by id
+## fetch instance by id
 ## Reactome id
-matchObject(id = "R-HSA-9626034")
+# matchObject(id = "R-HSA-9626034")
 ## non-Reactome id
-matchObject(id = "P60484", databaseName = "UniProt")
+# matchObject(id = "P60484", databaseName = "UniProt")
 
-# fecth instances by relationship
-matchObject(relationship="inferredTo", limit=10)
+## fecth instances by relationship
+# matchObject(relationship="inferredTo", limit=10)
 
-# fetch instances by property
+## fetch instances by property
 property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
-matchObject(property = property.list, 
-    returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
-    limit=20)
-}
+# matchObject(property = property.list, 
+#    returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+#    limit=20)
+    
 }
 \seealso{
 \link{multiObjects} for multiple ids

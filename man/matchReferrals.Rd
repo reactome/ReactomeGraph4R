@@ -44,10 +44,8 @@ For now it just focuses on biological referrals in the following Classes:
 , "Interaction", "AbstractModifiedResidue".
 }
 \examples{
-\dontrun{
-matchReferrals("113454", type="row")
-matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
-}
+stId <- "R-HSA-112479"
+# matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
 }
 \seealso{
 Other match: 

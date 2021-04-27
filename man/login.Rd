@@ -24,8 +24,8 @@ sanity check for the connection.
 \dontrun{
 # The first step to the graph database!
 login()
-
+}
 # you can also check the neo4r connexion object by running:
 getOption("con")
-}
+
 }

@@ -33,12 +33,11 @@ This function retrieves the hierarchical data of a given Event
 (Pathway or Reaction) or Entity (PhysicalEntity or ReferenceEntity).
 }
 \examples{
-\dontrun{
-# use the Reactome displayName of a UniProt object
-matchHierarchy(displayName="UniProt:P04637 TP53", 
-               databaseName="UniProt", type="row")
-matchHierarchy(id="R-HSA-1369062", type="graph")
-}
+## use the Reactome displayName of a UniProt object
+uniprot.name <- "UniProt:P04637 TP53"
+# matchHierarchy(displayName=uniprot.name, 
+#                databaseName="UniProt", type="row")
+# matchHierarchy(id="R-HSA-1369062", type="graph")
 }
 \seealso{
 Other match: 

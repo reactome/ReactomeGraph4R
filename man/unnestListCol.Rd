@@ -18,7 +18,5 @@ an unnested dataframe for network visualization
 Unnest a column of lists in a dataframe
 }
 \examples{
-\dontrun{
-nodes <- unnestListCol(graph$nodes, "properties")
-}
+# nodes <- unnestListCol(graph$nodes, "properties")
 }

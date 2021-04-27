@@ -32,29 +32,28 @@
 #' \href{https://reactome.org/content/schema/objects/ReferenceDatabase}{here}
 #' @return Reactome database object(s) that meets all specified conditions
 #' @examples
-#' \dontrun{
-#' # fetch instance by class
-#' all.species <- matchObject(schemaClass = "Species")
+#' ## fetch instance by class
+#' # all.species <- matchObject(schemaClass = "Species")
 #' 
-#' # fetch instance by name
-#' matchObject(displayName = "RCOR1 [nucleoplasm]", 
-#'            returnedAttributes=c("stId", "speciesName"))
+#' ## fetch instance by name
+#' # matchObject(displayName = "RCOR1 [nucleoplasm]", 
+#' #           returnedAttributes=c("stId", "speciesName"))
 #' 
-#' # fetch instance by id
+#' ## fetch instance by id
 #' ## Reactome id
-#' matchObject(id = "R-HSA-9626034")
+#' # matchObject(id = "R-HSA-9626034")
 #' ## non-Reactome id
-#' matchObject(id = "P60484", databaseName = "UniProt")
+#' # matchObject(id = "P60484", databaseName = "UniProt")
 #' 
-#' # fecth instances by relationship
-#' matchObject(relationship="inferredTo", limit=10)
+#' ## fecth instances by relationship
+#' # matchObject(relationship="inferredTo", limit=10)
 #' 
-#' # fetch instances by property
+#' ## fetch instances by property
 #' property.list <- list(hasEHLD = TRUE, isInDisease = TRUE)
-#' matchObject(property = property.list, 
-#'     returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
-#'     limit=20)
-#' }
+#' # matchObject(property = property.list, 
+#' #    returnedAttributes = c("displayName", "stId", "isInDisease", "hasEHLD"), 
+#' #    limit=20)
+#'     
 #' @rdname matchObject
 #' @family match 
 #' @seealso [multiObjects] for multiple ids
@@ -165,11 +164,10 @@ matchObject <- function(id=NULL,displayName=NULL,schemaClass=NULL,species=NULL,
 #' @export 
 #' @seealso [matchObject] for details
 #' @examples
-#' \dontrun{
-#' # "ids" can be Reactome or non-Reactome ids
+#' ## "ids" can be Reactome or non-Reactome ids
 #' ids <- c("P02741", "P08887", "P08505", "Q9GZQ8")
-#' res <- multiObjects(ids, databaseName="UniProt", speedUp=TRUE)
-#' }
+#' #res <- multiObjects(ids, databaseName="UniProt", speedUp=TRUE)
+#' 
 
 multiObjects <- function(ids, databaseName="Reactome",
                          speedUp=FALSE, cluster=2) {
@@ -227,9 +225,8 @@ multiObjects <- function(ids, databaseName="Reactome",
 #' @return preceding/following Events connected to the given Event in specified 
 #' depth(s), default depth = 1
 #' @examples
-#' \dontrun{
-#' matchPrecedingAndFollowingEvents("R-HSA-983150", depth=2, type="row")
-#' }
+#' stId <- "R-HSA-983150"
+#' # matchPrecedingAndFollowingEvents(event.id=stId, depth=2, type="row")
 #' @rdname matchPrecedingAndFollowingEvents
 #' @family match
 #' @export 
@@ -280,12 +277,11 @@ matchPrecedingAndFollowingEvents <- function(event.id=NULL, event.displayName=NU
 #' or as a graph object (\strong{'graph'})
 #' @return hierarchical instances of the given id and databaseName
 #' @examples
-#' \dontrun{
-#' # use the Reactome displayName of a UniProt object
-#' matchHierarchy(displayName="UniProt:P04637 TP53", 
-#'                databaseName="UniProt", type="row")
-#' matchHierarchy(id="R-HSA-1369062", type="graph")
-#' }
+#' ## use the Reactome displayName of a UniProt object
+#' uniprot.name <- "UniProt:P04637 TP53"
+#' # matchHierarchy(displayName=uniprot.name, 
+#' #                databaseName="UniProt", type="row")
+#' # matchHierarchy(id="R-HSA-1369062", type="graph")
 #' @rdname matchHierarchy
 #' @family match
 #' @export 
@@ -346,9 +342,8 @@ matchHierarchy <- function(id=NULL, displayName=NULL, databaseName="Reactome",
 #' or as a graph object (\strong{'graph'})
 #' @return interactions of a given PhysicalEntity
 #' @examples
-#' \dontrun{
-#' matchInteractors(996766)
-#' }
+#' pe.id <- 996766
+#' # matchInteractors(pe.id)
 #' @rdname matchInteractors
 #' @family match
 #' @export 
@@ -391,10 +386,9 @@ matchInteractors <- function(pe.id=NULL, pe.displayName=NULL,
 #' @return Reactions connected to the given Pathway/Reaction via 
 #' 'hasEvent' relationships
 #' @examples
-#' \dontrun{
-#' matchReactionsInPathway("R-HSA-1369062", type="graph")
-#' matchReactionsInPathway("R-HSA-5682285", type="row")
-#' }
+#' reaction <- "R-HSA-1369062"
+#' # matchReactionsInPathway(event.id=reaction, type="graph")
+#' # matchReactionsInPathway("R-HSA-5682285", type="row")
 #' @rdname matchReactionsInPathway
 #' @family match
 #' @export 
@@ -453,10 +447,8 @@ matchReactionsInPathway <- function(event.id=NULL, event.displayName=NULL,
 #' or as a graph object (\strong{'graph'})
 #' @return referrals of the given instance
 #' @examples
-#' \dontrun{
-#' matchReferrals("113454", type="row")
-#' matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
-#' }
+#' stId <- "R-HSA-112479"
+#' # matchReferrals("R-HSA-112479", main=FALSE, all.depth=TRUE, type="row")
 #' @rdname matchReferrals
 #' @family match
 #' @export 
@@ -532,11 +524,11 @@ matchReferrals <- function(id=NULL, displayName=NULL, main=TRUE, depth=1,
 #' or as a graph object (\strong{'graph'})
 #' @return information of the given PhysicalEntity and its role(s)
 #' @examples
-#' \dontrun{
-#' matchPEroles(pe.id = "R-HSA-8944354", type = "graph")
-#' matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", 
-#'              species = "pig", type = "row")
-#' }
+#' stId <- "R-HSA-8944354"
+#' # matchPEroles(pe.id = stId, type = "graph")
+#' 
+#' # matchPEroles(pe.displayName = "2SUMO1:MITF [nucleoplasm]", 
+#' #              species = "pig", type = "row")
 #' @rdname matchPEroles
 #' @family match
 #' @export 
@@ -577,10 +569,9 @@ matchPEroles <- function(pe.id=NULL, pe.displayName=NULL,
 #' @return Disease(s) related to the given PhysicalEntity/Reaction/Pathway; 
 #' or instances related to the given Disease
 #' @examples
-#' \dontrun{
-#' matchDiseases(displayName="neuropathy", species="M. musculus", type="row")
-#' matchDiseases(id="R-HSA-162588", type="graph")
-#' }
+#' disease <- "neuropathy"
+#' # matchDiseases(displayName=disease, species="M. musculus", type="row")
+#' # matchDiseases(id="R-HSA-162588", type="graph")
 #' @rdname matchDiseases
 #' @family match
 #' @export 
@@ -639,14 +630,13 @@ matchDiseases <- function(id=NULL, displayName=NULL, species=NULL,
 #' or as a graph object (\strong{'graph'})
 #' @return Reactome instances associated with a paper
 #' @examples
-#' \dontrun{
-#' # fetch Reactome instances by paper title
-#' matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance")
+#' ## fetch Reactome instances by paper title
+#' paper <- "Chaperone-mediated autophagy at a glance"
+#' # matchPaperObjects(displayName=paper)
 #' 
-#' # fetch Reactome instances by pubmed id
-#' matchPaperObjects(pubmed.id="20797626", type="graph")
-#' matchPaperObjects(pubmed.id="23515720", type="row")
-#' }
+#' ## fetch Reactome instances by pubmed id
+#' # matchPaperObjects(pubmed.id="20797626", type="graph")
+#' # matchPaperObjects(pubmed.id="23515720", type="row")
 #' @rdname matchPaperObjects
 #' @family match
 #' @export 

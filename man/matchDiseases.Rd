@@ -30,10 +30,9 @@ To find Diseases related to a PhysicalEntity or an Event, or
 get PhysicalEntities/Events associated with a Disease in reverse
 }
 \examples{
-\dontrun{
-matchDiseases(displayName="neuropathy", species="M. musculus", type="row")
-matchDiseases(id="R-HSA-162588", type="graph")
-}
+disease <- "neuropathy"
+# matchDiseases(displayName=disease, species="M. musculus", type="row")
+# matchDiseases(id="R-HSA-162588", type="graph")
 }
 \seealso{
 Other match: 

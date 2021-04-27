@@ -3,9 +3,7 @@
 #' @param df dataframe where a column to be unnested
 #' @param column specific column to be unnested
 #' @examples
-#' \dontrun{
-#' nodes <- unnestListCol(graph$nodes, "properties")
-#' }
+#' # nodes <- unnestListCol(graph$nodes, "properties")
 #' @importFrom purrr map
 #' @importFrom data.table rbindlist
 #' @return an unnested dataframe for network visualization

@@ -25,14 +25,13 @@ Reactome instances associated with a paper
 Fetch Reactome instances related to a paper by its PubMed id or title
 }
 \examples{
-\dontrun{
-# fetch Reactome instances by paper title
-matchPaperObjects(displayName="Chaperone-mediated autophagy at a glance")
+## fetch Reactome instances by paper title
+paper <- "Chaperone-mediated autophagy at a glance"
+# matchPaperObjects(displayName=paper)
 
-# fetch Reactome instances by pubmed id
-matchPaperObjects(pubmed.id="20797626", type="graph")
-matchPaperObjects(pubmed.id="23515720", type="row")
-}
+## fetch Reactome instances by pubmed id
+# matchPaperObjects(pubmed.id="20797626", type="graph")
+# matchPaperObjects(pubmed.id="23515720", type="row")
 }
 \seealso{
 Other match: 
