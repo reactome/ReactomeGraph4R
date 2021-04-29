@@ -31,12 +31,7 @@ Aside from performing basic Cypher queries and formatting the results as R objec
 
 ## Setups
 
-Follow this [instruction](https://github.com/reactome/ReactomeGraph4R/blob/develop/README.md) to download and setup the Reactome Graph Database.
-
-Then install `ReactomeGraph4R` package:
-```
-devtools::install_github("reactome/ReactomeGraph4R")
-```
+Follow this [instruction](https://github.com/reactome/ReactomeGraph4R/blob/develop/README.md) to download and setup the Reactome Graph Database, then install `ReactomeGraph4R` package.
 
 There are two questions needed to be answered for Neo4j server connection when loading the package. You can change the url port if it's not `7474`. And if the Neo4j authentication is required, the username and password are same as the ones to log in your local Neo4j database.
 
@@ -52,11 +47,10 @@ login()
 ```
 ## Is the url 'http://localhost:7474'? (Yes/no/cancel) 
 ## Does Neo4J require authentication? (yes/No/cancel)
-```
 
-```
 ## Successfully connected to the local Reactome Graph Database v76!
 ```
+
 
 ```{r getData, echo=FALSE}
 load("data/vignette.Rdata")
@@ -79,34 +73,23 @@ Note that this function only returns "row" data.
 
 The "id" input can be either non-Reactome or Reactome identifiers. If you use a non-Reactome id, remember that you _must_ also specify `databaseName` since the default one is "Reactome". For example, to get the Reactome instance associated with a circadian rhythmic gene _PER2_:
 
-```{r basic-id-1, eval=FALSE}
+```{r basic-id, eval=FALSE}
 # Retrieve the object of PER2 gene
 # NOTE: if you're unsure which database to specify, you have to leave it as NULL
 matchObject(id = "PER2", databaseName = NULL)
 ```
 
+```{r basic-id-data, echo=FALSE}
+per2
 ```
-## $databaseObject
-##            schemaClass identifier   databaseName              displayName
-## 1 ReferenceDNASequence       PER2 COSMIC (genes) COSMIC (genes):PER2 PER2
-##       dbId geneName                                                     url
-## 1 11509503     PER2 http://cancer.sanger.ac.uk/cosmic/gene/overview?ln=PER2
-```
-
 Now we know that the database name should be "COSMIC (genes)"! We can also try with a Reactome id "R-HSA-400219":
 
 ```{r basic-id-2, eval=FALSE}
 matchObject(id = 'R-HSA-400219')
 ```
 
-```
-## $databaseObject
-##   schemaClass  speciesName     oldStId isInDisease releaseDate
-## 1    Reaction Homo sapiens REACT_25088       FALSE  2010-09-21
-##                                    displayName    stIdVersion   dbId
-## 1 Beta-TrCP1 binds phosphorylated PER proteins R-HSA-400219.1 400219
-##                                           name         stId category isInferred
-## 1 Beta-TrCP1 binds phosphorylated PER proteins R-HSA-400219  binding       TRUE
+```{r basic-id-2-data, echo=FALSE}
+HSA_400219
 ```
 
 For multiple ids, say you want to get more information for your significantly enriched pathways, you can use function `multiObjects`. The `speedUp` option can determine to use the [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) method or not, details see `?multiObjects`.
@@ -129,12 +112,8 @@ Instances can also be fetched by their "displayNames". Do note that **spaces** a
 matchObject(displayName = "SUMO1:TOP1 [nucleoplasm]", species = "C. elegans")
 ```
 
-```
-## $databaseObject
-##   schemaClass            speciesName isInDisease              displayName
-## 1     Complex Caenorhabditis elegans       FALSE SUMO1:TOP1 [nucleoplasm]
-##       stIdVersion     dbId       name          stId
-## 1 R-CEL-4641301.1 10549504 SUMO1:TOP1 R-CEL-4641301
+```{r basic-name-data, echo=FALSE}
+sumo
 ```
 
 ### Fetch by class
@@ -248,13 +227,13 @@ exportImage(id = "R-HSA-8983711", output = "diagram",
 
 With the diagram shown above, we can see that the Reaction highlighted in blue is in the middle of a Reaction cascade, with other RLEs immediately preceding and following it. In order to know what these preceding and following Reactions are, we can use function `matchPrecedingAndFollowingEvents` to find RLEs linked via "precedingEvent". The argument `depth` is used to describe the "variable length relationships", the default value is 1 (i.e. immediately connected); or you can set `all.depth = TRUE` for retrieving the whole context. Details see `?matchPrecedingAndFollowingEvents`.
 
-```{r p-f-event-1, eval=FALSE}
+```{r p-f-event, eval=FALSE}
 # Retrieve RLE context with depth = 2
 rle.context <- matchPrecedingAndFollowingEvents(event.id = "R-HSA-8983688", depth = 2, type = "row")
 str(rle.context, max.level = 1)
 ```
 
-```{r p-f-event-1-data, echo=FALSE}
+```{r p-f-event-data, echo=FALSE}
 str(rle.context, max.level = 1)
 ```
 
@@ -265,36 +244,13 @@ Usually we query data in a way like parent to child `(parent) --> (child)`, wher
 
 We would look at a Regulation "Negative gene expression regulation by 'EGR2 [nucleoplasm]" with dbId "6810147":
 
-```{r referrals, eval=FALSE}
+```{r referral, eval=FALSE}
 # Find referrals of the given Regulation
 matchReferrals(id = 6810147, type = "row")
 ```
 
-```
-## Retrieving immediately connected instances... Specify depth-related arguments for more depths
-```
-```
-## $Regulation
-##                        schemaClass
-## 1 NegativeGeneExpressionRegulation
-##                                                   displayName     stIdVersion
-## 1 Negative gene expression regulation by 'EGR2 [nucleoplasm]' R-HSA-6810147.1
-##      dbId          stId
-## 1 6810147 R-HSA-6810147
-## 
-## $databaseObject
-##     schemaClass               displayName     stIdVersion    dbId          stId
-## 1 BlackBoxEvent HOXB1 gene is transcribed R-HSA-5617454.3 5617454 R-HSA-5617454
-##    speciesName isInDisease releaseDate                      name isChimeric
-## 1 Homo sapiens       FALSE  2015-12-15 HOXB1 gene is transcribed      FALSE
-##   category isInferred
-## 1  omitted       TRUE
-## 
-## $relationships
-##   neo4jId        type startNode.neo4jId startNode.dbId startNode.schemaClass
-## 1 5505941 regulatedBy           1330001        5617454         BlackBoxEvent
-##   endNode.neo4jId endNode.dbId              endNode.schemaClass properties
-## 1         1330002      6810147 NegativeGeneExpressionRegulation       1, 4
+```{r referral-data, echo=FALSE}
+referral
 ```
 The dbId of _endNode_ (`endNode.dbId` in `$relationships`) is exactly the dbId we just specified.
 
@@ -306,10 +262,6 @@ Interactions of a PhysicalEntity (PE) could be retrieved by `matchInteractors`. 
 ```{r interactor, eval=FALSE}
 # Retrieve interaction data of the given PE
 interactors <- matchInteractors(pe.id = "R-HSA-419535")
-```
-
-```
-## Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'
 ```
 
 ```{r interactor-2}
@@ -326,10 +278,6 @@ We'll take a look at a Polymer "HSBP1 oligomer [cytosol]" and input it into `mat
 ```{r PEroles, eval=FALSE}
 # Find possible roles of the given PE
 roles <- matchPEroles(pe.displayName = "HSBP1 oligomer [cytosol]")
-```
-
-```
-## Type argument not specified, retrieving 'row' data... For graph data, specify type='graph'
 ```
 
 ```{r PEroles-data}
@@ -349,10 +297,6 @@ Diseases related to a PhysicalEntity or an Event could be found using function `
 matchDiseases(displayName = "neuropathy", species = "human", type = "row")
 ```
 
-```
-## Retrieving instances associated with the given Disease...
-```
-
 ```{r disease-data, echo=FALSE}
 disease
 ```
@@ -366,7 +310,7 @@ Given the PubMed id or the title for a paper, Reactome instances related to this
 matchPaperObjects(displayName = "Aggresomes: a cellular response to misfolded proteins", type = "row")
 ```
 
-```{r paper=data, echo=FALSE}
+```{r paper-data, echo=FALSE}
 papers
 ```
 
