@@ -8,10 +8,10 @@
 \description{
 Pathways, reactions, and biological entities in Reactome knowledge 
     are systematically represented as an ordered network. Instances are 
-    represented as nodes and relationships between nodes as edges, they are 
-    stored in the Reactome Graph Database. This package provides an interface 
-    to query the interconnected data from the local Neo4j database, with the 
-    aim of minimizing the usage of Neo4j Cypher queries.
+    represented as nodes and relationships between instances as edges; they are 
+    all stored in the Reactome Graph Database. This package serves as an 
+    interface to query the interconnected data from a local Neo4j database, 
+    with the aim of minimizing the usage of Neo4j Cypher queries.
 }
 \seealso{
 Useful links:
