@@ -41,8 +41,14 @@ docker start reactome_graph_db
 ```
 
 ## Installation
-Install from GitHub:
 ```
+## from Bioconductor (BioC >= 3.13)
+if (!requireNamespace("BiocManager")) {
+  install.packages("BiocManager")
+}
+BiocManager::install("ReactomeGraph4R")
+
+# or from GitHub:
 devtools::install_github("reactome/ReactomeGraph4R")
 ```
 
@@ -187,5 +193,6 @@ Find the interactive graphs in the vignette!
 
 ## Feedback
 
-We'd love to hear your feedback! Feel free to open an [issue](https://github.com/reactome/ReactomeGraph4R/issues) on GitHub.
+We'd love to hear your feedback! Feel free to contribute any new features and/or 
+open an [issue](https://github.com/reactome/ReactomeGraph4R/issues) on GitHub.
 
