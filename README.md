@@ -42,7 +42,7 @@ docker start reactome_graph_db
 
 ## Installation
 ```
-## from Bioconductor (BioC >= 3.13)
+# from Bioconductor (BioC >= 3.13)
 if (!requireNamespace("BiocManager")) {
   install.packages("BiocManager")
 }
@@ -53,7 +53,7 @@ devtools::install_github("reactome/ReactomeGraph4R")
 ```
 
 ## Examples
-Read the complementary vignette at https://chilampoon.github.io/projects/ReactomeGraph4R.html
+Read the complementary [__vignette__](https://bioconductor.org/packages/release/bioc/vignettes/ReactomeGraph4R/inst/doc/Introduction.html).
 
 ### Loading and connecting
 Load the package
@@ -188,7 +188,7 @@ visNetwork(vis.nodes, vis.edges, main = "The hierarchy of protein MCM5",
 
 <img src="vignettes/figs/readme_network.png" width="100%" />
 
-Find the interactive graphs in the vignette!
+Find the interactive graphs in the [vignette](https://bioconductor.org/packages/release/bioc/vignettes/ReactomeGraph4R/inst/doc/Introduction.html)!
 
 
 ## Feedback

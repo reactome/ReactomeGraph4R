@@ -1,3 +1,4 @@
-# reactome.graphdb4r 0.0.0.9000
+# ReactomeGraph4R
 
-* Added a `NEWS.md` file to track changes to the package.
+### 1.0.0
+- Official release!
