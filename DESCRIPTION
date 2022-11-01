@@ -1,6 +1,6 @@
 Package: ReactomeGraph4R
 Title: Interface for the Reactome Graph Database
-Version: 1.5.0
+Version: 1.6.0
 Authors@R: c(
     person("Chi-Lam", "Poon", role = c("aut", "cre"), 
             email = "clpoon807@gmail.com", 
