@@ -436,6 +436,14 @@ forceNetwork(Links = d3.edges, Nodes = d3.nodes, Source="source", Target="target
 To modify the forceNetwork graph, one can execute custom javascript code with the [`htmlwidgets`](https://www.htmlwidgets.org/) R package, but it won't be discussed here.
 
 
+### Citation
+
+If you found this package useful and used in your projects, please cite [it](https://doi.org/10.7490/f1000research.1118690.1).
+```{r citation}
+citation('ReactomeGraph4R')
+```
+
+
 ## SessionInfo
 
 ```{r secinfo}
