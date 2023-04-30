@@ -4,7 +4,7 @@ bibentry(
              person("Justin", "Cook"), 
              person("Solomon", "Shorser"),
              person("Joel", "Weiser"),
-             person("Rohin", "Haw"),
+             person("Robin", "Haw"),
              person("Lincoln", "Stein")),
   title = "R interface to the reactome graph database",
   journal = "F1000Research",
