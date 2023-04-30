@@ -1,0 +1,16 @@
+bibentry(
+  bibtype = "manual",
+  author = c(person("Chi-Lam", "Poon"),
+             person("Justin", "Cook"), 
+             person("Solomon", "Shorser"),
+             person("Joel", "Weiser"),
+             person("Robin", "Haw"),
+             person("Lincoln", "Stein")),
+  title = "R interface to the reactome graph database",
+  journal = "F1000Research",
+  volume = "10",
+  pages = "721 (poster)",
+  year = "2021",
+  doi = "10.7490/f1000research.1118690.1"
+)
+
